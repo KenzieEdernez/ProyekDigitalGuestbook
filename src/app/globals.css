@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cream font-sans text-navy-800 antialiased;
+  }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-navy-800 outline-none transition placeholder:text-stone-400 focus:border-royal focus:ring-2 focus:ring-royal/20;
+  }
+
+  .btn-navy {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-navy px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-navy-700 disabled:opacity-50;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-royal px-6 py-3 text-sm font-semibold text-white transition hover:bg-royal-600 disabled:opacity-50;
+  }
+
+  .card-premium {
+    @apply rounded-xl border border-royal/20 bg-white shadow-card;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide;
+  }
+}
+
+@layer utilities {
+  .touch-target {
+    @apply min-h-[48px] min-w-[48px];
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
