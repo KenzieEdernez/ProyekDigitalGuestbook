@@ -10,7 +10,7 @@
     "stop": "node scripts/kill-dev.js",
     "reset": "node scripts/reset-build.js",
     "clean": "node scripts/reset-build.js",
-    "fresh": "node scripts/kill-dev.js && node scripts/reset-build.js && npm run dev",
+    "fresh": "set NEXT_PUBLIC_AUTO_SCAN=1&& node scripts/kill-dev.js && node scripts/reset-build.js && npm run dev",
     "lint": "next lint"
   },
   "dependencies": {

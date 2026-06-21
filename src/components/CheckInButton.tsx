@@ -1,9 +1,22 @@
-import React, { useState } from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import BarcodeScanner from "./BarcodeScanner";
 
 export default function CheckInButton() {
   const [open, setOpen] = useState(false);
   const [lastBarcode, setLastBarcode] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Auto-open modal when NEXT_PUBLIC_AUTO_SCAN is set (e.g., npm run fresh sets it)
+    try {
+      if (process.env.NEXT_PUBLIC_AUTO_SCAN === "1") {
+        setOpen(true);
+      }
+    } catch (e) {
+      // ignore in environments where process.env is not available
+    }
+  }, []);
 
   function handleSuccess(code: string) {
     setLastBarcode(code);
