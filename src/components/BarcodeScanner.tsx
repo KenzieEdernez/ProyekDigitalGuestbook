@@ -4,9 +4,16 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 type Props = {
   onSuccess?: (code: string) => void;
   apiEndpoint?: string; // default /api/checkin
+  start?: boolean; // if true, automatically start scanning
+  onClose?: () => void; // called when scanner stops / modal should close
 };
 
-export default function BarcodeScanner({ onSuccess, apiEndpoint = "/api/checkin" }: Props) {
+export default function BarcodeScanner({
+  onSuccess,
+  apiEndpoint = "/api/checkin",
+  start = false,
+  onClose,
+}: Props) {
   const [scanning, setScanning] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const readerRef = useRef<Html5Qrcode | null>(null);
@@ -19,6 +26,17 @@ export default function BarcodeScanner({ onSuccess, apiEndpoint = "/api/checkin"
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // watch the `start` prop and start/stop accordingly
+  useEffect(() => {
+    if (start) {
+      startScanner();
+    } else {
+      // if parent tells us to stop, stop
+      if (scanning) stopScanner();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start]);
 
   async function startScanner() {
     if (scanning) return;
@@ -46,9 +64,8 @@ export default function BarcodeScanner({ onSuccess, apiEndpoint = "/api/checkin"
           stopScanner();
           handleDetected(decodedText);
         },
-        (error) => {
-          // optional: per-frame decode failure
-          // console.debug("scan fail", error);
+        () => {
+          // per-frame decode failure ignored
         }
       );
       setMessage("Arahkan kamera ke barcode / QR");
@@ -56,6 +73,8 @@ export default function BarcodeScanner({ onSuccess, apiEndpoint = "/api/checkin"
       console.error("Tidak bisa mulai kamera:", err);
       setMessage("Gagal mengakses kamera. Pastikan izin diberikan atau coba upload gambar.");
       setScanning(false);
+      // if cannot start, signal parent to close (so UI can fallback)
+      onClose?.();
     }
   }
 
@@ -70,6 +89,7 @@ export default function BarcodeScanner({ onSuccess, apiEndpoint = "/api/checkin"
     }
     readerRef.current = null;
     setScanning(false);
+    onClose?.();
   }
 
   async function handleDetected(code: string) {
@@ -89,6 +109,10 @@ export default function BarcodeScanner({ onSuccess, apiEndpoint = "/api/checkin"
       setMessage(`Check-in berhasil: ${data.message ?? "OK"}`);
       if (onSuccess) onSuccess(code);
       // contoh: data.souvenir { id, name, pickupCode }
+      // close scanner after a short delay to show the user the message
+      setTimeout(() => {
+        onClose?.();
+      }, 800);
     } catch (err: any) {
       console.error(err);
       setMessage("Gagal mengirim ke server.");
