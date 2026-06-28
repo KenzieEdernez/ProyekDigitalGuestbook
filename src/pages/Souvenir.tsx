@@ -5,8 +5,12 @@ type Souvenir = { id: string; title: string };
 
 export default function SouvenirPage() {
   const [souvenirs, setSouvenirs] = useState<Souvenir[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    // jika sudah loaded, jangan load lagi (prevent double fetch)
+    if (loaded) return;
+
     let mounted = true;
     async function load() {
       try {
@@ -14,14 +18,17 @@ export default function SouvenirPage() {
         if (!res.ok) return;
         const data: Souvenir[] = await res.json();
         if (!mounted) return;
-        setSouvenirs(prev => dedupeById<Souvenir>([...prev, ...data]));
+        setSouvenirs(data);
+        setLoaded(true);
       } catch (err) {
         console.error("Failed to load souvenirs", err);
       }
     }
     load();
-    return () => { mounted = false; };
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [loaded]);
 
   return (
     <div>

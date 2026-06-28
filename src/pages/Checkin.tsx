@@ -7,8 +7,12 @@ type CheckinItem = HasId & { name: string };
 export default function CheckinPage() {
   const [items, setItems] = useState<CheckinItem[]>([]);
   const [scanSize, setScanSize] = useState({ width: 360, height: 600 });
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    // jika sudah loaded, jangan load lagi (prevent double fetch)
+    if (loaded) return;
+
     let mounted = true;
     async function load() {
       try {
@@ -16,14 +20,17 @@ export default function CheckinPage() {
         if (!res.ok) return;
         const data: CheckinItem[] = await res.json();
         if (!mounted) return;
-        setItems(prev => dedupeById<CheckinItem>([...prev, ...data]));
+        setItems(data);
+        setLoaded(true);
       } catch (err) {
         console.error("Failed to load checkin items", err);
       }
     }
     load();
-    return () => { mounted = false; };
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [loaded]);
 
   return (
     <div style={{ position: "relative", minHeight: 600 }}>
