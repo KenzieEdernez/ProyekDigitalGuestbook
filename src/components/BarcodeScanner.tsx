@@ -25,6 +25,8 @@ export default function BarcodeScanner({
   const submittingRef = useRef<Set<string>>(new Set());
   // guard deteksi agar callback tidak terpanggil berulang (mis. StrictMode / multiple events)
   const detectedRef = useRef(false);
+  // prevent multiple startScanner calls from effect
+  const startingRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -36,9 +38,11 @@ export default function BarcodeScanner({
 
   // watch the `start` prop and start/stop accordingly
   useEffect(() => {
-    if (start) {
+    if (start && !startingRef.current) {
+      startingRef.current = true;
       startScanner();
-    } else {
+    } else if (!start) {
+      startingRef.current = false;
       if (scanning) stopScanner();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,6 +96,7 @@ export default function BarcodeScanner({
       console.error("Tidak bisa mulai kamera:", err);
       setMessage("Gagal mengakses kamera. Pastikan izin diberikan atau coba upload gambar.");
       setScanning(false);
+      startingRef.current = false;
       onClose?.();
     }
   }

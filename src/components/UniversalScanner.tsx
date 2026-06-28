@@ -26,9 +26,13 @@ export default function UniversalScanner({
   const readerRef = useRef<Html5Qrcode | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const detectedRef = useRef(false);
+  const initStartedRef = useRef(false);
 
   useEffect(() => {
-    if (autoStart) startScanner();
+    if (autoStart && !initStartedRef.current) {
+      initStartedRef.current = true;
+      startScanner();
+    }
     return () => stopScanner();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
