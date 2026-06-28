@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
   Search,
   Gift,
@@ -49,7 +49,14 @@ export default function SouvenirPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchLog, setSearchLog] = useState("");
-  const [useManualInput, setUseManualInput] = useState(false);
+  const [useManualInput, setUseManualInput] = useState(true); // default manual, not camera
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Track mount to prevent double initialization
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   const fetchGuests = useCallback(async () => {
     const res = await fetch("/api/guests");
@@ -58,10 +65,11 @@ export default function SouvenirPage() {
   }, []);
 
   useEffect(() => {
+    if (!isMounted) return;
     fetchGuests();
     const interval = setInterval(fetchGuests, 10000);
     return () => clearInterval(interval);
-  }, [fetchGuests]);
+  }, [isMounted, fetchGuests]);
 
   const reset = useCallback(() => {
     setScanValue("");
@@ -149,6 +157,8 @@ export default function SouvenirPage() {
     (g) => g.status === "checked_in" || g.status === "souvenir_claimed"
   ).length;
 
+  if (!isMounted) return null; // prevent hydration mismatch
+
   return (
     <AdminShell
       title="Souvenir Management"
@@ -204,26 +214,32 @@ export default function SouvenirPage() {
                   </button>
                 </div>
 
-                {/* Show only ONE scanner at a time */}
-                {!useManualInput ? (
-                  /* Camera-based scanning */
-                  <UniversalScanner
-                    onDetected={(code) => {
-                      setScanValue(code);
-                      handleScan(code);
-                    }}
-                    autoStart={true}
-                  />
-                ) : (
-                  /* Manual text input fallback */
-                  <ScanInput
-                    value={scanValue}
-                    onChange={setScanValue}
-                    onScan={handleScan}
-                    placeholder="Scan barcode kartu souvenir..."
-                    disabled={loading}
-                    variant="premium"
-                  />
+                {/* Show only ONE scanner at a time - use key to force new instance */}
+                {!useManualInput && (
+                  <div key="camera-scanner">
+                    <UniversalScanner
+                      key="universal-scanner-souvenir"
+                      onDetected={(code) => {
+                        setScanValue(code);
+                        handleScan(code);
+                      }}
+                      autoStart={true}
+                      containerId="souvenir-scanner-container"
+                    />
+                  </div>
+                )}
+
+                {useManualInput && (
+                  <div key="manual-input">
+                    <ScanInput
+                      value={scanValue}
+                      onChange={setScanValue}
+                      onScan={handleScan}
+                      placeholder="Scan barcode kartu souvenir..."
+                      disabled={loading}
+                      variant="premium"
+                    />
+                  </div>
                 )}
               </div>
 
