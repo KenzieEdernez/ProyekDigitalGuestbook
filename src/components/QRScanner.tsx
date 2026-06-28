@@ -25,10 +25,19 @@ export default function QRScanner({ onDetected, prompt = "Arahkan kamera ke QR c
 
   async function startScanner() {
     if (readerRef.current) return;
+    // reset detection only when explicitly starting so we don't process duplicates
+    detectedRef.current = false;
     setMessage("Mencari kamera...");
+
+    // calculate a responsive qrbox sized to the container
+    const container = document.getElementById(containerId);
+    const containerWidth = container?.clientWidth || window.innerWidth;
+    const containerHeight = container?.clientHeight || window.innerHeight;
+    const boxSize = Math.max(300, Math.floor(Math.min(containerWidth, containerHeight) * 0.7)); // 70% of smaller side, min 300
+
     const config = {
       fps: 10,
-      qrbox: { width: 300, height: 300 },
+      qrbox: { width: boxSize, height: boxSize },
       formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
     } as any;
 
@@ -58,6 +67,7 @@ export default function QRScanner({ onDetected, prompt = "Arahkan kamera ke QR c
     } catch (err) {
       console.error("QR scanner start failed", err);
       setMessage("Gagal akses kamera. Klik untuk mulai manual atau upload gambar.");
+      readerRef.current = null;
     }
   }
 
@@ -71,11 +81,12 @@ export default function QRScanner({ onDetected, prompt = "Arahkan kamera ke QR c
       // ignore
     }
     readerRef.current = null;
+    // do NOT reset detectedRef here; only reset when explicitly restarting
   }
 
   return (
     <div className="relative">
-      <div id={containerId} style={{ width: "100%", minHeight: 360 }} />
+      <div id={containerId} style={{ width: "100%", minHeight: 540 }} />
       <div className="mt-2 text-center text-sm text-stone-400">{message}</div>
     </div>
   );
