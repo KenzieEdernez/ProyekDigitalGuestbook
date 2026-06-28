@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Search,
   Gift,
@@ -49,6 +49,7 @@ export default function SouvenirPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchLog, setSearchLog] = useState("");
+  const [useManualInput, setUseManualInput] = useState(false);
 
   const fetchGuests = useCallback(async () => {
     const res = await fetch("/api/guests");
@@ -179,17 +180,42 @@ export default function SouvenirPage() {
                 <h2 className="font-serif text-lg font-bold text-navy">Scan Barcode Souvenir</h2>
               </div>
               <div className="mt-4">
-                {/* UniversalScanner mounted here for camera-based scanning */}
-                <UniversalScanner
-                  onDetected={(code) => {
-                    setScanValue(code);
-                    handleScan(code);
-                  }}
-                  autoStart={true}
-                />
+                {/* Mode toggle */}
+                <div className="mb-4 flex gap-2">
+                  <button
+                    onClick={() => setUseManualInput(false)}
+                    className={`px-3 py-2 text-xs font-semibold rounded ${
+                      !useManualInput
+                        ? "bg-royal text-white"
+                        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                    }`}
+                  >
+                    Camera Scan
+                  </button>
+                  <button
+                    onClick={() => setUseManualInput(true)}
+                    className={`px-3 py-2 text-xs font-semibold rounded ${
+                      useManualInput
+                        ? "bg-royal text-white"
+                        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                    }`}
+                  >
+                    Manual Input
+                  </button>
+                </div>
 
-                {/* keep text input fallback for manual/keyboard scanners */}
-                <div className="mt-4">
+                {/* Show only ONE scanner at a time */}
+                {!useManualInput ? (
+                  /* Camera-based scanning */
+                  <UniversalScanner
+                    onDetected={(code) => {
+                      setScanValue(code);
+                      handleScan(code);
+                    }}
+                    autoStart={true}
+                  />
+                ) : (
+                  /* Manual text input fallback */
                   <ScanInput
                     value={scanValue}
                     onChange={setScanValue}
@@ -198,7 +224,7 @@ export default function SouvenirPage() {
                     disabled={loading}
                     variant="premium"
                   />
-                </div>
+                )}
               </div>
 
               {guest && (
