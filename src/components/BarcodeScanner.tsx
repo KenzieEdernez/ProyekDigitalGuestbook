@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 
@@ -19,6 +21,11 @@ export default function BarcodeScanner({
   const readerRef = useRef<Html5Qrcode | null>(null);
   const containerId = "html5qr-reader";
 
+  // guard untuk mencegah double-submit untuk barcode yang sama
+  const submittingRef = useRef<Set<string>>(new Set());
+  // guard deteksi agar callback tidak terpanggil berulang (mis. StrictMode / multiple events)
+  const detectedRef = useRef(false);
+
   useEffect(() => {
     return () => {
       // cleanup on unmount
@@ -32,7 +39,6 @@ export default function BarcodeScanner({
     if (start) {
       startScanner();
     } else {
-      // if parent tells us to stop, stop
       if (scanning) stopScanner();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,9 +47,17 @@ export default function BarcodeScanner({
   async function startScanner() {
     if (scanning) return;
     setMessage("Mencari kamera...");
+    detectedRef.current = false; // reset only when explicitly starting
+
+    // responsive qrbox based on container size (min 300)
+    const container = document.getElementById(containerId);
+    const containerWidth = container?.clientWidth || window.innerWidth;
+    const containerHeight = container?.clientHeight || window.innerHeight;
+    const boxSize = Math.max(300, Math.floor(Math.min(containerWidth, containerHeight) * 0.7));
+
     const config = {
       fps: 10,
-      qrbox: 250,
+      qrbox: { width: boxSize, height: boxSize },
       formatsToSupport: [
         Html5QrcodeSupportedFormats.QR_CODE,
         Html5QrcodeSupportedFormats.CODE_128,
@@ -60,20 +74,24 @@ export default function BarcodeScanner({
         { facingMode: "environment" },
         config,
         (decodedText) => {
-          // success
-          stopScanner();
+          // success callback: guard ganda
+          if (detectedRef.current) return;
+          detectedRef.current = true;
+          // proses hasil namun pastikan tidak double-submit
           handleDetected(decodedText);
+          // stop scanner setelah deteksi agar tidak ada callback lagi
+          stopScanner();
         },
         () => {
           // per-frame decode failure ignored
         }
       );
       setMessage("Arahkan kamera ke barcode / QR");
+      console.log("BarcodeScanner started", { boxSize });
     } catch (err: any) {
       console.error("Tidak bisa mulai kamera:", err);
       setMessage("Gagal mengakses kamera. Pastikan izin diberikan atau coba upload gambar.");
       setScanning(false);
-      // if cannot start, signal parent to close (so UI can fallback)
       onClose?.();
     }
   }
@@ -90,9 +108,16 @@ export default function BarcodeScanner({
     readerRef.current = null;
     setScanning(false);
     onClose?.();
+    // jangan reset detectedRef di sini — reset saat startScanner dipanggil
   }
 
   async function handleDetected(code: string) {
+    // block duplicate processing untuk kode yang sama saat sedang diproses
+    if (submittingRef.current.has(code)) {
+      setMessage("Sedang memproses kode ini...");
+      return;
+    }
+    submittingRef.current.add(code);
     setMessage(`Terbaca: ${code}. Mengirim ke server...`);
     try {
       const res = await fetch(apiEndpoint, {
@@ -108,7 +133,6 @@ export default function BarcodeScanner({
       const data = await res.json();
       setMessage(`Check-in berhasil: ${data.message ?? "OK"}`);
       if (onSuccess) onSuccess(code);
-      // contoh: data.souvenir { id, name, pickupCode }
       // close scanner after a short delay to show the user the message
       setTimeout(() => {
         onClose?.();
@@ -116,10 +140,12 @@ export default function BarcodeScanner({
     } catch (err: any) {
       console.error(err);
       setMessage("Gagal mengirim ke server.");
+    } finally {
+      submittingRef.current.delete(code);
     }
   }
 
-  // fallback: upload image (html5-qrcode juga mendukung scan dari file in-memory; keep simple: just send file to server)
+  // fallback: upload image
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -150,7 +176,7 @@ export default function BarcodeScanner({
 
   return (
     <div>
-      <div id={containerId} style={{ width: "100%", maxWidth: 640, margin: "0 auto" }}>
+      <div id={containerId} style={{ width: "100%", maxWidth: 900, margin: "0 auto", minHeight: 540 }}>
         {/* html5-qrcode mounts video/canvas into this div */}
       </div>
 
