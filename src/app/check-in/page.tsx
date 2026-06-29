@@ -125,10 +125,10 @@ export default function CheckInPage() {
         </div>
       ) : (
         <div className="grid gap-6 xl:grid-cols-2">
-          {/* Camera panel */}
+          {/* Camera panel - QR Scanner langsung jalan */}
           <div className="card-premium p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-serif text-lg font-bold text-navy">Guest Photo Capture</h2>
+              <h2 className="font-serif text-lg font-bold text-navy">Scan QR Undangan</h2>
               {showCamera && (
                 <span className="badge bg-emerald-100 text-emerald-700">Live Camera</span>
               )}
@@ -137,22 +137,16 @@ export default function CheckInPage() {
             {showCamera && guest ? (
               <CameraCapture compact autoStart onCapture={handleCheckIn} onCancel={() => setShowCamera(false)} />
             ) : (
-              // show QR camera scanner when no guest selected
-              <div>
-                <div className="flex aspect-[3/4] items-center justify-center rounded-xl bg-navy-900/5 text-stone-400">
-                  {/* QR camera will mount here */}
-                  <div style={{ width: "100%" }}>
-                    <QRScanner
-                      onDetected={(code) => {
-                        // set scanValue for UI and trigger handleScan
-                        setScanValue(code);
-                        handleScan(code);
-                      }}
-                      prompt="Arahkan scanner ke QR code undangan tamu"
-                      autoStart={true}
-                    />
-                  </div>
-                </div>
+              // QR camera langsung aktif
+              <div style={{ maxHeight: "300px", overflow: "hidden" }}>
+                <QRScanner
+                  onDetected={(code) => {
+                    setScanValue(code);
+                    handleScan(code);
+                  }}
+                  prompt="Arahkan kamera ke QR code undangan"
+                  autoStart={true}
+                />
               </div>
             )}
 
@@ -175,7 +169,7 @@ export default function CheckInPage() {
                   value={scanValue}
                   onChange={setScanValue}
                   onScan={handleScan}
-                  placeholder="Scan QR atau ketik nama..."
+                  placeholder="Atau input manual..."
                   disabled={loading}
                   variant="premium"
                 />

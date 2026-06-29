@@ -49,14 +49,6 @@ export default function SouvenirPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchLog, setSearchLog] = useState("");
-  const [useManualInput, setUseManualInput] = useState(true); // default manual, not camera
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Track mount to prevent double initialization
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
 
   const fetchGuests = useCallback(async () => {
     const res = await fetch("/api/guests");
@@ -65,11 +57,10 @@ export default function SouvenirPage() {
   }, []);
 
   useEffect(() => {
-    if (!isMounted) return;
     fetchGuests();
     const interval = setInterval(fetchGuests, 10000);
     return () => clearInterval(interval);
-  }, [isMounted, fetchGuests]);
+  }, [fetchGuests]);
 
   const reset = useCallback(() => {
     setScanValue("");
@@ -157,8 +148,6 @@ export default function SouvenirPage() {
     (g) => g.status === "checked_in" || g.status === "souvenir_claimed"
   ).length;
 
-  if (!isMounted) return null; // prevent hydration mismatch
-
   return (
     <AdminShell
       title="Souvenir Management"
@@ -183,93 +172,65 @@ export default function SouvenirPage() {
       ) : (
         <div className="grid gap-6 xl:grid-cols-3">
           <div className="space-y-6 xl:col-span-2">
-            {/* Scan panel */}
+            {/* Scan panel - Camera langsung aktif */}
             <div className="card-premium p-6">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mb-4">
                 <ScanLine className="h-5 w-5 text-royal" />
                 <h2 className="font-serif text-lg font-bold text-navy">Scan Barcode Souvenir</h2>
               </div>
-              <div className="mt-4">
-                {/* Mode toggle */}
-                <div className="mb-4 flex gap-2">
-                  <button
-                    onClick={() => setUseManualInput(false)}
-                    className={`px-3 py-2 text-xs font-semibold rounded ${
-                      !useManualInput
-                        ? "bg-royal text-white"
-                        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-                    }`}
-                  >
-                    Camera Scan
-                  </button>
-                  <button
-                    onClick={() => setUseManualInput(true)}
-                    className={`px-3 py-2 text-xs font-semibold rounded ${
-                      useManualInput
-                        ? "bg-royal text-white"
-                        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-                    }`}
-                  >
-                    Manual Input
-                  </button>
-                </div>
-
-                {/* Show only ONE scanner at a time - use key to force new instance */}
-                {!useManualInput && (
-                  <div key="camera-scanner">
-                    <UniversalScanner
-                      key="universal-scanner-souvenir"
-                      onDetected={(code) => {
-                        setScanValue(code);
-                        handleScan(code);
-                      }}
-                      autoStart={true}
-                      containerId="souvenir-scanner-container"
-                    />
-                  </div>
-                )}
-
-                {useManualInput && (
-                  <div key="manual-input">
-                    <ScanInput
-                      value={scanValue}
-                      onChange={setScanValue}
-                      onScan={handleScan}
-                      placeholder="Scan barcode kartu souvenir..."
-                      disabled={loading}
-                      variant="premium"
-                    />
-                  </div>
-                )}
+              
+              {/* Camera Scanner - Langsung jalan */}
+              <div className="mb-4" style={{ maxHeight: "300px", overflow: "hidden" }}>
+                <UniversalScanner
+                  onDetected={(code) => {
+                    setScanValue(code);
+                    handleScan(code);
+                  }}
+                  autoStart={true}
+                  containerId="souvenir-universal-scanner"
+                />
               </div>
 
-              {guest && (
-                <div className="mt-6 rounded-xl border border-royal/20 bg-parchment/50 p-5">
-                  <div className="flex items-center gap-4">
-                    {guest.photo_url ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={guest.photo_url}
-                        alt={guest.name}
-                        className="h-16 w-16 rounded-full object-cover ring-2 ring-royal/30"
-                      />
-                    ) : (
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-royal/20 text-xl font-bold text-royal">
-                        {guest.name.charAt(0)}
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-serif text-xl font-bold text-navy">{guest.name}</p>
-                      <p className="text-sm text-stone-500">{guest.pax} tamu · Angpao {guest.angpao_number}</p>
-                    </div>
-                  </div>
-                  <button onClick={handleClaim} disabled={loading} className="btn-navy mt-4 w-full py-3">
-                    <Gift className="h-4 w-4" />
-                    {loading ? "Memproses..." : "Konfirmasi Berikan Souvenir"}
-                  </button>
-                </div>
-              )}
+              {/* Manual input fallback */}
+              <div>
+                <ScanInput
+                  value={scanValue}
+                  onChange={setScanValue}
+                  onScan={handleScan}
+                  placeholder="Atau input manual..."
+                  disabled={loading}
+                  variant="premium"
+                />
+              </div>
             </div>
+
+            {/* Guest Info */}
+            {guest && (
+              <div className="rounded-xl border border-royal/20 bg-parchment/50 p-5">
+                <div className="flex items-center gap-4">
+                  {guest.photo_url ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={guest.photo_url}
+                      alt={guest.name}
+                      className="h-16 w-16 rounded-full object-cover ring-2 ring-royal/30"
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-royal/20 text-xl font-bold text-royal">
+                      {guest.name.charAt(0)}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-serif text-xl font-bold text-navy">{guest.name}</p>
+                    <p className="text-sm text-stone-500">{guest.pax} tamu · Angpao {guest.angpao_number}</p>
+                  </div>
+                </div>
+                <button onClick={handleClaim} disabled={loading} className="btn-navy mt-4 w-full py-3">
+                  <Gift className="h-4 w-4" />
+                  {loading ? "Memproses..." : "Konfirmasi Berikan Souvenir"}
+                </button>
+              </div>
+            )}
 
             {/* Inventory cards */}
             <div className="grid gap-4 sm:grid-cols-3">
