@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { CheckCircle2, Wifi } from "lucide-react";
+import { CheckCircle2, Printer, Wifi } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
 import ScanInput from "@/components/ScanInput";
 import CameraCapture from "@/components/CameraCapture";
@@ -9,6 +9,15 @@ import BarcodeDisplay from "@/components/BarcodeDisplay";
 import QRScanner from "@/components/QRScanner";
 import { formatRegNumber } from "@/lib/event-config";
 import type { EnvelopeSection, Guest, CheckInResult } from "@/types/guest";
+
+function escapeHtml(value: unknown) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 export default function CheckInPage() {
   const [scanValue, setScanValue] = useState("");
@@ -21,6 +30,7 @@ export default function CheckInPage() {
   const [scannerKey, setScannerKey] = useState(0);
   const processingRef = useRef(false);
   const lastBarcodeRef = useRef<string | null>(null);
+  const souvenirQrRef = useRef<HTMLDivElement>(null);
 
   const restartScanner = useCallback(() => {
     lastBarcodeRef.current = null;
@@ -117,6 +127,146 @@ export default function CheckInPage() {
     [envelopeSection, guest, loading]
   );
 
+  const handlePrintSticker = () => {
+    if (!result) return;
+
+    const qrSvg = souvenirQrRef.current?.querySelector("svg");
+    if (!qrSvg) {
+      alert("QR souvenir belum siap untuk dicetak.");
+      return;
+    }
+
+    const qrMarkup = new XMLSerializer().serializeToString(qrSvg);
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Popup diblokir. Izinkan popup untuk mencetak sticker.");
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Sticker ${escapeHtml(result.angpao_number)}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              background: #ffffff;
+              color: #14213d;
+              font-family: Arial, sans-serif;
+            }
+            .sticker {
+              width: 100mm;
+              height: 55mm;
+              display: grid;
+              grid-template-columns: 1fr 38mm;
+              gap: 4mm;
+              padding: 5mm;
+              border: 1px dashed #d6d3d1;
+            }
+            .left {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              min-width: 0;
+            }
+            .eyebrow {
+              color: #c5a059;
+              font-size: 8pt;
+              font-weight: 700;
+              letter-spacing: 0.18em;
+              text-transform: uppercase;
+            }
+            .guest {
+              margin-top: 2mm;
+              font-family: Georgia, serif;
+              font-size: 15pt;
+              font-weight: 700;
+              line-height: 1.15;
+              word-break: break-word;
+            }
+            .meta {
+              margin-top: 2mm;
+              color: #57534e;
+              font-size: 8pt;
+              line-height: 1.35;
+            }
+            .envelope {
+              margin-top: 4mm;
+              color: #dc2626;
+              font-family: Georgia, serif;
+              font-size: 30pt;
+              font-weight: 700;
+              line-height: 1;
+            }
+            .right {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              border-left: 1px solid #e7e5e4;
+              padding-left: 4mm;
+            }
+            .qr svg {
+              width: 30mm;
+              height: 30mm;
+              display: block;
+            }
+            .code {
+              margin-top: 2mm;
+              font-family: "Courier New", monospace;
+              font-size: 7pt;
+              font-weight: 700;
+              text-align: center;
+              word-break: break-all;
+            }
+            .label {
+              margin-top: 1mm;
+              color: #78716c;
+              font-size: 6.5pt;
+              font-weight: 700;
+              letter-spacing: 0.1em;
+              text-transform: uppercase;
+            }
+            @page { size: 100mm 55mm; margin: 0; }
+            @media print {
+              body { margin: 0; }
+              .sticker { border: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <main class="sticker">
+            <section class="left">
+              <div class="eyebrow">Check-in Sticker</div>
+              <div class="guest">${escapeHtml(result.guest.name)}</div>
+              <div class="meta">
+                ${escapeHtml(result.guest.pax)} tamu<br />
+                ${escapeHtml(formatRegNumber(result.guest.invitation_barcode))}
+              </div>
+              <div class="envelope">${escapeHtml(result.angpao_number)}</div>
+            </section>
+            <section class="right">
+              <div class="qr">${qrMarkup}</div>
+              <div class="code">${escapeHtml(result.souvenir_barcode)}</div>
+              <div class="label">Souvenir</div>
+            </section>
+          </main>
+          <script>
+            window.addEventListener("load", () => {
+              window.focus();
+              window.print();
+            });
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   return (
     <AdminShell title="Daftar Check-in">
       {error && (
@@ -147,10 +297,20 @@ export default function CheckInPage() {
             </div>
             <div className="card-premium p-6">
               <p className="mb-4 text-center text-xs font-bold uppercase tracking-widest text-royal">QR Souvenir</p>
-              <BarcodeDisplay value={result.souvenir_barcode} />
+              <div ref={souvenirQrRef}>
+                <BarcodeDisplay value={result.souvenir_barcode} />
+              </div>
               <p className="mt-2 text-center text-xs text-stone-400">QR code untuk kartu souvenir</p>
             </div>
           </div>
+
+          <button
+            onClick={handlePrintSticker}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-navy px-4 py-4 text-sm font-semibold uppercase tracking-wide text-navy transition hover:bg-navy/5"
+          >
+            <Printer className="h-5 w-5" />
+            Print Sticker Amplop & Souvenir
+          </button>
 
           <button onClick={reset} className="btn-navy w-full py-4">
             Check-in Tamu Berikutnya
