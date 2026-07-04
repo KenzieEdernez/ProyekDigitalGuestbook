@@ -27,6 +27,19 @@ export default function RegistrationPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  if (!eventSettings.settingsReady) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-cream px-6">
+        <div className="text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-royal">
+            EdernDigital
+          </p>
+          <p className="mt-3 text-sm text-stone-500">Memuat pengaturan event...</p>
+        </div>
+      </main>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);

@@ -5,7 +5,8 @@ import { DEFAULT_EVENT_SETTINGS, mergeEventSettings } from "@/lib/event-config";
 import type { EventSettings } from "@/types/event";
 
 export function useEventSettings() {
-  const [settings, setSettings] = useState<EventSettings>(DEFAULT_EVENT_SETTINGS);
+  const [settings, setSettings] = useState<EventSettings | null>(null);
+  const [settingsReady, setSettingsReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -18,7 +19,9 @@ export function useEventSettings() {
           setSettings(data.settings);
         }
       } catch {
-        // keep default settings
+        if (!cancelled) setSettings(DEFAULT_EVENT_SETTINGS);
+      } finally {
+        if (!cancelled) setSettingsReady(true);
       }
     }
 
@@ -28,5 +31,8 @@ export function useEventSettings() {
     };
   }, []);
 
-  return mergeEventSettings(settings);
+  return {
+    ...mergeEventSettings(settings ?? DEFAULT_EVENT_SETTINGS),
+    settingsReady,
+  };
 }
