@@ -3,8 +3,18 @@
 import { useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
-import { DEFAULT_EVENT_SETTINGS } from "@/lib/event-config";
 import type { EventSettings } from "@/types/event";
+
+const EMPTY_EVENT_SETTINGS: EventSettings = {
+  name: "",
+  date: "",
+  dateDisplay: "",
+  time: "",
+  location: "",
+  address: "",
+  dressCode: "",
+  dressNote: "",
+};
 
 const fields: Array<{
   key: keyof EventSettings;
@@ -15,7 +25,7 @@ const fields: Array<{
   {
     key: "name",
     label: "Nama Event",
-    placeholder: "Contoh: Gala Excellence 2024",
+    placeholder: "Contoh: Nama acara",
   },
   {
     key: "date",
@@ -51,7 +61,7 @@ const fields: Array<{
 ];
 
 export default function EventSettingsPage() {
-  const [form, setForm] = useState<EventSettings>(DEFAULT_EVENT_SETTINGS);
+  const [form, setForm] = useState<EventSettings>(EMPTY_EVENT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -118,28 +128,34 @@ export default function EventSettingsPage() {
           </div>
         )}
 
-        <div className="grid gap-5 md:grid-cols-2">
-          {fields.map((field) => (
-            <div key={field.key}>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                {field.label}
-              </label>
-              <input
-                type={field.type ?? "text"}
-                value={form[field.key]}
-                onChange={(e) =>
-                  setForm((current) => ({
-                    ...current,
-                    [field.key]: e.target.value,
-                  }))
-                }
-                placeholder={field.placeholder}
-                disabled={loading || saving}
-                className="input-field"
-              />
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="rounded-lg bg-parchment px-4 py-5 text-sm text-stone-500">
+            Memuat pengaturan event...
+          </div>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-2">
+            {fields.map((field) => (
+              <div key={field.key}>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  {field.label}
+                </label>
+                <input
+                  type={field.type ?? "text"}
+                  value={form[field.key]}
+                  onChange={(e) =>
+                    setForm((current) => ({
+                      ...current,
+                      [field.key]: e.target.value,
+                    }))
+                  }
+                  placeholder={field.placeholder}
+                  disabled={saving}
+                  className="input-field"
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         <button disabled={loading || saving} className="btn-navy mt-6 py-3">
           <Save className="h-4 w-4" />

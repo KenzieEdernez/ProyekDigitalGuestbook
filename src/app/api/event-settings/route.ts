@@ -2,8 +2,13 @@ import { NextResponse } from "next/server";
 import { getEventSettings, saveEventSettings } from "@/lib/event-settings";
 import { isAdminLoggedIn } from "@/lib/admin-auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  return NextResponse.json({ settings: await getEventSettings() });
+  return NextResponse.json(
+    { settings: await getEventSettings() },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 }
 
 export async function PUT(request: Request) {
@@ -14,7 +19,22 @@ export async function PUT(request: Request) {
     );
   }
 
-  const body = await request.json();
-  const settings = await saveEventSettings(body);
-  return NextResponse.json({ settings });
+  try {
+    const body = await request.json();
+    const settings = await saveEventSettings(body);
+    return NextResponse.json(
+      { settings },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Gagal menyimpan pengaturan.",
+      },
+      { status: 400 }
+    );
+  }
 }

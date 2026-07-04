@@ -10,7 +10,7 @@ import {
   Share2,
   Info,
 } from "lucide-react";
-import { EVENT, formatRegNumber, mergeEventSettings } from "@/lib/event-config";
+import { formatRegNumber, mergeEventSettings } from "@/lib/event-config";
 import type { Guest } from "@/types/guest";
 
 type ResolvedEvent = ReturnType<typeof mergeEventSettings>;
@@ -183,25 +183,25 @@ export function DeclinedMessage({ name }: { name: string }) {
   );
 }
 
-export function EventInfoCards() {
+export function EventInfoCards({ event }: { event: ResolvedEvent }) {
   const cards = [
     {
       icon: Calendar,
       label: "Tanggal & Waktu",
-      line1: EVENT.date,
-      line2: EVENT.time,
+      line1: event.dateDisplay,
+      line2: event.time,
     },
     {
       icon: MapPin,
       label: "Lokasi",
-      line1: EVENT.location,
-      line2: EVENT.address,
+      line1: event.location,
+      line2: event.address,
     },
     {
       icon: Clock,
       label: "Dress Code",
-      line1: EVENT.dressCode,
-      line2: EVENT.dressNote,
+      line1: event.dressCode,
+      line2: event.dressNote,
     },
   ];
 

@@ -22,35 +22,15 @@ create index if not exists idx_guests_angpao on public.guests(angpao_number);
 
 create table if not exists public.event_settings (
   id text primary key default 'default',
-  name text not null default 'Gala Excellence 2024',
-  date text not null default '2024-12-14',
-  time text not null default '19:00 - 00:00',
-  location text not null default 'The Imperial Grand Hall',
-  address text not null default '450 Prestige Blvd, Jakarta',
-  dress_code text not null default 'Black Tie & Formal',
-  dress_note text not null default 'Navy & Gold Preferred',
+  name text not null,
+  date text not null,
+  time text not null,
+  location text not null,
+  address text not null,
+  dress_code text not null,
+  dress_note text not null,
   updated_at timestamptz not null default now()
 );
-
-insert into public.event_settings (
-  id,
-  name,
-  date,
-  time,
-  location,
-  address,
-  dress_code,
-  dress_note
-) values (
-  'default',
-  'Gala Excellence 2024',
-  '2024-12-14',
-  '19:00 - 00:00',
-  'The Imperial Grand Hall',
-  '450 Prestige Blvd, Jakarta',
-  'Black Tie & Formal',
-  'Navy & Gold Preferred'
-) on conflict (id) do nothing;
 
 alter table public.guests enable row level security;
 alter table public.event_settings enable row level security;

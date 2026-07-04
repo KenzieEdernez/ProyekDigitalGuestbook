@@ -1,8 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DEFAULT_EVENT_SETTINGS, mergeEventSettings } from "@/lib/event-config";
+import { mergeEventSettings } from "@/lib/event-config";
 import type { EventSettings } from "@/types/event";
+
+const EMPTY_EVENT_SETTINGS: EventSettings = {
+  name: "",
+  date: "",
+  dateDisplay: "",
+  time: "",
+  location: "",
+  address: "",
+  dressCode: "",
+  dressNote: "",
+};
 
 export function useEventSettings() {
   const [settings, setSettings] = useState<EventSettings | null>(null);
@@ -35,7 +46,7 @@ export function useEventSettings() {
   }, []);
 
   return {
-    ...mergeEventSettings(settings ?? DEFAULT_EVENT_SETTINGS),
+    ...mergeEventSettings(settings ?? EMPTY_EVENT_SETTINGS),
     settingsReady,
     settingsAvailable,
   };
