@@ -7,9 +7,7 @@ import {
   Users,
   ScanLine,
   Gift,
-  FileSpreadsheet,
   LogOut,
-  Plus,
   Settings,
 } from "lucide-react";
 import { useEventSettings } from "@/hooks/useEventSettings";
@@ -19,7 +17,6 @@ const navItems = [
   { href: "/admin/guests", label: "Daftar Tamu", icon: Users },
   { href: "/check-in", label: "Check-in", icon: ScanLine },
   { href: "/souvenir", label: "Souvenir", icon: Gift },
-  { href: "/admin/import", label: "Import", icon: FileSpreadsheet },
   { href: "/admin/settings", label: "Pengaturan", icon: Settings },
 ];
 
@@ -77,14 +74,7 @@ export default function AdminShell({
           })}
         </nav>
 
-        <div className="space-y-2 border-t border-stone-100 p-4">
-          <Link
-            href="/admin/import"
-            className="btn-navy flex w-full items-center justify-center gap-2 py-3 text-xs"
-          >
-            <Plus className="h-4 w-4" />
-            Tambah Tamu Cepat
-          </Link>
+        <div className="border-t border-stone-100 p-4">
           <button
             type="button"
             onClick={async () => {

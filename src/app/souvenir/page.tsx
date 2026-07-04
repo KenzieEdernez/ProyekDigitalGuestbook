@@ -4,9 +4,7 @@ import { useCallback, useState, useEffect, useRef } from "react";
 import {
   Search,
   Gift,
-  Package,
   CheckCircle2,
-  Clock,
   ScanLine,
 } from "lucide-react";
 import { Html5QrcodeSupportedFormats } from "html5-qrcode";
@@ -20,33 +18,6 @@ const SOUVENIR_SCAN_FORMATS = [
   Html5QrcodeSupportedFormats.CODE_128,
   Html5QrcodeSupportedFormats.CODE_39,
   Html5QrcodeSupportedFormats.EAN_13,
-];
-
-const inventory = [
-  {
-    name: "Premium Gift Box",
-    category: "Premium",
-    stock: 245,
-    total: 300,
-    status: "Optimal",
-    statusColor: "bg-emerald-100 text-emerald-700",
-  },
-  {
-    name: "Crystal Souvenir",
-    category: "Tech",
-    stock: 12,
-    total: 150,
-    status: "Low Stock",
-    statusColor: "bg-red-100 text-red-700",
-  },
-  {
-    name: "Artisan Candle",
-    category: "Hospitality",
-    stock: 89,
-    total: 200,
-    status: "Moderate",
-    statusColor: "bg-amber-100 text-amber-700",
-  },
 ];
 
 export default function SouvenirPage() {
@@ -283,22 +254,6 @@ export default function SouvenirPage() {
               </div>
             )}
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              {inventory.map((item) => (
-                <div key={item.name} className="card-premium p-5">
-                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-parchment">
-                    <Package className="h-5 w-5 text-royal" />
-                  </div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">{item.category}</p>
-                  <p className="mt-1 font-semibold text-navy">{item.name}</p>
-                  <p className="mt-2 text-sm text-stone-500">
-                    {item.stock}/{item.total}
-                  </p>
-                  <span className={`badge mt-2 ${item.statusColor}`}>{item.status}</span>
-                </div>
-              ))}
-            </div>
-
             <div className="card-premium overflow-hidden">
               <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4">
                 <h2 className="font-serif text-lg font-bold text-navy">Transaction Log</h2>
@@ -383,19 +338,6 @@ export default function SouvenirPage() {
               </div>
             </div>
 
-            <div className="card-premium p-6">
-              <h3 className="font-serif text-lg font-bold text-navy">Action Center</h3>
-              <div className="mt-4 space-y-3">
-                <button className="flex w-full items-center gap-3 rounded-lg border border-stone-200 p-4 text-left text-sm transition hover:bg-stone-50">
-                  <Clock className="h-5 w-5 text-royal" />
-                  <span>Generate Daily Report</span>
-                </button>
-                <button className="flex w-full items-center gap-3 rounded-lg border border-stone-200 p-4 text-left text-sm transition hover:bg-stone-50">
-                  <Package className="h-5 w-5 text-royal" />
-                  <span>Inventory Summary</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       )}

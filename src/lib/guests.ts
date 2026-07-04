@@ -278,6 +278,18 @@ export async function deleteGuest(id: string): Promise<boolean> {
   return true;
 }
 
+export async function deleteAllGuests(): Promise<number> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("guests")
+    .delete()
+    .neq("id", "")
+    .select("id");
+
+  if (error) throw new Error(error.message);
+  return data?.length ?? 0;
+}
+
 async function savePhoto(base64: string, guestId: string): Promise<string> {
   const matches = base64.match(/^data:image\/(\w+);base64,(.+)$/);
   if (!matches) {

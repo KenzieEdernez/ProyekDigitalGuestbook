@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { Search, Download, Plus } from "lucide-react";
+import { Search, Download, Trash2 } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
 import type { Guest, GuestStats } from "@/types/guest";
 import { formatRegNumber } from "@/lib/event-config";
@@ -27,11 +26,32 @@ const souvenirConfig: Record<string, { label: string; className: string }> = {
   declined: { label: "-", className: "text-stone-300" },
 };
 
+function escapeHtml(value: unknown) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function GuestListPage() {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [stats, setStats] = useState<GuestStats | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [deletingAll, setDeletingAll] = useState(false);
 
   const fetchData = useCallback(async () => {
     const res = await fetch("/api/guests");
@@ -58,33 +78,234 @@ export default function GuestListPage() {
     return matchFilter && matchSearch;
   });
 
-  const exportCsv = () => {
-    const headers = ["Nama", "HP", "Alamat", "Pax", "QR", "Angpao", "Status"];
-    const rows = guests.map((g) => [
-      g.name,
-      g.phone || "",
-      g.address || "",
-      g.pax,
-      g.invitation_barcode || "",
-      g.angpao_number || "",
-      statusConfig[g.status]?.label || g.status,
-    ]);
-    const csv = [headers, ...rows]
-      .map((r) => r.map((c) => `"${c}"`).join(","))
-      .join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `guests-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const exportPrintableReport = () => {
+    const reportDate = new Date().toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const totalPax = guests
+      .filter((g) => g.status !== "declined")
+      .reduce((sum, g) => sum + g.pax, 0);
+    const rows = guests
+      .map(
+        (guest, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>
+              <strong>${escapeHtml(guest.name)}</strong>
+              <small>${escapeHtml(guest.phone || "-")}</small>
+            </td>
+            <td>${escapeHtml(guest.address || "-")}</td>
+            <td class="center">${guest.pax}</td>
+            <td>${escapeHtml(formatRegNumber(guest.invitation_barcode))}</td>
+            <td>${escapeHtml(guest.angpao_number || "-")}</td>
+            <td>${escapeHtml(statusConfig[guest.status]?.label || guest.status)}</td>
+            <td>${escapeHtml(formatDateTime(guest.checked_in_at))}</td>
+          </tr>
+        `
+      )
+      .join("");
+
+    const printableHtml = `
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Laporan Data Tamu</title>
+          <style>
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              background: #f7f3ea;
+              color: #14213d;
+              font-family: Arial, sans-serif;
+            }
+            .page {
+              width: 297mm;
+              min-height: 210mm;
+              margin: 0 auto;
+              background: white;
+              padding: 18mm;
+            }
+            .header {
+              display: flex;
+              justify-content: space-between;
+              gap: 24px;
+              border-bottom: 3px solid #c5a059;
+              padding-bottom: 18px;
+            }
+            .eyebrow {
+              color: #c5a059;
+              font-size: 11px;
+              font-weight: 700;
+              letter-spacing: 0.22em;
+              text-transform: uppercase;
+            }
+            h1 {
+              margin: 8px 0 0;
+              font-family: Georgia, serif;
+              font-size: 30px;
+            }
+            .meta {
+              color: #78716c;
+              font-size: 12px;
+              line-height: 1.6;
+              text-align: right;
+            }
+            .summary {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 12px;
+              margin: 20px 0;
+            }
+            .summary-card {
+              border: 1px solid #e7e5e4;
+              border-radius: 14px;
+              padding: 12px;
+            }
+            .summary-card span {
+              display: block;
+              color: #78716c;
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: 0.12em;
+              text-transform: uppercase;
+            }
+            .summary-card strong {
+              display: block;
+              margin-top: 6px;
+              font-family: Georgia, serif;
+              font-size: 24px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 11px;
+            }
+            th {
+              background: #14213d;
+              color: white;
+              padding: 10px 8px;
+              text-align: left;
+              text-transform: uppercase;
+              letter-spacing: 0.08em;
+              font-size: 9px;
+            }
+            td {
+              border-bottom: 1px solid #e7e5e4;
+              padding: 9px 8px;
+              vertical-align: top;
+            }
+            td small {
+              display: block;
+              margin-top: 3px;
+              color: #78716c;
+            }
+            .center { text-align: center; }
+            .footer {
+              margin-top: 18px;
+              color: #78716c;
+              font-size: 10px;
+              text-align: center;
+            }
+            @page { size: A4 landscape; margin: 10mm; }
+            @media print {
+              body { background: white; }
+              .page { width: auto; min-height: auto; padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <main class="page">
+            <section class="header">
+              <div>
+                <div class="eyebrow">Digital Guestbook</div>
+                <h1>Laporan Data Tamu</h1>
+              </div>
+              <div class="meta">
+                Dicetak: ${escapeHtml(reportDate)}<br />
+                Total data: ${guests.length} tamu
+              </div>
+            </section>
+
+            <section class="summary">
+              <div class="summary-card"><span>Total Tamu</span><strong>${guests.length}</strong></div>
+              <div class="summary-card"><span>Total Pax</span><strong>${totalPax}</strong></div>
+              <div class="summary-card"><span>Check-in</span><strong>${stats?.checked_in ?? 0}</strong></div>
+              <div class="summary-card"><span>Souvenir</span><strong>${stats?.souvenir_claimed ?? 0}</strong></div>
+            </section>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama / HP</th>
+                  <th>Alamat</th>
+                  <th>Pax</th>
+                  <th>No. Reg</th>
+                  <th>Angpao</th>
+                  <th>Status</th>
+                  <th>Check-in</th>
+                </tr>
+              </thead>
+              <tbody>${rows || `<tr><td colspan="8" class="center">Belum ada data tamu</td></tr>`}</tbody>
+            </table>
+
+            <div class="footer">Generated by EdernDigital Guestbook System</div>
+          </main>
+          <script>
+            window.addEventListener("load", () => {
+              window.focus();
+              window.print();
+            });
+          </script>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Popup diblokir. Izinkan popup untuk mencetak laporan.");
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(printableHtml);
+    printWindow.document.close();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus tamu ini?")) return;
     await fetch(`/api/guests/${id}`, { method: "DELETE" });
     fetchData();
+  };
+
+  const handleDeleteAll = async () => {
+    if (guests.length === 0) return;
+    if (!confirm(`Hapus semua ${guests.length} data tamu? Aksi ini tidak bisa dibatalkan.`)) {
+      return;
+    }
+    if (!confirm("Konfirmasi sekali lagi: semua data tamu akan dihapus permanen.")) {
+      return;
+    }
+
+    setDeletingAll(true);
+    try {
+      const res = await fetch("/api/guests", { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Gagal menghapus semua data.");
+        return;
+      }
+      await fetchData();
+    } catch {
+      alert("Gagal terhubung ke server.");
+    } finally {
+      setDeletingAll(false);
+    }
   };
 
   const checkInRate =
@@ -103,16 +324,20 @@ export default function GuestListPage() {
       actions={
         <>
           <button
-            onClick={exportCsv}
+            onClick={exportPrintableReport}
             className="inline-flex items-center gap-2 rounded-lg border border-stone-200 px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-50"
           >
             <Download className="h-4 w-4" />
-            Export CSV
+            Export / Print
           </button>
-          <Link href="/admin/import" className="btn-navy py-2 text-xs">
-            <Plus className="h-4 w-4" />
-            Add Guest
-          </Link>
+          <button
+            onClick={handleDeleteAll}
+            disabled={deletingAll || guests.length === 0}
+            className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Trash2 className="h-4 w-4" />
+            {deletingAll ? "Deleting..." : "Delete All Data"}
+          </button>
         </>
       }
     >
