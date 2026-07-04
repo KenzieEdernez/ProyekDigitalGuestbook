@@ -38,4 +38,32 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* html5-qrcode: satu preview kamera, full width */
+  .scanner-viewport {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: #1c1917;
+  }
+
+  .scanner-viewport video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+
+  /* cegah duplikat video dari remount StrictMode */
+  .scanner-viewport video:not(:first-of-type) {
+    display: none !important;
+  }
+
+  .scanner-viewport > div {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+  }
 }

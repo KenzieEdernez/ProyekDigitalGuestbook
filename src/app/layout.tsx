@@ -13,8 +13,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Gala Excellence 2024 | Royal Event Management",
-  description: "Konfirmasi kehadiran dan digital guestbook untuk acara Gala Excellence 2024",
+  title: "Digital Guestbook | EdernDigital",
+  description: "Konfirmasi kehadiran dan digital guestbook untuk acara Anda",
 };
 
 export const viewport: Viewport = {

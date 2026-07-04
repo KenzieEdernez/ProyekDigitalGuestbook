@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "predev": "node scripts/kill-dev.js",
-    "dev": "set NEXT_TELEMETRY_DISABLED=1&& next dev -p 3000",
-    "build": "set NEXT_TELEMETRY_DISABLED=1&& next build",
+    "dev": "node scripts/ensure-local-build.js && set NEXT_TELEMETRY_DISABLED=1&& next dev -p 3000",
+    "build": "node scripts/ensure-local-build.js && set NEXT_TELEMETRY_DISABLED=1&& next build",
     "start": "set NEXT_TELEMETRY_DISABLED=1&& next start -p 3000",
     "stop": "node scripts/kill-dev.js",
     "reset": "node scripts/reset-build.js",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",
+    "html5-qrcode": "^2.3.8",
     "jsbarcode": "^3.11.6",
     "lucide-react": "^0.468.0",
     "next": "^15.1.0",

@@ -5,6 +5,7 @@ import { getDb } from "./db";
 import { getUploadsDir } from "./paths";
 import type {
   CheckInResult,
+  EnvelopeSection,
   Guest,
   GuestStats,
   ImportGuestRow,
@@ -70,15 +71,15 @@ export function findGuestBySouvenirBarcode(barcode: string): Guest | null {
   return row ? rowToGuest(row as Record<string, unknown>) : null;
 }
 
-function getNextAngpaoNumber(): string {
+function getNextAngpaoNumber(section: EnvelopeSection): string {
   const db = getDb();
   const result = db
     .prepare(
-      "SELECT COUNT(*) as count FROM guests WHERE angpao_number IS NOT NULL"
+      "SELECT COUNT(*) as count FROM guests WHERE angpao_number LIKE ?"
     )
-    .get() as { count: number };
+    .get(`${section}-%`) as { count: number };
   const num = (result.count ?? 0) + 1;
-  return `A-${String(num).padStart(3, "0")}`;
+  return `${section}-${String(num).padStart(3, "0")}`;
 }
 
 function generateSouvenirBarcode(): string {
@@ -159,7 +160,8 @@ function generateInvitationBarcode(): string {
 
 export function checkInGuest(
   invitationBarcode: string,
-  photoBase64: string
+  photoBase64: string,
+  envelopeSection: EnvelopeSection
 ): CheckInResult {
   const db = getDb();
   const guest = findGuestByInvitationBarcode(invitationBarcode);
@@ -174,7 +176,7 @@ export function checkInGuest(
     );
   }
 
-  const angpaoNumber = getNextAngpaoNumber();
+  const angpaoNumber = getNextAngpaoNumber(envelopeSection);
   const souvenirBarcode = generateSouvenirBarcode();
   const photoUrl = savePhoto(photoBase64, guest.id);
   const now = new Date().toISOString();

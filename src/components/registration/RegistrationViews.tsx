@@ -10,8 +10,10 @@ import {
   Share2,
   Info,
 } from "lucide-react";
-import { EVENT, formatRegNumber } from "@/lib/event-config";
+import { EVENT, formatRegNumber, mergeEventSettings } from "@/lib/event-config";
 import type { Guest } from "@/types/guest";
+
+type ResolvedEvent = ReturnType<typeof mergeEventSettings>;
 
 interface QrCodeDisplayProps {
   value: string;
@@ -43,7 +45,13 @@ export default function QrCodeDisplay({
   );
 }
 
-export function RegistrationConfirmation({ guest }: { guest: Guest }) {
+export function RegistrationConfirmation({
+  guest,
+  event = mergeEventSettings(),
+}: {
+  guest: Guest;
+  event?: ResolvedEvent;
+}) {
   const handleSave = () => {
     window.print();
   };
@@ -52,7 +60,7 @@ export function RegistrationConfirmation({ guest }: { guest: Guest }) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${EVENT.name} - Konfirmasi Kehadiran`,
+          title: `${event.name} - Konfirmasi Kehadiran`,
           text: `Registrasi ${guest.name} - ${formatRegNumber(guest.invitation_barcode)}`,
         });
       } catch {
@@ -73,7 +81,7 @@ export function RegistrationConfirmation({ guest }: { guest: Guest }) {
           Registrasi Dikonfirmasi
         </h2>
         <p className="mt-2 text-sm text-white/70">
-          Anda resmi terdaftar di daftar tamu {EVENT.name}
+          Anda resmi terdaftar di daftar tamu {event.name}
         </p>
       </div>
 
@@ -118,16 +126,16 @@ export function RegistrationConfirmation({ guest }: { guest: Guest }) {
           <div className="mt-4 space-y-3 text-sm text-stone-600">
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-royal" />
-              <span>{EVENT.date}</span>
+              <span>{event.dateDisplay}</span>
             </div>
             <div className="flex items-center gap-3">
               <Clock className="h-4 w-4 text-royal" />
-              <span>{EVENT.time}</span>
+              <span>{event.time}</span>
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="h-4 w-4 text-royal" />
               <span>
-                {EVENT.location}, {EVENT.address}
+                {event.location}, {event.address}
               </span>
             </div>
           </div>
@@ -149,8 +157,8 @@ export function RegistrationConfirmation({ guest }: { guest: Guest }) {
       </div>
 
       <div className="flex items-center justify-between border-t border-stone-100 bg-stone-50 px-8 py-4 text-xs text-stone-500">
-        <span className="font-semibold uppercase">{EVENT.organizer}</span>
-        <span className="italic text-royal">Majestic Hospitality</span>
+        <span className="font-semibold uppercase">{event.organizer}</span>
+        <span className="italic text-royal">EdernDigital</span>
       </div>
     </div>
   );

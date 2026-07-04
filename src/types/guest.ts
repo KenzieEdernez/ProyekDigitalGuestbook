@@ -4,6 +4,8 @@ export type GuestStatus =
   | "souvenir_claimed"
   | "declined";
 
+export type EnvelopeSection = "A" | "B";
+
 export interface Guest {
   id: string;
   invitation_barcode: string | null;

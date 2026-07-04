@@ -12,6 +12,7 @@ import {
 import AdminShell from "@/components/layout/AdminShell";
 import type { Guest, GuestStats } from "@/types/guest";
 import { formatRegNumber } from "@/lib/event-config";
+import { useEventSettings } from "@/hooks/useEventSettings";
 
 function StatCard({
   label,
@@ -57,6 +58,7 @@ function StatCard({
 }
 
 export default function AdminDashboard() {
+  const eventSettings = useEventSettings();
   const [guests, setGuests] = useState<Guest[]>([]);
   const [stats, setStats] = useState<GuestStats | null>(null);
 
@@ -113,7 +115,7 @@ export default function AdminDashboard() {
   return (
     <AdminShell
       title="Event Overview"
-      subtitle="Real-time monitoring untuk Gala Excellence 2024"
+      subtitle={`Real-time monitoring untuk ${eventSettings.name}`}
     >
       {stats && (
         <div className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">

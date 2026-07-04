@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import JsBarcode from "jsbarcode";
+import { QRCodeSVG } from "qrcode.react";
 
 interface BarcodeDisplayProps {
   value: string;
@@ -14,26 +13,6 @@ export default function BarcodeDisplay({
   label,
   className = "",
 }: BarcodeDisplayProps) {
-  const svgRef = useRef<SVGSVGElement>(null);
-
-  useEffect(() => {
-    if (svgRef.current && value) {
-      try {
-        JsBarcode(svgRef.current, value, {
-          format: "CODE128",
-          width: 2,
-          height: 64,
-          displayValue: true,
-          fontSize: 14,
-          margin: 8,
-          lineColor: "#1a2332",
-        });
-      } catch {
-        // invalid barcode
-      }
-    }
-  }, [value]);
-
   return (
     <div className={`flex flex-col items-center ${className}`}>
       {label && (
@@ -41,8 +20,8 @@ export default function BarcodeDisplay({
           {label}
         </p>
       )}
-      <div className="rounded-lg bg-white p-3 ring-1 ring-stone-100">
-        <svg ref={svgRef} />
+      <div className="rounded-lg bg-white p-5 ring-1 ring-stone-100">
+        <QRCodeSVG value={value} size={240} level="H" includeMargin />
       </div>
       <p className="mt-2 font-mono text-sm font-semibold text-navy">{value}</p>
     </div>

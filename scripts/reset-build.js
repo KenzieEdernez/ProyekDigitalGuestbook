@@ -1,6 +1,3 @@
-/**
- * Remove OneDrive workaround junctions and reset local build folders.
- */
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
@@ -30,13 +27,8 @@ function removeLink(linkPath) {
   }
 }
 
-removeLink(path.join(projectRoot, ".next"));
-removeLink(path.join(projectRoot, "node_modules", ".cache"));
-
 const externalNext = path.join(
-  os.homedir(),
-  "AppData",
-  "Local",
+  process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"),
   "digital-guestbook",
   ".next"
 );
@@ -47,9 +39,7 @@ try {
 }
 
 const externalCache = path.join(
-  os.homedir(),
-  "AppData",
-  "Local",
+  process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"),
   "digital-guestbook",
   "cache"
 );
@@ -59,4 +49,9 @@ try {
   // ignore
 }
 
-console.log("Build folders direset ke default project.");
+removeLink(path.join(projectRoot, ".next"));
+removeLink(path.join(projectRoot, "node_modules", ".cache"));
+
+require("./ensure-local-build");
+
+console.log("Build folders direset dan diarahkan ke folder lokal.");

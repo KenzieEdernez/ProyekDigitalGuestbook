@@ -8,11 +8,13 @@ import {
   RegistrationConfirmation,
   DeclinedMessage,
 } from "@/components/registration/RegistrationViews";
+import { useEventSettings } from "@/hooks/useEventSettings";
 import type { Guest } from "@/types/guest";
 
 type Step = "form" | "success" | "declined";
 
 export default function RegistrationPage() {
+  const eventSettings = useEventSettings();
   const [step, setStep] = useState<Step>("form");
   const [attending, setAttending] = useState(true);
   const [form, setForm] = useState({
@@ -61,7 +63,7 @@ export default function RegistrationPage() {
     return (
       <main className="min-h-screen bg-cream py-12">
         <div className="px-6">
-          <RegistrationConfirmation guest={guest} />
+          <RegistrationConfirmation guest={guest} event={eventSettings} />
           <p className="mt-8 text-center text-sm text-stone-500">
             Perlu ubah registrasi? Hubungi:{" "}
             <a
@@ -91,15 +93,15 @@ export default function RegistrationPage() {
       {/* Hero */}
       <section
         className="relative bg-cover bg-center px-6 pb-16 pt-20"
-        style={{ backgroundImage: `url('${EVENT.heroImage}')` }}
+        style={{ backgroundImage: `url('${eventSettings.heroImage}')` }}
       >
         <div className="absolute inset-0 bg-hero-overlay" />
         <div className="relative mx-auto max-w-3xl text-center">
           <h1 className="font-serif text-4xl font-bold text-white md:text-5xl lg:text-6xl">
-            {EVENT.name}
+            {eventSettings.name}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-balance text-sm leading-relaxed text-white/80 md:text-base">
-            {EVENT.tagline}
+            {eventSettings.tagline}
           </p>
         </div>
       </section>
@@ -110,10 +112,10 @@ export default function RegistrationPage() {
           <div className="card-premium overflow-hidden">
             <div className="border-b border-royal/10 px-8 py-6">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-royal">
-                Official RSVP
+                Konfirmasi Resmi
               </p>
               <h2 className="mt-1 font-serif text-2xl font-bold text-navy">
-                Guest Registration
+                Form Pendaftaran Tamu
               </h2>
             </div>
 
@@ -202,7 +204,7 @@ export default function RegistrationPage() {
                         : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                     }`}
                   >
-                    Will Attend
+                    Hadir
                   </button>
                   <button
                     type="button"
@@ -213,7 +215,7 @@ export default function RegistrationPage() {
                         : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                     }`}
                   >
-                    Decline
+                    Tidak Hadir
                   </button>
                 </div>
               </div>
@@ -222,7 +224,7 @@ export default function RegistrationPage() {
                 <div className="flex gap-3 rounded-lg bg-parchment p-4">
                   <Info className="mt-0.5 h-4 w-4 shrink-0 text-royal" />
                   <p className="text-xs leading-relaxed text-stone-600">
-                    Setelah submit, QR code digital unik akan dibuat untuk
+                    Setelah dikirim, QR code digital unik akan dibuat untuk
                     grup Anda. Tunjukkan kode ini di meja resepsionis untuk
                     check-in prioritas.
                   </p>
@@ -238,7 +240,7 @@ export default function RegistrationPage() {
                 {loading
                   ? "Memproses..."
                   : attending
-                    ? "Generate My QR Code"
+                    ? "Buat QR Code Saya"
                     : "Kirim Konfirmasi"}
               </button>
             </form>
@@ -251,9 +253,9 @@ export default function RegistrationPage() {
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              { icon: "📅", label: "Tanggal & Waktu", line1: EVENT.date, line2: EVENT.time },
-              { icon: "📍", label: "Lokasi", line1: EVENT.location, line2: EVENT.address },
-              { icon: "👔", label: "Dress Code", line1: EVENT.dressCode, line2: EVENT.dressNote },
+              { icon: "📅", label: "Tanggal & Waktu", line1: eventSettings.dateDisplay, line2: eventSettings.time },
+              { icon: "📍", label: "Lokasi", line1: eventSettings.location, line2: eventSettings.address },
+              { icon: "👔", label: "Dress Code", line1: eventSettings.dressCode, line2: eventSettings.dressNote },
             ].map(({ icon, label, line1, line2 }) => (
               <div key={label} className="card-premium p-6 text-center">
                 <span className="text-2xl">{icon}</span>
@@ -271,14 +273,14 @@ export default function RegistrationPage() {
       {/* Footer */}
       <footer className="border-t border-stone-200 bg-white px-6 py-10 text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-navy">
-          {EVENT.organizer}
+          {eventSettings.organizer}
         </p>
-        <p className="mt-1 text-xs text-stone-500">{EVENT.organizerTagline}</p>
+        <p className="mt-1 text-xs text-stone-500">{eventSettings.organizerTagline}</p>
         <Link
           href="/admin"
           className="mt-6 inline-block text-[10px] uppercase tracking-widest text-stone-300 hover:text-royal"
         >
-          Staff Login
+          Masuk Panitia
         </Link>
       </footer>
     </main>

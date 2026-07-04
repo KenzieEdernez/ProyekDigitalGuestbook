@@ -10,8 +10,9 @@ import {
   FileSpreadsheet,
   LogOut,
   Plus,
+  Settings,
 } from "lucide-react";
-import { EVENT } from "@/lib/event-config";
+import { useEventSettings } from "@/hooks/useEventSettings";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/check-in", label: "Check-in", icon: ScanLine },
   { href: "/souvenir", label: "Souvenir", icon: Gift },
   { href: "/admin/import", label: "Import", icon: FileSpreadsheet },
+  { href: "/admin/settings", label: "Pengaturan", icon: Settings },
 ];
 
 interface AdminShellProps {
@@ -35,8 +37,10 @@ export default function AdminShell({
   actions,
 }: AdminShellProps) {
   const pathname = usePathname();
+  const eventSettings = useEventSettings();
 
   const isActive = (href: string, exact?: boolean) => {
+    if (!pathname) return false;
     if (exact) return pathname === href;
     return pathname.startsWith(href);
   };
@@ -45,8 +49,10 @@ export default function AdminShell({
     <div className="flex min-h-screen bg-cream">
       <aside className="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-stone-200 bg-white">
         <div className="border-b border-stone-100 px-6 py-6">
-          <p className="font-serif text-lg font-bold text-navy">{EVENT.name}</p>
-          <p className="mt-0.5 text-xs text-stone-500">Lead Organizer</p>
+          <p className="font-serif text-lg font-bold text-navy">
+            {eventSettings.organizer}
+          </p>
+          <p className="mt-0.5 text-xs text-stone-500">{eventSettings.name}</p>
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">
@@ -77,15 +83,19 @@ export default function AdminShell({
             className="btn-navy flex w-full items-center justify-center gap-2 py-3 text-xs"
           >
             <Plus className="h-4 w-4" />
-            Quick Guest Entry
+            Tambah Tamu Cepat
           </Link>
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={async () => {
+              await fetch("/api/admin/logout", { method: "POST" });
+              window.location.href = "/";
+            }}
             className="flex items-center gap-2 px-4 py-2 text-sm text-stone-500 transition hover:text-navy"
           >
             <LogOut className="h-4 w-4" />
             Keluar
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -94,7 +104,7 @@ export default function AdminShell({
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-stone-400">
-                {EVENT.organizer}
+                {eventSettings.organizer}
               </p>
               {title && (
                 <h1 className="font-serif text-2xl font-bold text-navy">

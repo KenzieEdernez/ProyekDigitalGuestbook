@@ -8,6 +8,8 @@ interface CameraCaptureProps {
   onCancel?: () => void;
   compact?: boolean;
   autoStart?: boolean;
+  /** Ambil foto otomatis sekali saat kamera siap — tanpa tombol Capture */
+  autoCaptureOnce?: boolean;
 }
 
 export default function CameraCapture({
@@ -15,17 +17,48 @@ export default function CameraCapture({
   onCancel,
   compact = false,
   autoStart = false,
+  autoCaptureOnce = false,
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const capturedRef = useRef(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
 
+  const stopCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setCameraReady(false);
+  }, []);
+
+  const takePhoto = useCallback(
+    (submitImmediately = false) => {
+      if (capturedRef.current || !videoRef.current || !canvasRef.current) return;
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d")?.drawImage(video, 0, 0);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      capturedRef.current = true;
+      stopCamera();
+
+      if (submitImmediately || autoCaptureOnce) {
+        onCapture(dataUrl);
+        return;
+      }
+
+      setPreview(dataUrl);
+    },
+    [autoCaptureOnce, onCapture, stopCamera]
+  );
+
   const startCamera = useCallback(async () => {
     try {
       setError(null);
+      capturedRef.current = false;
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "user",
@@ -45,27 +78,16 @@ export default function CameraCapture({
     }
   }, []);
 
-  const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-    setCameraReady(false);
-  }, []);
-
   useEffect(() => {
     if (autoStart) startCamera();
     return () => stopCamera();
   }, [autoStart, startCamera, stopCamera]);
 
-  const takePhoto = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d")?.drawImage(video, 0, 0);
-    setPreview(canvas.toDataURL("image/jpeg", 0.85));
-    stopCamera();
-  }, [stopCamera]);
+  useEffect(() => {
+    if (!autoCaptureOnce || !cameraReady || capturedRef.current) return;
+    const timer = setTimeout(() => takePhoto(true), 600);
+    return () => clearTimeout(timer);
+  }, [autoCaptureOnce, cameraReady, takePhoto]);
 
   const containerClass = compact
     ? "relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-navy-900"
@@ -77,6 +99,10 @@ export default function CameraCapture({
         <div className="mb-3 rounded-lg bg-red-50 p-3 text-center text-sm text-red-700">
           {error}
         </div>
+      )}
+
+      {autoCaptureOnce && cameraReady && !error && (
+        <p className="mb-2 text-center text-sm text-stone-500">Mengambil foto...</p>
       )}
 
       {!preview ? (
@@ -97,12 +123,12 @@ export default function CameraCapture({
                 </button>
               </div>
             )}
-            {cameraReady && compact && (
+            {cameraReady && compact && !autoCaptureOnce && (
               <div className="pointer-events-none absolute inset-x-0 top-1/2 h-0.5 bg-royal/60" />
             )}
           </div>
 
-          {cameraReady && (
+          {cameraReady && !autoCaptureOnce && (
             <div className={`flex gap-3 ${compact ? "mt-4" : "mt-2"}`}>
               {onCancel && (
                 <button
@@ -116,11 +142,11 @@ export default function CameraCapture({
                 </button>
               )}
               <button
-                onClick={takePhoto}
+                onClick={() => takePhoto(false)}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-lg bg-white py-2.5 text-sm font-semibold text-navy shadow-md transition hover:bg-stone-50 ${compact ? "" : "touch-target"}`}
               >
                 <Camera className="h-4 w-4" />
-                Capture
+                Ambil Foto
               </button>
             </div>
           )}
@@ -134,12 +160,13 @@ export default function CameraCapture({
           <div className={`flex gap-3 ${compact ? "mt-4" : "mt-2"}`}>
             <button
               onClick={() => {
+                capturedRef.current = false;
                 setPreview(null);
                 startCamera();
               }}
               className="flex-1 rounded-lg border border-stone-200 py-2.5 text-sm font-medium"
             >
-              Retake
+              Foto Ulang
             </button>
             <button
               onClick={() => onCapture(preview)}

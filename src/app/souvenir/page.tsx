@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import {
   Search,
   Gift,
@@ -9,10 +9,18 @@ import {
   Clock,
   ScanLine,
 } from "lucide-react";
+import { Html5QrcodeSupportedFormats } from "html5-qrcode";
 import AdminShell from "@/components/layout/AdminShell";
 import ScanInput from "@/components/ScanInput";
 import UniversalScanner from "@/components/UniversalScanner";
 import type { Guest } from "@/types/guest";
+
+const SOUVENIR_SCAN_FORMATS = [
+  Html5QrcodeSupportedFormats.QR_CODE,
+  Html5QrcodeSupportedFormats.CODE_128,
+  Html5QrcodeSupportedFormats.CODE_39,
+  Html5QrcodeSupportedFormats.EAN_13,
+];
 
 const inventory = [
   {
@@ -49,6 +57,9 @@ export default function SouvenirPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchLog, setSearchLog] = useState("");
+  const [scannerKey, setScannerKey] = useState(0);
+  const processingRef = useRef(false);
+  const lastBarcodeRef = useRef<string | null>(null);
 
   const fetchGuests = useCallback(async () => {
     const res = await fetch("/api/guests");
@@ -62,52 +73,75 @@ export default function SouvenirPage() {
     return () => clearInterval(interval);
   }, [fetchGuests]);
 
+  const restartScanner = useCallback(() => {
+    lastBarcodeRef.current = null;
+    processingRef.current = false;
+    setScannerKey((k) => k + 1);
+  }, []);
+
   const reset = useCallback(() => {
     setScanValue("");
     setGuest(null);
     setClaimedGuest(null);
     setError(null);
-  }, []);
+    restartScanner();
+  }, [restartScanner]);
 
-  const handleScan = async (barcode: string) => {
-    if (loading || claimedGuest) return;
-    setLoading(true);
-    setError(null);
+  const handleScan = useCallback(
+    async (barcode: string) => {
+      const code = barcode.trim().toUpperCase();
+      if (!code || loading || claimedGuest || guest) return;
+      if (processingRef.current || lastBarcodeRef.current === code) return;
 
-    try {
-      const res = await fetch(
-        `/api/souvenir?barcode=${encodeURIComponent(barcode)}`
-      );
-      const data = await res.json();
+      processingRef.current = true;
+      lastBarcodeRef.current = code;
+      setLoading(true);
+      setError(null);
+      setScanValue(code);
 
-      if (!res.ok) {
-        setError(data.error || "Barcode tidak ditemukan.");
-        setScanValue("");
-        return;
+      try {
+        const res = await fetch(`/api/souvenir?barcode=${encodeURIComponent(code)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error || "Barcode tidak ditemukan.");
+          setScanValue("");
+          lastBarcodeRef.current = null;
+          restartScanner();
+          return;
+        }
+
+        if (data.guest.status === "pending") {
+          setError("Tamu belum check-in.");
+          setScanValue("");
+          lastBarcodeRef.current = null;
+          restartScanner();
+          return;
+        }
+
+        if (data.guest.status === "souvenir_claimed") {
+          setError("Souvenir sudah diambil sebelumnya.");
+          setScanValue("");
+          lastBarcodeRef.current = null;
+          restartScanner();
+          return;
+        }
+
+        setGuest(data.guest);
+      } catch {
+        setError("Gagal terhubung ke server.");
+        lastBarcodeRef.current = null;
+        restartScanner();
+      } finally {
+        setLoading(false);
+        processingRef.current = false;
       }
-
-      if (data.guest.status === "pending") {
-        setError("Tamu belum check-in.");
-        setScanValue("");
-        return;
-      }
-
-      if (data.guest.status === "souvenir_claimed") {
-        setError("Souvenir sudah diambil sebelumnya.");
-        setScanValue("");
-        return;
-      }
-
-      setGuest(data.guest);
-    } catch {
-      setError("Gagal terhubung ke server.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [loading, claimedGuest, guest, restartScanner]
+  );
 
   const handleClaim = async () => {
-    if (!guest) return;
+    if (!guest || loading) return;
     setLoading(true);
     setError(null);
 
@@ -121,6 +155,7 @@ export default function SouvenirPage() {
 
       if (!res.ok) {
         setError(data.error || "Penukaran gagal.");
+        restartScanner();
         return;
       }
 
@@ -129,6 +164,7 @@ export default function SouvenirPage() {
       fetchGuests();
     } catch {
       setError("Gagal terhubung ke server.");
+      restartScanner();
     } finally {
       setLoading(false);
     }
@@ -142,11 +178,12 @@ export default function SouvenirPage() {
     .filter((g) => !searchLog || g.name.toLowerCase().includes(searchLog.toLowerCase()))
     .slice(0, 10);
 
-  const totalClaimed = allGuests.filter((g) => g.status === "souvenir_claimed")
-    .length;
+  const totalClaimed = allGuests.filter((g) => g.status === "souvenir_claimed").length;
   const totalEligible = allGuests.filter(
     (g) => g.status === "checked_in" || g.status === "souvenir_claimed"
   ).length;
+
+  const scannerActive = !loading && !claimedGuest && !guest;
 
   return (
     <AdminShell
@@ -166,45 +203,57 @@ export default function SouvenirPage() {
           </div>
           <h2 className="font-serif text-2xl font-bold text-navy">Souvenir Berhasil Diberikan</h2>
           <p className="mt-2 text-stone-600">{claimedGuest.name}</p>
-          <p className="text-sm text-stone-400">Angpao {claimedGuest.angpao_number} · {claimedGuest.pax} tamu</p>
-          <button onClick={reset} className="btn-navy mt-8 w-full py-3">Scan Berikutnya</button>
+          <p className="text-sm text-stone-400">
+            Angpao {claimedGuest.angpao_number} · {claimedGuest.pax} tamu
+          </p>
+          <button onClick={reset} className="btn-navy mt-8 w-full py-3">
+            Scan Berikutnya
+          </button>
         </div>
       ) : (
         <div className="grid gap-6 xl:grid-cols-3">
           <div className="space-y-6 xl:col-span-2">
-            {/* Scan panel - Camera langsung aktif */}
             <div className="card-premium p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <ScanLine className="h-5 w-5 text-royal" />
-                <h2 className="font-serif text-lg font-bold text-navy">Scan Barcode Souvenir</h2>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <ScanLine className="h-5 w-5 text-royal" />
+                  <h2 className="font-serif text-lg font-bold text-navy">Scan QR / Barcode Souvenir</h2>
+                </div>
+                {scannerActive && (
+                  <span className="badge bg-emerald-100 text-emerald-700">Live Camera</span>
+                )}
               </div>
-              
-              {/* Camera Scanner - Langsung jalan */}
-              <div className="mb-4" style={{ maxHeight: "300px", overflow: "hidden" }}>
+
+              <div className="mb-4">
                 <UniversalScanner
-                  onDetected={(code) => {
-                    setScanValue(code);
-                    handleScan(code);
-                  }}
-                  autoStart={true}
-                  containerId="souvenir-universal-scanner"
+                  key={scannerKey}
+                  active={scannerActive}
+                  autoStart
+                  formats={SOUVENIR_SCAN_FORMATS}
+                  scanRegion="full"
+                  onDetected={handleScan}
+                  prompt="Arahkan kamera ke QR atau barcode souvenir"
                 />
               </div>
 
-              {/* Manual input fallback */}
               <div>
                 <ScanInput
                   value={scanValue}
                   onChange={setScanValue}
                   onScan={handleScan}
                   placeholder="Atau input manual..."
-                  disabled={loading}
+                  disabled={loading || !!guest}
                   variant="premium"
                 />
               </div>
+
+              {!guest && !loading && (
+                <p className="mt-3 text-center text-sm text-stone-400">
+                  Kamera aktif — scan 1 QR/barcode souvenir lalu konfirmasi penukaran
+                </p>
+              )}
             </div>
 
-            {/* Guest Info */}
             {guest && (
               <div className="rounded-xl border border-royal/20 bg-parchment/50 p-5">
                 <div className="flex items-center gap-4">
@@ -222,7 +271,9 @@ export default function SouvenirPage() {
                   )}
                   <div>
                     <p className="font-serif text-xl font-bold text-navy">{guest.name}</p>
-                    <p className="text-sm text-stone-500">{guest.pax} tamu · Angpao {guest.angpao_number}</p>
+                    <p className="text-sm text-stone-500">
+                      {guest.pax} tamu · Angpao {guest.angpao_number}
+                    </p>
                   </div>
                 </div>
                 <button onClick={handleClaim} disabled={loading} className="btn-navy mt-4 w-full py-3">
@@ -232,7 +283,6 @@ export default function SouvenirPage() {
               </div>
             )}
 
-            {/* Inventory cards */}
             <div className="grid gap-4 sm:grid-cols-3">
               {inventory.map((item) => (
                 <div key={item.name} className="card-premium p-5">
@@ -241,13 +291,14 @@ export default function SouvenirPage() {
                   </div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">{item.category}</p>
                   <p className="mt-1 font-semibold text-navy">{item.name}</p>
-                  <p className="mt-2 text-sm text-stone-500">{item.stock}/{item.total}</p>
+                  <p className="mt-2 text-sm text-stone-500">
+                    {item.stock}/{item.total}
+                  </p>
                   <span className={`badge mt-2 ${item.statusColor}`}>{item.status}</span>
                 </div>
               ))}
             </div>
 
-            {/* Transaction log */}
             <div className="card-premium overflow-hidden">
               <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4">
                 <h2 className="font-serif text-lg font-bold text-navy">Transaction Log</h2>
@@ -274,7 +325,10 @@ export default function SouvenirPage() {
                   {transactions.map((g) => (
                     <tr key={g.id} className="border-t border-stone-50">
                       <td className="px-6 py-3 text-stone-500">
-                        {new Date(g.souvenir_claimed_at!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                        {new Date(g.souvenir_claimed_at!).toLocaleTimeString("id-ID", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </td>
                       <td className="px-6 py-3 font-medium text-navy">{g.name}</td>
                       <td className="px-6 py-3">
@@ -284,7 +338,9 @@ export default function SouvenirPage() {
                   ))}
                   {transactions.length === 0 && (
                     <tr>
-                      <td colSpan={3} className="px-6 py-8 text-center text-stone-400">Belum ada transaksi</td>
+                      <td colSpan={3} className="px-6 py-8 text-center text-stone-400">
+                        Belum ada transaksi
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -292,7 +348,6 @@ export default function SouvenirPage() {
             </div>
           </div>
 
-          {/* Insights panel */}
           <div className="space-y-6">
             <div className="rounded-xl bg-navy p-6 text-white">
               <h3 className="font-serif text-lg font-bold">Distribution Insights</h3>
@@ -300,7 +355,15 @@ export default function SouvenirPage() {
                 <div className="relative flex h-36 w-36 items-center justify-center">
                   <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
                     <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#c5a059" strokeWidth="3" strokeDasharray={`${totalEligible ? (totalClaimed / totalEligible) * 100 : 0} 100`} />
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="15.9"
+                      fill="none"
+                      stroke="#c5a059"
+                      strokeWidth="3"
+                      strokeDasharray={`${totalEligible ? (totalClaimed / totalEligible) * 100 : 0} 100`}
+                    />
                   </svg>
                   <div className="absolute text-center">
                     <p className="font-serif text-3xl font-bold">{totalClaimed}</p>
