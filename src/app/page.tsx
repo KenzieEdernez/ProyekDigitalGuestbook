@@ -214,7 +214,7 @@ export default function RegistrationPage() {
                   }
                   className="input-field"
                 >
-                  {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                  {Array.from({ length: 5 }, (_, i) => i + 1).map((n) => (
                     <option key={n} value={n}>
                       {n} Tamu
                     </option>
