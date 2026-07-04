@@ -1,4 +1,4 @@
-import { getSupabaseAdmin } from "./supabase-server";
+import { getPhotoBucket, getSupabaseAdmin } from "./supabase-server";
 import type { EventSettings } from "@/types/event";
 
 function toDateInputValue(value?: string) {
@@ -26,6 +26,31 @@ function textValue(value: unknown) {
   return String(value ?? "").trim();
 }
 
+async function saveHeroImage(value: string) {
+  if (!value.startsWith("data:image/")) return value;
+
+  const matches = value.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!matches) {
+    throw new Error("Format gambar hero tidak valid.");
+  }
+
+  const ext = matches[1] === "jpeg" ? "jpg" : matches[1];
+  const buffer = Buffer.from(matches[2], "base64");
+  const supabase = getSupabaseAdmin();
+  const bucket = getPhotoBucket();
+  const filename = `event/hero-${Date.now()}.${ext}`;
+
+  const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
+    contentType: `image/${ext === "jpg" ? "jpeg" : ext}`,
+    upsert: true,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
+  return data.publicUrl;
+}
+
 function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown>): EventSettings {
   const date = toDateInputValue(textValue(input.date));
   const settings = {
@@ -37,6 +62,7 @@ function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown
     address: textValue(input.address),
     dressCode: textValue(input.dressCode ?? input.dress_code),
     dressNote: textValue(input.dressNote ?? input.dress_note),
+    heroImage: textValue(input.heroImage ?? input.hero_image),
   };
 
   const requiredFields = [
@@ -76,6 +102,7 @@ export async function saveEventSettings(
   input: Partial<EventSettings>
 ): Promise<EventSettings> {
   const settings = sanitizeSettings(input);
+  const heroImage = await saveHeroImage(settings.heroImage);
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.from("event_settings").upsert({
     id: "default",
@@ -86,9 +113,10 @@ export async function saveEventSettings(
     address: settings.address,
     dress_code: settings.dressCode,
     dress_note: settings.dressNote,
+    hero_image: heroImage || null,
     updated_at: new Date().toISOString(),
   });
 
   if (error) throw new Error(error.message);
-  return settings;
+  return { ...settings, heroImage };
 }

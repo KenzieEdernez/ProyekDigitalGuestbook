@@ -26,6 +26,7 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   address: EVENT.address,
   dressCode: EVENT.dressCode,
   dressNote: EVENT.dressNote,
+  heroImage: EVENT.heroImage,
 };
 
 export function mergeEventSettings(settings?: Partial<EventSettings>) {

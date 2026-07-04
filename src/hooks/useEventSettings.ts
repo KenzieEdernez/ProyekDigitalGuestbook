@@ -13,6 +13,7 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   address: "",
   dressCode: "",
   dressNote: "",
+  heroImage: "",
 };
 
 export function useEventSettings() {

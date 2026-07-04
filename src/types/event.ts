@@ -7,4 +7,5 @@ export interface EventSettings {
   address: string;
   dressCode: string;
   dressNote: string;
+  heroImage: string;
 }

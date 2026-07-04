@@ -29,8 +29,12 @@ create table if not exists public.event_settings (
   address text not null,
   dress_code text not null,
   dress_note text not null,
+  hero_image text,
   updated_at timestamptz not null default now()
 );
+
+alter table public.event_settings
+add column if not exists hero_image text;
 
 alter table public.guests enable row level security;
 alter table public.event_settings enable row level security;
