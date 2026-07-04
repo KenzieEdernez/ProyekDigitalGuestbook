@@ -3,6 +3,11 @@ const path = require("path");
 const os = require("os");
 const { execSync } = require("child_process");
 
+if (process.env.VERCEL || process.platform !== "win32") {
+  console.log("Build/cache Next.js memakai default project.");
+  process.exit(0);
+}
+
 const projectRoot = process.cwd();
 const localRoot = path.join(
   process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"),
