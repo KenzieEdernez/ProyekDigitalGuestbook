@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   CheckCircle2,
@@ -14,6 +15,129 @@ import { formatRegNumber, mergeEventSettings } from "@/lib/event-config";
 import type { Guest } from "@/types/guest";
 
 type ResolvedEvent = ReturnType<typeof mergeEventSettings>;
+
+function sanitizeFilename(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function loadImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+}
+
+function drawCenteredText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  y: number,
+  maxWidth: number
+) {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let line = "";
+
+  for (const word of words) {
+    const testLine = line ? `${line} ${word}` : word;
+    if (ctx.measureText(testLine).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = testLine;
+    }
+  }
+
+  if (line) lines.push(line);
+  lines.forEach((currentLine, index) => {
+    ctx.fillText(currentLine, 450, y + index * 42);
+  });
+
+  return y + Math.max(lines.length, 1) * 42;
+}
+
+async function createQrImageBlob({
+  qrElement,
+  guest,
+  event,
+  invitationBarcode,
+}: {
+  qrElement: HTMLElement | null;
+  guest: Guest;
+  event: ResolvedEvent;
+  invitationBarcode: string;
+}) {
+  const svg = qrElement?.querySelector("svg");
+  if (!svg) throw new Error("QR code belum siap.");
+
+  const svgText = new XMLSerializer().serializeToString(svg);
+  const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`;
+  const qrImage = await loadImage(svgDataUrl);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 900;
+  canvas.height = 1200;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Browser tidak mendukung export gambar.");
+
+  ctx.fillStyle = "#f7f3ea";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "rgba(20, 33, 61, 0.14)";
+  ctx.shadowBlur = 28;
+  ctx.shadowOffsetY = 12;
+  ctx.roundRect(70, 70, 760, 1060, 32);
+  ctx.fill();
+  ctx.shadowColor = "transparent";
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#c5a059";
+  ctx.font = "700 24px Arial";
+  ctx.fillText("KONFIRMASI KEHADIRAN", 450, 145);
+
+  ctx.fillStyle = "#14213d";
+  ctx.font = "700 42px Georgia";
+  let nextY = drawCenteredText(ctx, event.name, 205, 680);
+
+  ctx.fillStyle = "#78716c";
+  ctx.font = "24px Arial";
+  ctx.fillText(event.dateDisplay, 450, nextY + 18);
+  ctx.fillText(event.time, 450, nextY + 56);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.roundRect(220, 355, 460, 460, 28);
+  ctx.fill();
+  ctx.drawImage(qrImage, 250, 385, 400, 400);
+
+  ctx.fillStyle = "#14213d";
+  ctx.font = "700 34px Arial";
+  ctx.fillText(guest.name, 450, 885);
+
+  ctx.fillStyle = "#78716c";
+  ctx.font = "24px Arial";
+  ctx.fillText(`${guest.pax} Tamu`, 450, 925);
+
+  ctx.fillStyle = "#14213d";
+  ctx.font = "700 28px 'Courier New'";
+  ctx.fillText(formatRegNumber(invitationBarcode), 450, 985);
+
+  ctx.fillStyle = "#78716c";
+  ctx.font = "20px Arial";
+  ctx.fillText("Tunjukkan QR code ini di pintu masuk untuk check-in", 450, 1045);
+
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("Gagal membuat gambar QR code."));
+    }, "image/png");
+  });
+}
 
 interface QrCodeDisplayProps {
   value: string;
@@ -52,24 +176,62 @@ export function RegistrationConfirmation({
   guest: Guest;
   event?: ResolvedEvent;
 }) {
-  const handleSave = () => {
-    window.print();
+  const qrRef = useRef<HTMLDivElement>(null);
+  const invitationBarcode = guest.invitation_barcode;
+
+  if (!invitationBarcode) return null;
+
+  const createImage = () =>
+    createQrImageBlob({
+      qrElement: qrRef.current,
+      guest,
+      event,
+      invitationBarcode,
+    });
+
+  const getFileName = () =>
+    `qr-${sanitizeFilename(guest.name) || "guest"}-${invitationBarcode}.png`;
+
+  const downloadQrImage = async () => {
+    const blob = await createImage();
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = getFileName();
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   };
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${event.name} - Konfirmasi Kehadiran`,
-          text: `Registrasi ${guest.name} - ${formatRegNumber(guest.invitation_barcode)}`,
-        });
-      } catch {
-        // user cancelled
-      }
+  const handleSave = async () => {
+    try {
+      await downloadQrImage();
+    } catch {
+      alert("Gagal menyimpan gambar QR code.");
     }
   };
 
-  if (!guest.invitation_barcode) return null;
+  const handleShare = async () => {
+    try {
+      const blob = await createImage();
+      const file = new File([blob], getFileName(), { type: "image/png" });
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: `${event.name} - QR Code`,
+          text: `QR code check-in untuk ${guest.name}`,
+          files: [file],
+        });
+        return;
+      }
+
+      await downloadQrImage();
+      alert("Browser ini belum mendukung share gambar. QR code sudah di-download.");
+    } catch {
+      // user cancelled or image generation failed
+    }
+  };
 
   return (
     <div className="mx-auto max-w-lg overflow-hidden rounded-2xl bg-white shadow-card-lg">
@@ -86,8 +248,8 @@ export function RegistrationConfirmation({
       </div>
 
       <div className="px-8 py-8">
-        <div className="flex justify-center">
-          <QrCodeDisplay value={guest.invitation_barcode} glow />
+        <div ref={qrRef} className="flex justify-center">
+          <QrCodeDisplay value={invitationBarcode} glow />
         </div>
         <p className="mt-4 flex items-center justify-center gap-2 text-xs text-stone-500">
           <Info className="h-3.5 w-3.5 shrink-0" />
