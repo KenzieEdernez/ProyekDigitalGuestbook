@@ -42,7 +42,7 @@ function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown
   };
 }
 
-export async function getEventSettings(): Promise<EventSettings> {
+export async function getEventSettings(): Promise<EventSettings | null> {
   try {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
@@ -52,9 +52,10 @@ export async function getEventSettings(): Promise<EventSettings> {
       .maybeSingle();
 
     if (error) throw error;
-    return sanitizeSettings((data ?? {}) as Partial<EventSettings> & Record<string, unknown>);
+    if (!data) return null;
+    return sanitizeSettings(data as Partial<EventSettings> & Record<string, unknown>);
   } catch {
-    return DEFAULT_EVENT_SETTINGS;
+    return null;
   }
 }
 

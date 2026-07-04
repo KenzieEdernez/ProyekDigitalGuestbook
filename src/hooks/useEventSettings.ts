@@ -7,6 +7,7 @@ import type { EventSettings } from "@/types/event";
 export function useEventSettings() {
   const [settings, setSettings] = useState<EventSettings | null>(null);
   const [settingsReady, setSettingsReady] = useState(false);
+  const [settingsAvailable, setSettingsAvailable] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -14,12 +15,14 @@ export function useEventSettings() {
     async function loadSettings() {
       try {
         const res = await fetch("/api/event-settings", { cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to load event settings");
         const data = await res.json();
         if (!cancelled && data.settings) {
           setSettings(data.settings);
+          setSettingsAvailable(true);
         }
       } catch {
-        if (!cancelled) setSettings(DEFAULT_EVENT_SETTINGS);
+        if (!cancelled) setSettingsAvailable(false);
       } finally {
         if (!cancelled) setSettingsReady(true);
       }
@@ -34,5 +37,6 @@ export function useEventSettings() {
   return {
     ...mergeEventSettings(settings ?? DEFAULT_EVENT_SETTINGS),
     settingsReady,
+    settingsAvailable,
   };
 }

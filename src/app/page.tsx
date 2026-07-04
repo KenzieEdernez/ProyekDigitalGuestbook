@@ -40,6 +40,25 @@ export default function RegistrationPage() {
     );
   }
 
+  if (!eventSettings.settingsAvailable) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-cream px-6">
+        <div className="max-w-md text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-royal">
+            EdernDigital
+          </p>
+          <h1 className="mt-3 font-serif text-2xl font-bold text-navy">
+            Pengaturan event belum tersedia
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-stone-500">
+            Silakan isi dan simpan pengaturan event dari halaman admin terlebih
+            dahulu.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
