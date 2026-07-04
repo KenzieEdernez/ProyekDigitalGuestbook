@@ -159,79 +159,88 @@ export default function CheckInPage() {
               font-family: Arial, sans-serif;
             }
             .sticker {
-              width: 100mm;
-              height: 55mm;
-              display: grid;
-              grid-template-columns: 1fr 38mm;
-              gap: 4mm;
-              padding: 5mm;
-              border: 1px dashed #d6d3d1;
-            }
-            .left {
+              width: 85mm;
+              height: 54mm;
               display: flex;
               flex-direction: column;
-              justify-content: center;
-              min-width: 0;
+              gap: 3mm;
+              padding: 3.5mm;
+              border: 1px dashed #d6d3d1;
             }
-            .eyebrow {
-              color: #c5a059;
-              font-size: 8pt;
-              font-weight: 700;
-              letter-spacing: 0.18em;
+            .envelope-box,
+            .qr-box {
+              border: 1.5px solid #14213d;
+              border-radius: 3mm;
+              background: #ffffff;
+            }
+            .envelope-box {
+              height: 14mm;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 3mm;
+              padding: 2mm 3mm;
+            }
+            .envelope-label {
+              color: #14213d;
+              font-size: 11pt;
+              font-weight: 800;
+              letter-spacing: 0.08em;
               text-transform: uppercase;
             }
-            .guest {
-              margin-top: 2mm;
+            .envelope-number {
+              color: #dc2626;
               font-family: Georgia, serif;
-              font-size: 15pt;
+              font-size: 21pt;
+              font-weight: 700;
+              line-height: 1;
+            }
+            .qr-box {
+              flex: 1;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 4mm;
+              padding: 3mm;
+            }
+            .qr-info {
+              min-width: 0;
+              flex: 1;
+            }
+            .qr svg {
+              width: 28mm;
+              height: 28mm;
+              display: block;
+            }
+            .guest {
+              color: #14213d;
+              font-family: Georgia, serif;
+              font-size: 12pt;
               font-weight: 700;
               line-height: 1.15;
               word-break: break-word;
             }
             .meta {
-              margin-top: 2mm;
+              margin-top: 1.5mm;
               color: #57534e;
-              font-size: 8pt;
+              font-size: 7.5pt;
               line-height: 1.35;
-            }
-            .envelope {
-              margin-top: 4mm;
-              color: #dc2626;
-              font-family: Georgia, serif;
-              font-size: 30pt;
-              font-weight: 700;
-              line-height: 1;
-            }
-            .right {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              border-left: 1px solid #e7e5e4;
-              padding-left: 4mm;
-            }
-            .qr svg {
-              width: 30mm;
-              height: 30mm;
-              display: block;
             }
             .code {
               margin-top: 2mm;
               font-family: "Courier New", monospace;
-              font-size: 7pt;
+              font-size: 7.5pt;
               font-weight: 700;
-              text-align: center;
               word-break: break-all;
             }
             .label {
-              margin-top: 1mm;
               color: #78716c;
-              font-size: 6.5pt;
+              font-size: 7pt;
               font-weight: 700;
               letter-spacing: 0.1em;
               text-transform: uppercase;
             }
-            @page { size: 100mm 55mm; margin: 0; }
+            @page { size: 85mm 54mm; margin: 0; }
             @media print {
               body { margin: 0; }
               .sticker { border: none; }
@@ -240,19 +249,21 @@ export default function CheckInPage() {
         </head>
         <body>
           <main class="sticker">
-            <section class="left">
-              <div class="eyebrow">Check-in Sticker</div>
-              <div class="guest">${escapeHtml(result.guest.name)}</div>
-              <div class="meta">
-                ${escapeHtml(result.guest.pax)} tamu<br />
-                ${escapeHtml(formatRegNumber(result.guest.invitation_barcode))}
-              </div>
-              <div class="envelope">${escapeHtml(result.angpao_number)}</div>
+            <section class="envelope-box">
+              <span class="envelope-label">No. Amplop</span>
+              <span class="envelope-number">${escapeHtml(result.angpao_number)}</span>
             </section>
-            <section class="right">
+            <section class="qr-box">
               <div class="qr">${qrMarkup}</div>
-              <div class="code">${escapeHtml(result.souvenir_barcode)}</div>
-              <div class="label">Souvenir</div>
+              <div class="qr-info">
+                <div class="label">QR Code Souvenir</div>
+                <div class="guest">${escapeHtml(result.guest.name)}</div>
+                <div class="meta">
+                  ${escapeHtml(result.guest.pax)} tamu<br />
+                  ${escapeHtml(formatRegNumber(result.guest.invitation_barcode))}
+                </div>
+                <div class="code">${escapeHtml(result.souvenir_barcode)}</div>
+              </div>
             </section>
           </main>
           <script>
