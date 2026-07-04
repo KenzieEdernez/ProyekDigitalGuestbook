@@ -1,8 +1,5 @@
-import fs from "fs";
-import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { getDb } from "./db";
-import { getUploadsDir } from "./paths";
+import { getPhotoBucket, getSupabaseAdmin } from "./supabase-server";
 import type {
   CheckInResult,
   EnvelopeSection,
@@ -16,91 +13,91 @@ function rowToGuest(row: Record<string, unknown>): Guest {
   return row as unknown as Guest;
 }
 
-export function getAllGuests(): Guest[] {
-  const db = getDb();
-  const rows = db
-    .prepare("SELECT * FROM guests ORDER BY created_at DESC")
-    .all();
-  return rows.map((r) => rowToGuest(r as Record<string, unknown>));
+export async function getAllGuests(): Promise<Guest[]> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("guests")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => rowToGuest(r as Record<string, unknown>));
 }
 
-export function getGuestStats(): GuestStats {
-  const db = getDb();
-  const stats = db
-    .prepare(
-      `
-    SELECT
-      COUNT(*) as total,
-      SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-      SUM(CASE WHEN status = 'checked_in' THEN 1 ELSE 0 END) as checked_in,
-      SUM(CASE WHEN status = 'souvenir_claimed' THEN 1 ELSE 0 END) as souvenir_claimed,
-      SUM(CASE WHEN status = 'declined' THEN 1 ELSE 0 END) as declined,
-      SUM(CASE WHEN status IN ('pending', 'checked_in', 'souvenir_claimed') THEN pax ELSE 0 END) as total_pax_registered,
-      SUM(CASE WHEN status IN ('checked_in', 'souvenir_claimed') THEN pax ELSE 0 END) as total_pax_checked_in
-    FROM guests
-  `
-    )
-    .get() as Record<string, number>;
+export async function getGuestStats(): Promise<GuestStats> {
+  const guests = await getAllGuests();
 
   return {
-    total: stats.total ?? 0,
-    pending: stats.pending ?? 0,
-    checked_in: stats.checked_in ?? 0,
-    souvenir_claimed: stats.souvenir_claimed ?? 0,
-    declined: stats.declined ?? 0,
-    total_pax_registered: stats.total_pax_registered ?? 0,
-    total_pax_checked_in: stats.total_pax_checked_in ?? 0,
+    total: guests.length,
+    pending: guests.filter((g) => g.status === "pending").length,
+    checked_in: guests.filter((g) => g.status === "checked_in").length,
+    souvenir_claimed: guests.filter((g) => g.status === "souvenir_claimed")
+      .length,
+    declined: guests.filter((g) => g.status === "declined").length,
+    total_pax_registered: guests
+      .filter((g) => g.status !== "declined")
+      .reduce((sum, g) => sum + g.pax, 0),
+    total_pax_checked_in: guests
+      .filter((g) => g.status === "checked_in" || g.status === "souvenir_claimed")
+      .reduce((sum, g) => sum + g.pax, 0),
   };
 }
 
-export function findGuestByInvitationBarcode(
+export async function findGuestByInvitationBarcode(
   barcode: string
-): Guest | null {
-  const db = getDb();
-  const row = db
-    .prepare("SELECT * FROM guests WHERE invitation_barcode = ?")
-    .get(barcode.trim());
-  return row ? rowToGuest(row as Record<string, unknown>) : null;
+): Promise<Guest | null> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("guests")
+    .select("*")
+    .eq("invitation_barcode", barcode.trim())
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return data ? rowToGuest(data as Record<string, unknown>) : null;
 }
 
-export function findGuestBySouvenirBarcode(barcode: string): Guest | null {
-  const db = getDb();
-  const row = db
-    .prepare("SELECT * FROM guests WHERE souvenir_barcode = ?")
-    .get(barcode.trim());
-  return row ? rowToGuest(row as Record<string, unknown>) : null;
+export async function findGuestBySouvenirBarcode(
+  barcode: string
+): Promise<Guest | null> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("guests")
+    .select("*")
+    .eq("souvenir_barcode", barcode.trim())
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return data ? rowToGuest(data as Record<string, unknown>) : null;
 }
 
-function getNextAngpaoNumber(section: EnvelopeSection): string {
-  const db = getDb();
-  const result = db
-    .prepare(
-      "SELECT COUNT(*) as count FROM guests WHERE angpao_number LIKE ?"
-    )
-    .get(`${section}-%`) as { count: number };
-  const num = (result.count ?? 0) + 1;
+async function getNextAngpaoNumber(section: EnvelopeSection): Promise<string> {
+  const supabase = getSupabaseAdmin();
+  const { count, error } = await supabase
+    .from("guests")
+    .select("id", { count: "exact", head: true })
+    .like("angpao_number", `${section}-%`);
+
+  if (error) throw new Error(error.message);
+  const num = (count ?? 0) + 1;
   return `${section}-${String(num).padStart(3, "0")}`;
 }
 
-function generateSouvenirBarcode(): string {
-  const db = getDb();
+async function generateSouvenirBarcode(): Promise<string> {
   let barcode: string;
   let exists: boolean;
 
   do {
     const num = Math.floor(100000 + Math.random() * 900000);
     barcode = `SV-${num}`;
-    const row = db
-      .prepare("SELECT id FROM guests WHERE souvenir_barcode = ?")
-      .get(barcode);
-    exists = !!row;
+    exists = !!(await findGuestBySouvenirBarcode(barcode));
   } while (exists);
 
   return barcode;
 }
 
-export function registerGuest(input: RegisterGuestInput): Guest {
-  const db = getDb();
+export async function registerGuest(input: RegisterGuestInput): Promise<Guest> {
+  const supabase = getSupabaseAdmin();
   const id = uuidv4();
   const name = input.name.trim();
   const address = input.address.trim();
@@ -117,54 +114,48 @@ export function registerGuest(input: RegisterGuestInput): Guest {
     throw new Error("Nomor HP wajib diisi.");
   }
 
-  if (input.attending) {
-    const invitationBarcode = generateInvitationBarcode();
-    db.prepare(
-      `
-      INSERT INTO guests (id, invitation_barcode, name, address, phone, pax, status, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, 'pending', datetime('now'))
-    `
-    ).run(id, invitationBarcode, name, address, phone, pax);
-  } else {
-    db.prepare(
-      `
-      INSERT INTO guests (id, invitation_barcode, name, address, phone, pax, status, created_at)
-      VALUES (?, NULL, ?, ?, ?, ?, 'declined', datetime('now'))
-    `
-    ).run(id, name, address, phone, pax);
-  }
+  const row = {
+    id,
+    invitation_barcode: input.attending
+      ? await generateInvitationBarcode()
+      : null,
+    name,
+    address,
+    phone,
+    pax,
+    status: input.attending ? "pending" : "declined",
+  };
 
-  const row = db
-    .prepare("SELECT * FROM guests WHERE id = ?")
-    .get(id) as Record<string, unknown>;
+  const { data, error } = await supabase
+    .from("guests")
+    .insert(row)
+    .select("*")
+    .single();
 
-  return rowToGuest(row);
+  if (error) throw new Error(error.message);
+  return rowToGuest(data as Record<string, unknown>);
 }
 
-function generateInvitationBarcode(): string {
-  const db = getDb();
+async function generateInvitationBarcode(): Promise<string> {
   let barcode: string;
   let exists: boolean;
 
   do {
     const num = Math.floor(100000 + Math.random() * 900000);
     barcode = `INV-${num}`;
-    const row = db
-      .prepare("SELECT id FROM guests WHERE invitation_barcode = ?")
-      .get(barcode);
-    exists = !!row;
+    exists = !!(await findGuestByInvitationBarcode(barcode));
   } while (exists);
 
   return barcode;
 }
 
-export function checkInGuest(
+export async function checkInGuest(
   invitationBarcode: string,
   photoBase64: string,
   envelopeSection: EnvelopeSection
-): CheckInResult {
-  const db = getDb();
-  const guest = findGuestByInvitationBarcode(invitationBarcode);
+): Promise<CheckInResult> {
+  const supabase = getSupabaseAdmin();
+  const guest = await findGuestByInvitationBarcode(invitationBarcode);
 
   if (!guest) {
     throw new Error("Tamu tidak ditemukan. Periksa kembali barcode undangan.");
@@ -176,37 +167,36 @@ export function checkInGuest(
     );
   }
 
-  const angpaoNumber = getNextAngpaoNumber(envelopeSection);
-  const souvenirBarcode = generateSouvenirBarcode();
-  const photoUrl = savePhoto(photoBase64, guest.id);
+  const angpaoNumber = await getNextAngpaoNumber(envelopeSection);
+  const souvenirBarcode = await generateSouvenirBarcode();
+  const photoUrl = await savePhoto(photoBase64, guest.id);
   const now = new Date().toISOString();
 
-  db.prepare(
-    `
-    UPDATE guests SET
-      angpao_number = ?,
-      souvenir_barcode = ?,
-      photo_url = ?,
-      checked_in_at = ?,
-      status = 'checked_in'
-    WHERE id = ?
-  `
-  ).run(angpaoNumber, souvenirBarcode, photoUrl, now, guest.id);
+  const { data, error } = await supabase
+    .from("guests")
+    .update({
+      angpao_number: angpaoNumber,
+      souvenir_barcode: souvenirBarcode,
+      photo_url: photoUrl,
+      checked_in_at: now,
+      status: "checked_in",
+    })
+    .eq("id", guest.id)
+    .select("*")
+    .single();
 
-  const updated = db
-    .prepare("SELECT * FROM guests WHERE id = ?")
-    .get(guest.id) as Record<string, unknown>;
+  if (error) throw new Error(error.message);
 
   return {
-    guest: rowToGuest(updated),
+    guest: rowToGuest(data as Record<string, unknown>),
     angpao_number: angpaoNumber,
     souvenir_barcode: souvenirBarcode,
   };
 }
 
-export function claimSouvenir(souvenirBarcode: string): Guest {
-  const db = getDb();
-  const guest = findGuestBySouvenirBarcode(souvenirBarcode);
+export async function claimSouvenir(souvenirBarcode: string): Promise<Guest> {
+  const supabase = getSupabaseAdmin();
+  const guest = await findGuestBySouvenirBarcode(souvenirBarcode);
 
   if (!guest) {
     throw new Error("Barcode souvenir tidak ditemukan.");
@@ -224,74 +214,71 @@ export function claimSouvenir(souvenirBarcode: string): Guest {
 
   const now = new Date().toISOString();
 
-  db.prepare(
-    `
-    UPDATE guests SET
-      souvenir_claimed_at = ?,
-      status = 'souvenir_claimed'
-    WHERE id = ?
-  `
-  ).run(now, guest.id);
+  const { data, error } = await supabase
+    .from("guests")
+    .update({
+      souvenir_claimed_at: now,
+      status: "souvenir_claimed",
+    })
+    .eq("id", guest.id)
+    .select("*")
+    .single();
 
-  const updated = db
-    .prepare("SELECT * FROM guests WHERE id = ?")
-    .get(guest.id) as Record<string, unknown>;
-
-  return rowToGuest(updated);
+  if (error) throw new Error(error.message);
+  return rowToGuest(data as Record<string, unknown>);
 }
 
-export function importGuests(rows: ImportGuestRow[]): {
+export async function importGuests(rows: ImportGuestRow[]): Promise<{
   imported: number;
   skipped: number;
-} {
-  const db = getDb();
+}> {
+  const supabase = getSupabaseAdmin();
   let imported = 0;
   let skipped = 0;
+  const inserts = [];
 
-  const insert = db.prepare(`
-    INSERT INTO guests (id, invitation_barcode, name, address, phone, pax, status, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, 'pending', datetime('now'))
-  `);
-
-  const transaction = db.transaction((items: ImportGuestRow[]) => {
-    for (const row of items) {
-      if (!row.name?.trim()) {
-        skipped++;
-        continue;
-      }
-
-      const barcode =
-        row.invitation_barcode?.trim() || generateInvitationBarcode();
-
-      try {
-        insert.run(
-          uuidv4(),
-          barcode,
-          row.name.trim(),
-          row.address?.trim() || null,
-          row.phone?.trim() || null,
-          row.pax || 1
-        );
-        imported++;
-      } catch {
-        skipped++;
-      }
+  for (const row of rows) {
+    if (!row.name?.trim()) {
+      skipped++;
+      continue;
     }
-  });
 
-  transaction(rows);
+    inserts.push({
+      id: uuidv4(),
+      invitation_barcode:
+        row.invitation_barcode?.trim() || (await generateInvitationBarcode()),
+      name: row.name.trim(),
+      address: row.address?.trim() || null,
+      phone: row.phone?.trim() || null,
+      pax: row.pax || 1,
+      status: "pending",
+    });
+  }
+
+  if (inserts.length > 0) {
+    const { data, error } = await supabase
+      .from("guests")
+      .insert(inserts)
+      .select("id");
+
+    if (error) {
+      skipped += inserts.length;
+    } else {
+      imported += data?.length ?? 0;
+    }
+  }
+
   return { imported, skipped };
 }
 
-export function deleteGuest(id: string): boolean {
-  const db = getDb();
-  const result = db.prepare("DELETE FROM guests WHERE id = ?").run(id);
-  return result.changes > 0;
+export async function deleteGuest(id: string): Promise<boolean> {
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("guests").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  return true;
 }
 
-function savePhoto(base64: string, guestId: string): string {
-  const uploadsDir = getUploadsDir();
-
+async function savePhoto(base64: string, guestId: string): Promise<string> {
   const matches = base64.match(/^data:image\/(\w+);base64,(.+)$/);
   if (!matches) {
     throw new Error("Format foto tidak valid.");
@@ -300,8 +287,22 @@ function savePhoto(base64: string, guestId: string): string {
   const ext = matches[1] === "jpeg" ? "jpg" : matches[1];
   const data = matches[2];
   const filename = `${guestId}.${ext}`;
-  const filepath = path.join(uploadsDir, filename);
+  const buffer = Buffer.from(data, "base64");
+  const supabase = getSupabaseAdmin();
+  const bucket = getPhotoBucket();
 
-  fs.writeFileSync(filepath, Buffer.from(data, "base64"));
-  return `/api/uploads/${filename}`;
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(filename, buffer, {
+      contentType: `image/${ext === "jpg" ? "jpeg" : ext}`,
+      upsert: true,
+    });
+
+  if (error) throw new Error(error.message);
+
+  const { data: publicUrl } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(filename);
+
+  return publicUrl.publicUrl;
 }

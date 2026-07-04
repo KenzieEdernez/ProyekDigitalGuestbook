@@ -7,7 +7,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const deleted = deleteGuest(id);
+    const deleted = await deleteGuest(id);
 
     if (!deleted) {
       return NextResponse.json(

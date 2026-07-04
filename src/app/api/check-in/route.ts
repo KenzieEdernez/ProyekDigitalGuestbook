@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = checkInGuest(
+    const result = await checkInGuest(
       invitation_barcode,
       photo,
       envelope_section as EnvelopeSection

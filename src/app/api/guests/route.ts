@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const barcode = searchParams.get("barcode");
 
     if (barcode) {
-      const guest = findGuestByInvitationBarcode(barcode);
+      const guest = await findGuestByInvitationBarcode(barcode);
       if (!guest) {
         return NextResponse.json(
           { error: "Tamu tidak ditemukan." },
@@ -21,8 +21,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ guest });
     }
 
-    const guests = getAllGuests();
-    const stats = getGuestStats();
+    const guests = await getAllGuests();
+    const stats = await getGuestStats();
     return NextResponse.json({ guests, stats });
   } catch (error) {
     return NextResponse.json(

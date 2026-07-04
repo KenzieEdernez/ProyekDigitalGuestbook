@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = importGuests(guests);
+    const result = await importGuests(guests);
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(

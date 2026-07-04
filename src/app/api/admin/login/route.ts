@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE, getAdminSessionValue } from "@/lib/admin-auth";
 
-const ADMIN_USERNAME = "kenzie";
-const ADMIN_PASSWORD = "29June2005";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "kenzie";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "29June2005";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));

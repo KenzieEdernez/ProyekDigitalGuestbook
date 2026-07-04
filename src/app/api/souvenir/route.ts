@@ -13,7 +13,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const guest = findGuestBySouvenirBarcode(barcode);
+    const guest = await findGuestBySouvenirBarcode(barcode);
     if (!guest) {
       return NextResponse.json(
         { error: "Barcode souvenir tidak ditemukan." },
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const guest = claimSouvenir(souvenir_barcode);
+    const guest = await claimSouvenir(souvenir_barcode);
     return NextResponse.json({ guest });
   } catch (error) {
     return NextResponse.json(

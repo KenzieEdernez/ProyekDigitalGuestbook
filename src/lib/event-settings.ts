@@ -1,10 +1,6 @@
-import fs from "fs";
-import path from "path";
 import { DEFAULT_EVENT_SETTINGS } from "./event-config";
-import { getDataDir } from "./paths";
+import { getSupabaseAdmin } from "./supabase-server";
 import type { EventSettings } from "@/types/event";
-
-const SETTINGS_PATH = path.join(getDataDir(), "event-settings.json");
 
 function toDateInputValue(value?: string) {
   if (!value) return DEFAULT_EVENT_SETTINGS.date;
@@ -27,8 +23,8 @@ function formatDateDisplay(date: string) {
   }).format(parsed);
 }
 
-function sanitizeSettings(input: Partial<EventSettings>): EventSettings {
-  const date = toDateInputValue(input.date);
+function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown>): EventSettings {
+  const date = toDateInputValue(String(input.date ?? DEFAULT_EVENT_SETTINGS.date));
 
   return {
     name: String(input.name ?? DEFAULT_EVENT_SETTINGS.name).trim(),
@@ -37,24 +33,48 @@ function sanitizeSettings(input: Partial<EventSettings>): EventSettings {
     time: String(input.time ?? DEFAULT_EVENT_SETTINGS.time).trim(),
     location: String(input.location ?? DEFAULT_EVENT_SETTINGS.location).trim(),
     address: String(input.address ?? DEFAULT_EVENT_SETTINGS.address).trim(),
-    dressCode: String(input.dressCode ?? DEFAULT_EVENT_SETTINGS.dressCode).trim(),
-    dressNote: String(input.dressNote ?? DEFAULT_EVENT_SETTINGS.dressNote).trim(),
+    dressCode: String(
+      input.dressCode ?? input.dress_code ?? DEFAULT_EVENT_SETTINGS.dressCode
+    ).trim(),
+    dressNote: String(
+      input.dressNote ?? input.dress_note ?? DEFAULT_EVENT_SETTINGS.dressNote
+    ).trim(),
   };
 }
 
-export function getEventSettings(): EventSettings {
+export async function getEventSettings(): Promise<EventSettings> {
   try {
-    if (!fs.existsSync(SETTINGS_PATH)) return DEFAULT_EVENT_SETTINGS;
-    const raw = fs.readFileSync(SETTINGS_PATH, "utf8");
-    return sanitizeSettings(JSON.parse(raw) as Partial<EventSettings>);
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("event_settings")
+      .select("*")
+      .eq("id", "default")
+      .maybeSingle();
+
+    if (error) throw error;
+    return sanitizeSettings((data ?? {}) as Partial<EventSettings> & Record<string, unknown>);
   } catch {
     return DEFAULT_EVENT_SETTINGS;
   }
 }
 
-export function saveEventSettings(input: Partial<EventSettings>): EventSettings {
+export async function saveEventSettings(
+  input: Partial<EventSettings>
+): Promise<EventSettings> {
   const settings = sanitizeSettings(input);
-  fs.mkdirSync(path.dirname(SETTINGS_PATH), { recursive: true });
-  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), "utf8");
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("event_settings").upsert({
+    id: "default",
+    name: settings.name,
+    date: settings.date,
+    time: settings.time,
+    location: settings.location,
+    address: settings.address,
+    dress_code: settings.dressCode,
+    dress_note: settings.dressNote,
+    updated_at: new Date().toISOString(),
+  });
+
+  if (error) throw new Error(error.message);
   return settings;
 }

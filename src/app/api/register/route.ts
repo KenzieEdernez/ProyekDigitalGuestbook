@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as RegisterGuestInput;
 
-    const guest = registerGuest({
+    const guest = await registerGuest({
       name: body.name ?? "",
       address: body.address ?? "",
       phone: body.phone ?? "",
