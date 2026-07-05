@@ -209,12 +209,11 @@ export default function RegistrationPage() {
                 <input
                   type="number"
                   min={1}
-                  max={5}
                   value={form.pax}
                   onChange={(e) =>
                     setForm((f) => ({
                       ...f,
-                      pax: Math.min(5, Math.max(1, parseInt(e.target.value) || 1)),
+                      pax: Math.max(1, parseInt(e.target.value) || 1),
                     }))
                   }
                   placeholder="Enter number of guests"
