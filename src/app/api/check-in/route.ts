@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
+import { isAdminLoggedIn } from "@/lib/admin-auth";
 import { checkInGuest } from "@/lib/guests";
 import type { EnvelopeSection } from "@/types/guest";
 
 export async function POST(request: Request) {
+  if (!(await isAdminLoggedIn())) {
+    return NextResponse.json(
+      { error: "You must be logged in as staff." },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { invitation_barcode, photo, envelope_section } = body;

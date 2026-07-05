@@ -8,6 +8,13 @@ import {
 import { isAdminLoggedIn } from "@/lib/admin-auth";
 
 export async function GET(request: Request) {
+  if (!(await isAdminLoggedIn())) {
+    return NextResponse.json(
+      { error: "You must be logged in as staff." },
+      { status: 401 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const barcode = searchParams.get("barcode");
@@ -28,7 +35,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ guests, stats });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Terjadi kesalahan." },
+      { error: error instanceof Error ? error.message : "Something went wrong." },
       { status: 500 }
     );
   }
@@ -37,7 +44,7 @@ export async function GET(request: Request) {
 export async function DELETE() {
   if (!(await isAdminLoggedIn())) {
     return NextResponse.json(
-      { error: "Anda harus login sebagai panitia." },
+      { error: "You must be logged in as staff." },
       { status: 401 }
     );
   }

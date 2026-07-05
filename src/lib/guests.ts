@@ -73,14 +73,16 @@ export async function findGuestBySouvenirBarcode(
 
 async function getNextAngpaoNumber(section: EnvelopeSection): Promise<string> {
   const supabase = getSupabaseAdmin();
-  const { count, error } = await supabase
-    .from("guests")
-    .select("id", { count: "exact", head: true })
-    .like("angpao_number", `${section}-%`);
+  const { data, error } = await supabase.rpc("next_angpao_number", {
+    p_section: section,
+  });
 
   if (error) throw new Error(error.message);
-  const num = (count ?? 0) + 1;
-  return `${section}-${String(num).padStart(3, "0")}`;
+  if (typeof data !== "string" || !data) {
+    throw new Error("Failed to generate envelope number.");
+  }
+
+  return data;
 }
 
 async function generateSouvenirBarcode(): Promise<string> {
@@ -102,7 +104,7 @@ export async function registerGuest(input: RegisterGuestInput): Promise<Guest> {
   const name = input.name.trim();
   const address = input.address.trim();
   const phone = input.phone.trim();
-  const pax = Math.max(1, input.pax || 1);
+  const pax = Math.min(5, Math.max(1, input.pax || 1));
 
   if (!name) {
     throw new Error("Name is required.");
@@ -182,10 +184,20 @@ export async function checkInGuest(
       status: "checked_in",
     })
     .eq("id", guest.id)
+    .eq("status", "pending")
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (error) throw new Error(error.message);
+  if (!data) {
+    const current = await findGuestByInvitationBarcode(invitationBarcode);
+    if (current && current.status !== "pending") {
+      throw new Error(
+        `Guest already checked in at ${current.checked_in_at ? new Date(current.checked_in_at).toLocaleString("en-US") : "an unknown time"}.`
+      );
+    }
+    throw new Error("Check-in failed because another staff member is processing this guest.");
+  }
 
   return {
     guest: rowToGuest(data as Record<string, unknown>),
@@ -221,10 +233,21 @@ export async function claimSouvenir(souvenirBarcode: string): Promise<Guest> {
       status: "souvenir_claimed",
     })
     .eq("id", guest.id)
+    .eq("status", "checked_in")
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (error) throw new Error(error.message);
+  if (!data) {
+    const current = await findGuestBySouvenirBarcode(souvenirBarcode);
+    if (current?.status === "souvenir_claimed") {
+      throw new Error(
+        `Souvenir was already collected at ${current.souvenir_claimed_at ? new Date(current.souvenir_claimed_at).toLocaleString("en-US") : "an unknown time"}.`
+      );
+    }
+    throw new Error("Souvenir pickup failed because another staff member is processing this guest.");
+  }
+
   return rowToGuest(data as Record<string, unknown>);
 }
 

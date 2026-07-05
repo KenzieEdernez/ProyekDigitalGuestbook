@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import {
-  ADMIN_SESSION_COOKIE,
-  ADMIN_SESSION_VALUE,
-} from "@/lib/admin-auth-constants";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-auth-constants";
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 
 const protectedPaths = ["/admin", "/check-in", "/souvenir", "/staff"];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isProtected = protectedPaths.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`)
@@ -17,8 +15,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isLoggedIn =
-    request.cookies.get(ADMIN_SESSION_COOKIE)?.value === ADMIN_SESSION_VALUE;
+  const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  const isLoggedIn = token ? await verifyAdminSessionToken(token) : false;
 
   if (isLoggedIn) return NextResponse.next();
 

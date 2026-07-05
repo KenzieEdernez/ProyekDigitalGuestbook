@@ -1,8 +1,28 @@
 import { NextResponse } from "next/server";
 import { registerGuest } from "@/lib/guests";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { RegisterGuestInput } from "@/types/guest";
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const rateLimit = checkRateLimit({
+    key: `register:${ip}`,
+    limit: 10,
+    windowMs: 10 * 60 * 1000,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        error: `Too many registration attempts. Please try again in ${rateLimit.retryAfter} seconds.`,
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfter) },
+      }
+    );
+  }
+
   try {
     const body = (await request.json()) as RegisterGuestInput;
 
@@ -19,7 +39,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error ? error.message : "Pendaftaran gagal.",
+          error instanceof Error ? error.message : "Registration failed.",
       },
       { status: 400 }
     );

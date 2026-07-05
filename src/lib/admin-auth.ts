@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
-import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_VALUE } from "./admin-auth-constants";
+import { ADMIN_SESSION_COOKIE } from "./admin-auth-constants";
+import { verifyAdminSessionToken } from "./admin-session";
 
 export async function isAdminLoggedIn() {
-  return (await cookies()).get(ADMIN_SESSION_COOKIE)?.value === ADMIN_SESSION_VALUE;
+  const token = (await cookies()).get(ADMIN_SESSION_COOKIE)?.value;
+  if (!token) return false;
+  return verifyAdminSessionToken(token);
 }
 
-export function getAdminSessionValue() {
-  return ADMIN_SESSION_VALUE;
-}
-
-export { ADMIN_SESSION_COOKIE };
+export { ADMIN_SESSION_COOKIE } from "./admin-auth-constants";
+export { createAdminSessionToken, verifyAdminSessionToken } from "./admin-session";
