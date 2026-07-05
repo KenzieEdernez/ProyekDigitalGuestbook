@@ -206,19 +206,20 @@ export default function RegistrationPage() {
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
                   Number of Guests
                 </label>
-                <select
+                <input
+                  type="number"
+                  min={1}
+                  max={5}
                   value={form.pax}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, pax: parseInt(e.target.value) }))
+                    setForm((f) => ({
+                      ...f,
+                      pax: Math.min(5, Math.max(1, parseInt(e.target.value) || 1)),
+                    }))
                   }
+                  placeholder="Enter number of guests"
                   className="input-field"
-                >
-                  {Array.from({ length: 5 }, (_, i) => i + 1).map((n) => (
-                    <option key={n} value={n}>
-                      {n} Guest{n > 1 ? "s" : ""}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
