@@ -105,13 +105,13 @@ export async function registerGuest(input: RegisterGuestInput): Promise<Guest> {
   const pax = Math.max(1, input.pax || 1);
 
   if (!name) {
-    throw new Error("Nama wajib diisi.");
+    throw new Error("Name is required.");
   }
   if (!address) {
-    throw new Error("Alamat wajib diisi.");
+    throw new Error("Address is required.");
   }
   if (!phone) {
-    throw new Error("Nomor HP wajib diisi.");
+    throw new Error("Phone number is required.");
   }
 
   const row = {
@@ -158,12 +158,12 @@ export async function checkInGuest(
   const guest = await findGuestByInvitationBarcode(invitationBarcode);
 
   if (!guest) {
-    throw new Error("Tamu tidak ditemukan. Periksa kembali barcode undangan.");
+    throw new Error("Guest not found. Please check the invitation barcode.");
   }
 
   if (guest.status !== "pending") {
     throw new Error(
-      `Tamu sudah check-in pada ${guest.checked_in_at ? new Date(guest.checked_in_at).toLocaleString("id-ID") : "waktu tidak diketahui"}.`
+      `Guest already checked in at ${guest.checked_in_at ? new Date(guest.checked_in_at).toLocaleString("en-US") : "an unknown time"}.`
     );
   }
 
@@ -199,16 +199,16 @@ export async function claimSouvenir(souvenirBarcode: string): Promise<Guest> {
   const guest = await findGuestBySouvenirBarcode(souvenirBarcode);
 
   if (!guest) {
-    throw new Error("Barcode souvenir tidak ditemukan.");
+    throw new Error("Souvenir barcode not found.");
   }
 
   if (guest.status === "pending") {
-    throw new Error("Tamu belum check-in. Harap check-in terlebih dahulu.");
+    throw new Error("Guest has not checked in yet. Please check in first.");
   }
 
   if (guest.status === "souvenir_claimed") {
     throw new Error(
-      `Souvenir sudah diambil pada ${guest.souvenir_claimed_at ? new Date(guest.souvenir_claimed_at).toLocaleString("id-ID") : "waktu tidak diketahui"}.`
+      `Souvenir was already collected at ${guest.souvenir_claimed_at ? new Date(guest.souvenir_claimed_at).toLocaleString("en-US") : "an unknown time"}.`
     );
   }
 
@@ -293,7 +293,7 @@ export async function deleteAllGuests(): Promise<number> {
 async function savePhoto(base64: string, guestId: string): Promise<string> {
   const matches = base64.match(/^data:image\/(\w+);base64,(.+)$/);
   if (!matches) {
-    throw new Error("Format foto tidak valid.");
+    throw new Error("Invalid photo format.");
   }
 
   const ext = matches[1] === "jpeg" ? "jpg" : matches[1];

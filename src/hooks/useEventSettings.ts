@@ -11,8 +11,8 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   time: "",
   location: "",
   address: "",
-  dressCode: "",
-  dressNote: "",
+  dressLadies: "",
+  dressGentlemen: "",
   heroImage: "",
 };
 

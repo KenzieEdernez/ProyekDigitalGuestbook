@@ -119,7 +119,7 @@ export default function CameraCapture({
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-navy-900/90">
                 <Camera className="h-12 w-12 text-royal/60" />
                 <button onClick={startCamera} className="btn-gold text-xs">
-                  Buka Kamera
+                  Open Camera
                 </button>
               </div>
             )}

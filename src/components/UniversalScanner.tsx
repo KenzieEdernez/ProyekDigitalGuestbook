@@ -22,7 +22,7 @@ const DEFAULT_FORMATS = [
 
 export default function UniversalScanner({
   onDetected,
-  prompt = "Arahkan kamera ke barcode/QR",
+  prompt = "Point the camera at the barcode/QR",
   autoStart = true,
   active = true,
   formats,
@@ -46,7 +46,7 @@ export default function UniversalScanner({
       {needsManualStart && active && (
         <div className="mt-2 text-center">
           <button type="button" onClick={() => void startScanner()} className="btn-gold text-sm">
-            Mulai Kamera
+            Start Camera
           </button>
         </div>
       )}

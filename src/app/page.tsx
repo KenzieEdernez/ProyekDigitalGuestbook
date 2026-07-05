@@ -34,7 +34,7 @@ export default function RegistrationPage() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-royal">
             EdernDigital
           </p>
-          <p className="mt-3 text-sm text-stone-500">Memuat pengaturan event...</p>
+          <p className="mt-3 text-sm text-stone-500">Loading event settings...</p>
         </div>
       </main>
     );
@@ -48,11 +48,10 @@ export default function RegistrationPage() {
             EdernDigital
           </p>
           <h1 className="mt-3 font-serif text-2xl font-bold text-navy">
-            Pengaturan event belum tersedia
+            Event settings are not available
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-stone-500">
-            Silakan isi dan simpan pengaturan event dari halaman admin terlebih
-            dahulu.
+            Please fill in and save the event settings from the admin page first.
           </p>
         </div>
       </main>
@@ -64,7 +63,7 @@ export default function RegistrationPage() {
     setError(null);
 
     if (!form.name.trim() || !form.address.trim() || !form.phone.trim()) {
-      setError("Nama, alamat, dan nomor HP wajib diisi.");
+      setError("Name, address, and phone number are required.");
       return;
     }
 
@@ -78,14 +77,14 @@ export default function RegistrationPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Pendaftaran gagal.");
+        setError(data.error || "Registration failed.");
         return;
       }
 
       setGuest(data.guest);
       setStep(attending ? "success" : "declined");
     } catch {
-      setError("Gagal terhubung ke server.");
+      setError("Failed to connect to the server.");
     } finally {
       setLoading(false);
     }
@@ -97,7 +96,7 @@ export default function RegistrationPage() {
         <div className="px-6">
           <RegistrationConfirmation guest={guest} event={eventSettings} />
           <p className="mt-8 text-center text-sm text-stone-500">
-            Perlu ubah registrasi? Hubungi:{" "}
+            Need to update your registration? Contact:{" "}
             <a
               href={`mailto:${EVENT.supportEmail}`}
               className="font-semibold text-navy underline"
@@ -144,10 +143,10 @@ export default function RegistrationPage() {
           <div className="card-premium overflow-hidden">
             <div className="border-b border-royal/10 px-8 py-6">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-royal">
-                Konfirmasi Resmi
+                Official Confirmation
               </p>
               <h2 className="mt-1 font-serif text-2xl font-bold text-navy">
-                Form Pendaftaran Tamu
+                Guest Registration Form
               </h2>
             </div>
 
@@ -160,7 +159,7 @@ export default function RegistrationPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Nama Lengkap
+                  Full Name
                 </label>
                 <input
                   type="text"
@@ -168,14 +167,14 @@ export default function RegistrationPage() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, name: e.target.value }))
                   }
-                  placeholder="Masukkan nama lengkap"
+                  placeholder="Enter your full name"
                   className="input-field"
                 />
               </div>
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Nomor HP
+                  Phone Number
                 </label>
                 <input
                   type="tel"
@@ -190,7 +189,7 @@ export default function RegistrationPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Alamat
+                  Address
                 </label>
                 <input
                   type="text"
@@ -198,14 +197,14 @@ export default function RegistrationPage() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, address: e.target.value }))
                   }
-                  placeholder="Alamat lengkap"
+                  placeholder="Full address"
                   className="input-field"
                 />
               </div>
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Jumlah Tamu
+                  Number of Guests
                 </label>
                 <select
                   value={form.pax}
@@ -216,7 +215,7 @@ export default function RegistrationPage() {
                 >
                   {Array.from({ length: 5 }, (_, i) => i + 1).map((n) => (
                     <option key={n} value={n}>
-                      {n} Tamu
+                      {n} Guest{n > 1 ? "s" : ""}
                     </option>
                   ))}
                 </select>
@@ -224,7 +223,7 @@ export default function RegistrationPage() {
 
               <div>
                 <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Konfirmasi Kehadiran
+                  Attendance Confirmation
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -236,7 +235,7 @@ export default function RegistrationPage() {
                         : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                     }`}
                   >
-                    Hadir
+                    Attending
                   </button>
                   <button
                     type="button"
@@ -247,7 +246,7 @@ export default function RegistrationPage() {
                         : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                     }`}
                   >
-                    Tidak Hadir
+                    Not Attending
                   </button>
                 </div>
               </div>
@@ -256,9 +255,9 @@ export default function RegistrationPage() {
                 <div className="flex gap-3 rounded-lg bg-parchment p-4">
                   <Info className="mt-0.5 h-4 w-4 shrink-0 text-royal" />
                   <p className="text-xs leading-relaxed text-stone-600">
-                    Setelah dikirim, QR code digital unik akan dibuat untuk
-                    grup Anda. Tunjukkan kode ini di meja resepsionis untuk
-                    check-in prioritas.
+                    After submitting, a unique digital QR code will be created
+                    for your group. Show this code at reception for priority
+                    check-in.
                   </p>
                 </div>
               )}
@@ -270,10 +269,10 @@ export default function RegistrationPage() {
               >
                 <QrCode className="h-5 w-5" />
                 {loading
-                  ? "Memproses..."
+                  ? "Processing..."
                   : attending
-                    ? "Buat QR Code Saya"
-                    : "Kirim Konfirmasi"}
+                    ? "Create My QR Code"
+                    : "Submit Confirmation"}
               </button>
             </form>
           </div>
@@ -285,17 +284,36 @@ export default function RegistrationPage() {
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              { icon: "📅", label: "Tanggal & Waktu", line1: eventSettings.dateDisplay, line2: eventSettings.time },
-              { icon: "📍", label: "Lokasi", line1: eventSettings.location, line2: eventSettings.address },
-              { icon: "👔", label: "Dress Code", line1: eventSettings.dressCode, line2: eventSettings.dressNote },
-            ].map(({ icon, label, line1, line2 }) => (
+              { icon: "📅", label: "Date & Time", line1: eventSettings.dateDisplay, line2: eventSettings.time },
+              {
+                icon: "👔",
+                label: "Dress Code",
+                line1: eventSettings.dressLadies,
+                line2: eventSettings.dressGentlemen,
+                dressCode: true,
+              },
+              { icon: "📍", label: "Location", line1: eventSettings.location, line2: eventSettings.address },
+            ].map(({ icon, label, line1, line2, dressCode }) => (
               <div key={label} className="card-premium p-6 text-center">
                 <span className="text-2xl">{icon}</span>
                 <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-royal">
                   {label}
                 </p>
-                <p className="mt-2 font-semibold text-navy">{line1}</p>
-                <p className="text-sm text-stone-500">{line2}</p>
+                {dressCode ? (
+                  <div className="mt-2 space-y-1 text-center text-sm text-navy">
+                    <p>
+                      <strong>Ladies:</strong> {line1}
+                    </p>
+                    <p>
+                      <strong>Gentlemen:</strong> {line2}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mt-2 font-semibold text-navy">{line1}</p>
+                    <p className="text-sm text-stone-500">{line2}</p>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -312,7 +330,7 @@ export default function RegistrationPage() {
           href="/admin"
           className="mt-6 inline-block text-[10px] uppercase tracking-widest text-stone-300 hover:text-royal"
         >
-          Masuk Panitia
+          Staff Login
         </Link>
       </footer>
     </main>

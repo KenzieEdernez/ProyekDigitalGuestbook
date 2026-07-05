@@ -11,7 +11,7 @@ export async function DELETE(
 
     if (!deleted) {
       return NextResponse.json(
-        { error: "Tamu tidak ditemukan." },
+        { error: "Guest not found." },
         { status: 404 }
       );
     }
@@ -19,7 +19,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Gagal menghapus." },
+      { error: error instanceof Error ? error.message : "Failed to delete." },
       { status: 500 }
     );
   }

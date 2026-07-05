@@ -83,7 +83,7 @@ export default function SouvenirPage() {
         }
 
         if (data.guest.status === "pending") {
-          setError("Tamu belum check-in.");
+          setError("Guest has not checked in yet.");
           setScanValue("");
           lastBarcodeRef.current = null;
           restartScanner();
@@ -91,7 +91,7 @@ export default function SouvenirPage() {
         }
 
         if (data.guest.status === "souvenir_claimed") {
-          setError("Souvenir sudah diambil sebelumnya.");
+          setError("Souvenir has already been collected.");
           setScanValue("");
           lastBarcodeRef.current = null;
           restartScanner();
@@ -100,7 +100,7 @@ export default function SouvenirPage() {
 
         setGuest(data.guest);
       } catch {
-        setError("Gagal terhubung ke server.");
+        setError("Failed to connect to the server.");
         lastBarcodeRef.current = null;
         restartScanner();
       } finally {
@@ -134,7 +134,7 @@ export default function SouvenirPage() {
       setGuest(null);
       fetchGuests();
     } catch {
-      setError("Gagal terhubung ke server.");
+        setError("Failed to connect to the server.");
       restartScanner();
     } finally {
       setLoading(false);
@@ -159,7 +159,7 @@ export default function SouvenirPage() {
   return (
     <AdminShell
       title="Souvenir Management"
-      subtitle="Kelola distribusi souvenir dan lacak pengambilan tamu"
+      subtitle="Manage souvenir distribution and track guest pickups"
     >
       {error && (
         <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -172,13 +172,13 @@ export default function SouvenirPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
             <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
-          <h2 className="font-serif text-2xl font-bold text-navy">Souvenir Berhasil Diberikan</h2>
+          <h2 className="font-serif text-2xl font-bold text-navy">Souvenir Collected Successfully</h2>
           <p className="mt-2 text-stone-600">{claimedGuest.name}</p>
           <p className="text-sm text-stone-400">
-            Angpao {claimedGuest.angpao_number} · {claimedGuest.pax} tamu
+            Envelope {claimedGuest.angpao_number} · {claimedGuest.pax} guest{claimedGuest.pax > 1 ? "s" : ""}
           </p>
           <button onClick={reset} className="btn-navy mt-8 w-full py-3">
-            Scan Berikutnya
+            Scan Next Guest
           </button>
         </div>
       ) : (
@@ -188,7 +188,7 @@ export default function SouvenirPage() {
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <ScanLine className="h-5 w-5 text-royal" />
-                  <h2 className="font-serif text-lg font-bold text-navy">Scan QR / Barcode Souvenir</h2>
+              <h2 className="font-serif text-lg font-bold text-navy">Scan Souvenir QR / Barcode</h2>
                 </div>
                 {scannerActive && (
                   <span className="badge bg-emerald-100 text-emerald-700">Live Camera</span>
@@ -203,7 +203,7 @@ export default function SouvenirPage() {
                   formats={SOUVENIR_SCAN_FORMATS}
                   scanRegion="full"
                   onDetected={handleScan}
-                  prompt="Arahkan kamera ke QR atau barcode souvenir"
+                  prompt="Point the camera at the souvenir QR or barcode"
                 />
               </div>
 
@@ -212,7 +212,7 @@ export default function SouvenirPage() {
                   value={scanValue}
                   onChange={setScanValue}
                   onScan={handleScan}
-                  placeholder="Atau input manual..."
+                  placeholder="Or enter manually..."
                   disabled={loading || !!guest}
                   variant="premium"
                 />
@@ -220,7 +220,7 @@ export default function SouvenirPage() {
 
               {!guest && !loading && (
                 <p className="mt-3 text-center text-sm text-stone-400">
-                  Kamera aktif — scan 1 QR/barcode souvenir lalu konfirmasi penukaran
+                  Camera active — scan one souvenir QR/barcode, then confirm pickup
                 </p>
               )}
             </div>
@@ -243,13 +243,13 @@ export default function SouvenirPage() {
                   <div>
                     <p className="font-serif text-xl font-bold text-navy">{guest.name}</p>
                     <p className="text-sm text-stone-500">
-                      {guest.pax} tamu · Angpao {guest.angpao_number}
+                      {guest.pax} guest{guest.pax > 1 ? "s" : ""} · Envelope {guest.angpao_number}
                     </p>
                   </div>
                 </div>
                 <button onClick={handleClaim} disabled={loading} className="btn-navy mt-4 w-full py-3">
                   <Gift className="h-4 w-4" />
-                  {loading ? "Memproses..." : "Konfirmasi Berikan Souvenir"}
+                  {loading ? "Processing..." : "Confirm Souvenir Pickup"}
                 </button>
               </div>
             )}
@@ -261,7 +261,7 @@ export default function SouvenirPage() {
                   <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone-400" />
                   <input
                     type="text"
-                    placeholder="Cari tamu..."
+                    placeholder="Search guest..."
                     value={searchLog}
                     onChange={(e) => setSearchLog(e.target.value)}
                     className="rounded-lg border border-stone-200 py-1.5 pl-8 pr-3 text-xs outline-none focus:border-royal"
@@ -271,8 +271,8 @@ export default function SouvenirPage() {
               <table className="w-full text-sm">
                 <thead className="bg-stone-50 text-left">
                   <tr>
-                    <th className="px-6 py-3 text-xs font-semibold uppercase text-stone-400">Waktu</th>
-                    <th className="px-6 py-3 text-xs font-semibold uppercase text-stone-400">Tamu</th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase text-stone-400">Time</th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase text-stone-400">Guest</th>
                     <th className="px-6 py-3 text-xs font-semibold uppercase text-stone-400">Status</th>
                   </tr>
                 </thead>
@@ -287,14 +287,14 @@ export default function SouvenirPage() {
                       </td>
                       <td className="px-6 py-3 font-medium text-navy">{g.name}</td>
                       <td className="px-6 py-3">
-                        <span className="text-xs font-semibold text-emerald-600">+ Collected</span>
+                        <span className="text-xs font-semibold text-emerald-600">Collected</span>
                       </td>
                     </tr>
                   ))}
                   {transactions.length === 0 && (
                     <tr>
                       <td colSpan={3} className="px-6 py-8 text-center text-stone-400">
-                        Belum ada transaksi
+                        No transactions yet
                       </td>
                     </tr>
                   )}
@@ -327,11 +327,11 @@ export default function SouvenirPage() {
                 </div>
                 <div className="mt-4 w-full space-y-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-white/60">Sudah diambil</span>
+                    <span className="text-white/60">Collected</span>
                     <span className="font-semibold text-royal">{totalClaimed}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/60">Menunggu</span>
+                    <span className="text-white/60">Waiting</span>
                     <span className="font-semibold">{totalEligible - totalClaimed}</span>
                   </div>
                 </div>

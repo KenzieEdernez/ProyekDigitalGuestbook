@@ -83,18 +83,18 @@ export default function BarcodeScanner({
           detectedRef.current = true;
           // proses hasil namun pastikan tidak double-submit
           handleDetected(decodedText);
-          // stop scanner setelah deteksi agar tidak ada callback lagi
+          // Stop scanner after detection so no more callbacks fire.
           stopScanner();
         },
         () => {
           // per-frame decode failure ignored
         }
       );
-      setMessage("Arahkan kamera ke barcode / QR");
+      setMessage("Point the camera at the barcode / QR");
       console.log("BarcodeScanner started", { boxSize });
     } catch (err: any) {
-      console.error("Tidak bisa mulai kamera:", err);
-      setMessage("Gagal mengakses kamera. Pastikan izin diberikan atau coba upload gambar.");
+      console.error("Unable to start camera:", err);
+      setMessage("Failed to access the camera. Allow camera access or upload an image.");
       setScanning(false);
       startingRef.current = false;
       onClose?.();
@@ -113,17 +113,17 @@ export default function BarcodeScanner({
     readerRef.current = null;
     setScanning(false);
     onClose?.();
-    // jangan reset detectedRef di sini — reset saat startScanner dipanggil
+    // Do not reset detectedRef here; reset it when startScanner is called.
   }
 
   async function handleDetected(code: string) {
-    // block duplicate processing untuk kode yang sama saat sedang diproses
+    // Block duplicate processing for the same code while it is being processed.
     if (submittingRef.current.has(code)) {
-      setMessage("Sedang memproses kode ini...");
+      setMessage("This code is already being processed...");
       return;
     }
     submittingRef.current.add(code);
-    setMessage(`Terbaca: ${code}. Mengirim ke server...`);
+    setMessage(`Detected: ${code}. Sending to server...`);
     try {
       const res = await fetch(apiEndpoint, {
         method: "POST",
@@ -136,7 +136,7 @@ export default function BarcodeScanner({
         return;
       }
       const data = await res.json();
-      setMessage(`Check-in berhasil: ${data.message ?? "OK"}`);
+      setMessage(`Check-in successful: ${data.message ?? "OK"}`);
       if (onSuccess) onSuccess(code);
       // close scanner after a short delay to show the user the message
       setTimeout(() => {
@@ -144,7 +144,7 @@ export default function BarcodeScanner({
       }, 800);
     } catch (err: any) {
       console.error(err);
-      setMessage("Gagal mengirim ke server.");
+      setMessage("Failed to send to the server.");
     } finally {
       submittingRef.current.delete(code);
     }
@@ -154,7 +154,7 @@ export default function BarcodeScanner({
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setMessage("Mengirim gambar ke server untuk di-scan...");
+    setMessage("Sending image to the server for scanning...");
     const f = new FormData();
     f.append("image", file);
     try {
@@ -168,14 +168,14 @@ export default function BarcodeScanner({
       }
       const data = await res.json();
       if (data.barcode) {
-        setMessage(`Terbaca: ${data.barcode}`);
+        setMessage(`Detected: ${data.barcode}`);
         handleDetected(data.barcode);
       } else {
-        setMessage("Gagal membaca barcode dari gambar.");
+        setMessage("Failed to read barcode from image.");
       }
     } catch (err) {
       console.error(err);
-      setMessage("Gagal mengirim gambar ke server.");
+      setMessage("Failed to send image to the server.");
     }
   }
 
@@ -187,12 +187,12 @@ export default function BarcodeScanner({
 
       <div style={{ marginTop: 12 }}>
         {!scanning ? (
-          <button onClick={startScanner}>Buka Kamera untuk Scan</button>
+          <button onClick={startScanner}>Open Camera to Scan</button>
         ) : (
-          <button onClick={stopScanner}>Stop Kamera</button>
+          <button onClick={stopScanner}>Stop Camera</button>
         )}
         <label style={{ marginLeft: 8 }}>
-          atau upload gambar:
+          or upload image:
           <input type="file" accept="image/*" onChange={handleImageUpload} />
         </label>
       </div>

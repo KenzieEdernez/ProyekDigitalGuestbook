@@ -118,7 +118,7 @@ export function useHtml5Scanner({
         (decodedText) => {
           if (detectedRef.current || readerRef.current !== html5QrCode) return;
           detectedRef.current = true;
-          setMessage(`Terbaca: ${decodedText}`);
+          setMessage(`Detected: ${decodedText}`);
           void (async () => {
             await stopLocal();
             onDetectedRef.current(decodedText);
@@ -148,7 +148,7 @@ export function useHtml5Scanner({
       clearContainer(containerId);
       if (mountedRef.current) {
         setNeedsManualStart(true);
-        setMessage("Gagal akses kamera. Izinkan kamera lalu klik Mulai.");
+        setMessage("Failed to access the camera. Allow camera access, then click Start.");
       }
     }
   }, [active, containerId, stopLocal]);
@@ -166,7 +166,7 @@ export function useHtml5Scanner({
       }
     };
 
-    // tunggu DOM siap sebelum start kamera
+    // Wait for the DOM before starting the camera.
     const timer = window.setTimeout(boot, 100);
 
     return () => {

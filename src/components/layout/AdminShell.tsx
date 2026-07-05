@@ -14,10 +14,10 @@ import { useEventSettings } from "@/hooks/useEventSettings";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/guests", label: "Daftar Tamu", icon: Users },
+  { href: "/admin/guests", label: "Guest List", icon: Users },
   { href: "/check-in", label: "Check-in", icon: ScanLine },
   { href: "/souvenir", label: "Souvenir", icon: Gift },
-  { href: "/admin/settings", label: "Pengaturan", icon: Settings },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 interface AdminShellProps {
@@ -84,7 +84,7 @@ export default function AdminShell({
             className="flex items-center gap-2 px-4 py-2 text-sm text-stone-500 transition hover:text-navy"
           >
             <LogOut className="h-4 w-4" />
-            Keluar
+            Logout
           </button>
         </div>
       </aside>

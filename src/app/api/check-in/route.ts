@@ -9,14 +9,14 @@ export async function POST(request: Request) {
 
     if (!invitation_barcode || !photo || !envelope_section) {
       return NextResponse.json(
-        { error: "Barcode undangan, foto, dan bagian amplop wajib diisi." },
+        { error: "Invitation barcode, photo, and envelope section are required." },
         { status: 400 }
       );
     }
 
     if (envelope_section !== "A" && envelope_section !== "B") {
       return NextResponse.json(
-        { error: "Bagian amplop harus A atau B." },
+        { error: "Envelope section must be A or B." },
         { status: 400 }
       );
     }
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Check-in gagal." },
+      { error: error instanceof Error ? error.message : "Check-in failed." },
       { status: 400 }
     );
   }

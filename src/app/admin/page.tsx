@@ -120,13 +120,13 @@ export default function AdminDashboard() {
       {stats && (
         <div className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
-            label="Total Tamu"
+            label="Total Guests"
             value={stats.total - stats.declined}
             sub={`${attendRate}% RSVP`}
             icon={Users}
           />
           <StatCard
-            label="Tamu Hadir"
+            label="Checked-in Guests"
             value={stats.checked_in + stats.souvenir_claimed}
             sub={`${stats.total_pax_checked_in} pax`}
             icon={UserCheck}
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
             bar={checkInRate}
           />
           <StatCard
-            label="Souvenir Diberikan"
+            label="Souvenirs Collected"
             value={stats.souvenir_claimed}
             sub={`${souvenirRate}% distribusi`}
             icon={Gift}
@@ -142,9 +142,9 @@ export default function AdminDashboard() {
             bar={souvenirRate}
           />
           <StatCard
-            label="Menunggu Check-in"
+            label="Waiting for Check-in"
             value={stats.pending}
-            sub="Belum tiba"
+            sub="Not arrived yet"
             icon={TrendingUp}
             accent="text-amber-600"
           />
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
             Arrival Trend
           </h2>
           <p className="text-xs text-stone-500">
-            Kecepatan check-in tamu sepanjang acara
+            Guest check-in pace throughout the event
           </p>
           <div className="mt-8 flex h-48 items-end gap-2">
             {hourlyData.map(({ hour, count }) => (
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
           </h2>
           <div className="mt-4 space-y-4">
             {recentActivity.length === 0 ? (
-              <p className="text-sm text-stone-400">Belum ada aktivitas</p>
+              <p className="text-sm text-stone-400">No activity yet</p>
             ) : (
               recentActivity.map((g) => (
                 <div key={g.id} className="flex items-center gap-3">
@@ -226,10 +226,10 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4">
           <div>
             <h2 className="font-serif text-xl font-bold text-navy">
-              Tamu Menunggu Check-in
+              Guests Waiting for Check-in
             </h2>
             <p className="text-xs text-stone-500">
-              Tamu terdaftar yang belum tiba
+              Registered guests who have not arrived yet
             </p>
           </div>
           <Link href="/admin/guests" className="text-xs font-semibold text-royal hover:underline">
@@ -241,7 +241,7 @@ export default function AdminDashboard() {
             <thead className="bg-stone-50 text-left">
               <tr>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-stone-400">
-                  Nama
+                  Name
                 </th>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-stone-400">
                   No. Reg
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
                   Daftar
                 </th>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-stone-400">
-                  Aksi
+                  Action
                 </th>
               </tr>
             </thead>
@@ -286,7 +286,7 @@ export default function AdminDashboard() {
               {pendingGuests.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-stone-400">
-                    Semua tamu sudah check-in
+                    All guests have checked in
                   </td>
                 </tr>
               )}

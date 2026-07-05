@@ -14,7 +14,7 @@ function formatDateDisplay(date: string) {
   const parsed = new Date(`${date}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return "";
 
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -31,7 +31,7 @@ async function saveHeroImage(value: string) {
 
   const matches = value.match(/^data:image\/(\w+);base64,(.+)$/);
   if (!matches) {
-    throw new Error("Format gambar hero tidak valid.");
+    throw new Error("Invalid hero image format.");
   }
 
   const ext = matches[1] === "jpeg" ? "jpg" : matches[1];
@@ -60,8 +60,15 @@ function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown
     time: textValue(input.time),
     location: textValue(input.location),
     address: textValue(input.address),
-    dressCode: textValue(input.dressCode ?? input.dress_code),
-    dressNote: textValue(input.dressNote ?? input.dress_note),
+    dressLadies: textValue(
+      input.dressLadies ?? input.dress_ladies ?? input.dressCode ?? input.dress_code
+    ),
+    dressGentlemen: textValue(
+      input.dressGentlemen ??
+        input.dress_gentlemen ??
+        input.dressNote ??
+        input.dress_note
+    ),
     heroImage: textValue(input.heroImage ?? input.hero_image),
   };
 
@@ -71,11 +78,12 @@ function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown
     settings.time,
     settings.location,
     settings.address,
-    settings.dressCode,
+    settings.dressLadies,
+    settings.dressGentlemen,
   ];
 
   if (requiredFields.some((value) => !value)) {
-    throw new Error("Pengaturan event belum lengkap.");
+    throw new Error("Event settings are incomplete.");
   }
 
   return settings;
@@ -111,8 +119,10 @@ export async function saveEventSettings(
     time: settings.time,
     location: settings.location,
     address: settings.address,
-    dress_code: settings.dressCode,
-    dress_note: settings.dressNote,
+    dress_code: settings.dressLadies,
+    dress_note: settings.dressGentlemen,
+    dress_ladies: settings.dressLadies,
+    dress_gentlemen: settings.dressGentlemen,
     hero_image: heroImage || null,
     updated_at: new Date().toISOString(),
   });

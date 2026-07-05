@@ -5,7 +5,7 @@ export interface EventSettings {
   time: string;
   location: string;
   address: string;
-  dressCode: string;
-  dressNote: string;
+  dressLadies: string;
+  dressGentlemen: string;
   heroImage: string;
 }

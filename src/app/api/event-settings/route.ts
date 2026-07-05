@@ -32,7 +32,7 @@ export async function PUT(request: Request) {
         error:
           error instanceof Error
             ? error.message
-            : "Gagal menyimpan pengaturan.",
+          : "Failed to save event settings.",
       },
       { status: 400 }
     );

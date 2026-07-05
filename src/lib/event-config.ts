@@ -11,8 +11,8 @@ export const EVENT = {
   time: "19:00 - 00:00",
   location: "The Imperial Grand Hall",
   address: "450 Prestige Blvd, Jakarta",
-  dressCode: "Black Tie & Formal",
-  dressNote: "Navy & Gold Preferred",
+  dressLadies: "Evening dress",
+  dressGentlemen: "Formal suit",
   heroImage:
     "https://images.unsplash.com/photo-1519167758481-83f550bb49b8?w=1920&q=80&auto=format&fit=crop",
 } as const;
@@ -24,8 +24,8 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   time: EVENT.time,
   location: EVENT.location,
   address: EVENT.address,
-  dressCode: EVENT.dressCode,
-  dressNote: EVENT.dressNote,
+  dressLadies: EVENT.dressLadies,
+  dressGentlemen: EVENT.dressGentlemen,
   heroImage: EVENT.heroImage,
 };
 

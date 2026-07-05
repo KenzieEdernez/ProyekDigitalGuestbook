@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 function requireEnv(name: string) {
   const value = process.env[name];
   if (!value) {
-    throw new Error(`Environment variable ${name} belum diisi.`);
+    throw new Error(`Environment variable ${name} is not configured.`);
   }
   return value;
 }

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
       const guest = await findGuestByInvitationBarcode(barcode);
       if (!guest) {
         return NextResponse.json(
-          { error: "Tamu tidak ditemukan." },
+          { error: "Guest not found." },
           { status: 404 }
         );
       }
@@ -47,7 +47,7 @@ export async function DELETE() {
     return NextResponse.json({ success: true, deleted });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Gagal menghapus data." },
+      { error: error instanceof Error ? error.message : "Failed to delete data." },
       { status: 500 }
     );
   }

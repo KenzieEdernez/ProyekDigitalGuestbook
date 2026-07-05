@@ -65,14 +65,14 @@ export default function CheckInPage() {
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error || "Tamu tidak ditemukan.");
+          setError(data.error || "Guest not found.");
           setScanValue("");
           restartScanner();
           return;
         }
 
         if (data.guest.status !== "pending") {
-          setError("Tamu sudah check-in sebelumnya.");
+          setError("Guest has already checked in.");
           setScanValue("");
           restartScanner();
           return;
@@ -81,7 +81,7 @@ export default function CheckInPage() {
         setGuest(data.guest);
         setShowCamera(true);
       } catch {
-        setError("Gagal terhubung ke server.");
+        setError("Failed to connect to the server.");
         restartScanner();
       } finally {
         setLoading(false);
@@ -118,7 +118,7 @@ export default function CheckInPage() {
         setResult(data);
         setShowCamera(false);
       } catch {
-        setError("Gagal terhubung ke server.");
+        setError("Failed to connect to the server.");
         setShowCamera(true);
       } finally {
         setLoading(false);
@@ -132,14 +132,14 @@ export default function CheckInPage() {
 
     const qrSvg = souvenirQrRef.current?.querySelector("svg");
     if (!qrSvg) {
-      alert("QR souvenir belum siap untuk dicetak.");
+      alert("Souvenir QR code is not ready to print.");
       return;
     }
 
     const qrMarkup = new XMLSerializer().serializeToString(qrSvg);
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
-      alert("Popup diblokir. Izinkan popup untuk mencetak sticker.");
+      alert("Popup was blocked. Please allow popups to print the sticker.");
       return;
     }
 
@@ -259,7 +259,7 @@ export default function CheckInPage() {
                 <div class="label">QR Code Souvenir</div>
                 <div class="guest">${escapeHtml(result.guest.name)}</div>
                 <div class="meta">
-                  ${escapeHtml(result.guest.pax)} tamu<br />
+                ${escapeHtml(result.guest.pax)} guest${result.guest.pax > 1 ? "s" : ""}<br />
                   ${escapeHtml(formatRegNumber(result.guest.invitation_barcode))}
                 </div>
                 <div class="code">${escapeHtml(result.souvenir_barcode)}</div>
@@ -279,7 +279,7 @@ export default function CheckInPage() {
   };
 
   return (
-    <AdminShell title="Daftar Check-in">
+    <AdminShell title="Check-in List">
       {error && (
         <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -292,26 +292,26 @@ export default function CheckInPage() {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
               <CheckCircle2 className="h-7 w-7 text-emerald-600" />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-navy">Check-in Berhasil</h2>
+            <h2 className="font-serif text-2xl font-bold text-navy">Check-in Successful</h2>
             <p className="mt-2 text-stone-600">
-              {result.guest.name} · {result.guest.pax} tamu · Boleh masuk
+              {result.guest.name} · {result.guest.pax} guest{result.guest.pax > 1 ? "s" : ""} · Entry approved
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="card-premium p-6 text-center">
-              <p className="text-xs font-bold uppercase tracking-widest text-red-500">Nomor Amplop</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-red-500">Envelope Number</p>
               <p className="mt-3 font-serif text-5xl font-bold text-red-600">{result.angpao_number}</p>
               <p className="mt-2 text-xs text-stone-400">
-                Tempel ke amplop bagian {result.angpao_number.charAt(0)}
+                Attach to envelope section {result.angpao_number.charAt(0)}
               </p>
             </div>
             <div className="card-premium p-6">
-              <p className="mb-4 text-center text-xs font-bold uppercase tracking-widest text-royal">QR Souvenir</p>
+              <p className="mb-4 text-center text-xs font-bold uppercase tracking-widest text-royal">Souvenir QR</p>
               <div ref={souvenirQrRef}>
                 <BarcodeDisplay value={result.souvenir_barcode} />
               </div>
-              <p className="mt-2 text-center text-xs text-stone-400">QR code untuk kartu souvenir</p>
+              <p className="mt-2 text-center text-xs text-stone-400">QR code for souvenir pickup</p>
             </div>
           </div>
 
@@ -320,11 +320,11 @@ export default function CheckInPage() {
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-navy px-4 py-4 text-sm font-semibold uppercase tracking-wide text-navy transition hover:bg-navy/5"
           >
             <Printer className="h-5 w-5" />
-            Print Sticker Amplop & Souvenir
+            Print Envelope & Souvenir Sticker
           </button>
 
           <button onClick={reset} className="btn-navy w-full py-4">
-            Check-in Tamu Berikutnya
+            Check in Next Guest
           </button>
         </div>
       ) : (
@@ -336,11 +336,11 @@ export default function CheckInPage() {
                   Langkah 1
                 </p>
                 <h2 className="font-serif text-lg font-bold text-navy">
-                  {showCamera ? "Ambil Foto Tamu" : "Scan QR Undangan"}
+                  {showCamera ? "Take Guest Photo" : "Scan Invitation QR"}
                 </h2>
               </div>
               {!showCamera && (
-                <span className="badge bg-emerald-100 text-emerald-700">Kamera Aktif</span>
+                <span className="badge bg-emerald-100 text-emerald-700">Camera Active</span>
               )}
             </div>
 
@@ -362,7 +362,7 @@ export default function CheckInPage() {
                 active={!loading && !showCamera}
                 autoStart
                 onDetected={handleScan}
-                prompt="Arahkan kamera ke QR code undangan"
+                prompt="Point the camera at the invitation QR code"
               />
             )}
 
@@ -376,14 +376,14 @@ export default function CheckInPage() {
 
           <div className="card-premium p-6">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-royal">
-              Langkah 2
+                  Step 2
             </p>
-            <h2 className="mt-1 font-serif text-2xl font-bold text-navy">Data Tamu & Amplop</h2>
+            <h2 className="mt-1 font-serif text-2xl font-bold text-navy">Guest & Envelope Data</h2>
 
             <div className="mt-6 space-y-5">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-stone-400">
-                  Nama Tamu / QR Code
+                  Guest Name / QR Code
                 </label>
                 <ScanInput
                   value={scanValue}
@@ -399,7 +399,7 @@ export default function CheckInPage() {
                 <>
                   <div>
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-stone-400">
-                      No. Registrasi
+                      Registration No.
                     </label>
                     <input
                       readOnly
@@ -410,14 +410,14 @@ export default function CheckInPage() {
 
                   <div>
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-stone-400">
-                      Jumlah Tamu
+                      Number of Guests
                     </label>
-                    <input readOnly value={`${guest.pax} Tamu`} className="input-field bg-stone-50" />
+                    <input readOnly value={`${guest.pax} Guest${guest.pax > 1 ? "s" : ""}`} className="input-field bg-stone-50" />
                   </div>
 
                   <div>
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-400">
-                      Pilih Bagian Amplop
+                      Select Envelope Section
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                       {(["A", "B"] as EnvelopeSection[]).map((section) => (
@@ -432,17 +432,17 @@ export default function CheckInPage() {
                               : "border-stone-200 bg-white text-navy hover:bg-stone-50"
                           }`}
                         >
-                          Amplop Bagian {section}
+                          Envelope Section {section}
                         </button>
                       ))}
                     </div>
                     <p className="mt-2 text-xs text-stone-400">
-                      Nomor amplop akan dibuat berdasarkan pilihan A atau B.
+                      The envelope number will be generated based on section A or B.
                     </p>
                   </div>
 
                   <div className="rounded-lg bg-navy px-5 py-4 text-white">
-                    <p className="text-xs text-white/60">Informasi Tamu</p>
+                    <p className="text-xs text-white/60">Guest Information</p>
                     <p className="mt-1 font-serif text-xl font-bold">{guest.name}</p>
                     <p className="mt-1 text-sm text-white/70">
                       {guest.phone} · {guest.pax} orang
@@ -451,17 +451,17 @@ export default function CheckInPage() {
                 </>
               )}
 
-              {loading && <p className="text-center text-sm text-stone-400">Memproses...</p>}
+              {loading && <p className="text-center text-sm text-stone-400">Processing...</p>}
 
               {!guest && !loading && (
                 <p className="text-center text-sm text-stone-400">
-                  Kamera aktif — arahkan ke QR code undangan tamu
+                  Camera active — point it at the guest invitation QR code
                 </p>
               )}
 
               {showCamera && guest && (
                 <p className="text-center text-sm text-stone-400">
-                  Ambil foto tamu, lalu gunakan atau retake jika perlu
+                  Take the guest photo, then use it or retake if needed
                 </p>
               )}
             </div>

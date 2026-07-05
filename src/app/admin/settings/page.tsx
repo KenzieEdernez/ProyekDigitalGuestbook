@@ -12,8 +12,8 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   time: "",
   location: "",
   address: "",
-  dressCode: "",
-  dressNote: "",
+  dressLadies: "",
+  dressGentlemen: "",
   heroImage: "",
 };
 
@@ -31,7 +31,7 @@ function readLandscapeImage(file: File) {
 
         const ctx = canvas.getContext("2d");
         if (!ctx) {
-          reject(new Error("Browser tidak mendukung resize gambar."));
+          reject(new Error("Browser does not support image resizing."));
           return;
         }
 
@@ -64,10 +64,10 @@ function readLandscapeImage(file: File) {
 
         resolve(canvas.toDataURL("image/jpeg", 0.85));
       };
-      image.onerror = () => reject(new Error("Gagal membaca gambar."));
+      image.onerror = () => reject(new Error("Failed to read image."));
       image.src = String(reader.result);
     };
-    reader.onerror = () => reject(new Error("Gagal membaca file gambar."));
+    reader.onerror = () => reject(new Error("Failed to read image file."));
     reader.readAsDataURL(file);
   });
 }
@@ -80,39 +80,39 @@ const fields: Array<{
 }> = [
   {
     key: "name",
-    label: "Nama Event",
-    placeholder: "Contoh: Nama acara",
+    label: "Event Name",
+    placeholder: "Example: Engagement Dinner",
   },
   {
     key: "date",
-    label: "Tanggal",
-    placeholder: "Pilih tanggal acara",
+    label: "Date",
+    placeholder: "Select event date",
     type: "date",
   },
   {
     key: "time",
-    label: "Waktu",
-    placeholder: "Contoh: 19:00 - 00:00",
+    label: "Time",
+    placeholder: "Example: 19:00 - 00:00",
   },
   {
     key: "location",
-    label: "Lokasi",
-    placeholder: "Contoh: The Imperial Grand Hall",
+    label: "Location",
+    placeholder: "Example: The Imperial Grand Hall",
   },
   {
     key: "address",
-    label: "Alamat",
-    placeholder: "Contoh: 450 Prestige Blvd, Jakarta",
+    label: "Address",
+    placeholder: "Example: 450 Prestige Blvd, Jakarta",
   },
   {
-    key: "dressCode",
-    label: "Dress Code",
-    placeholder: "Contoh: Black Tie & Formal",
+    key: "dressLadies",
+    label: "Ladies",
+    placeholder: "Example: Evening dress in neutral tones",
   },
   {
-    key: "dressNote",
-    label: "Catatan Dress Code",
-    placeholder: "Contoh: Navy & Gold Preferred",
+    key: "dressGentlemen",
+    label: "Gentlemen",
+    placeholder: "Example: Formal suit in dark tones",
   },
 ];
 
@@ -131,7 +131,7 @@ export default function EventSettingsPage() {
         const data = await res.json();
         if (data.settings) setForm(data.settings);
       } catch {
-        setError("Gagal memuat pengaturan event.");
+        setError("Failed to load event settings.");
       } finally {
         setLoading(false);
       }
@@ -155,14 +155,14 @@ export default function EventSettingsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Gagal menyimpan pengaturan.");
+        setError(data.error || "Failed to save event settings.");
         return;
       }
 
       setForm(data.settings);
-      setMessage("Pengaturan event berhasil disimpan.");
+      setMessage("Event settings saved successfully.");
     } catch {
-      setError("Gagal terhubung ke server.");
+      setError("Failed to connect to the server.");
     } finally {
       setSaving(false);
     }
@@ -175,7 +175,7 @@ export default function EventSettingsPage() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setError("File harus berupa gambar.");
+      setError("File must be an image.");
       return;
     }
 
@@ -185,7 +185,7 @@ export default function EventSettingsPage() {
       const heroImage = await readLandscapeImage(file);
       setForm((current) => ({ ...current, heroImage }));
     } catch {
-      setError("Gagal memproses gambar.");
+      setError("Failed to process image.");
     } finally {
       setImageProcessing(false);
     }
@@ -193,8 +193,8 @@ export default function EventSettingsPage() {
 
   return (
     <AdminShell
-      title="Pengaturan Event"
-      subtitle="Atur tanggal, waktu, lokasi, dan dress code yang tampil di form tamu"
+      title="Event Settings"
+      subtitle="Manage date, time, location, dress code, and hero image for the guest form"
     >
       <form onSubmit={handleSubmit} className="card-premium max-w-3xl p-6">
         {message && (
@@ -210,26 +210,26 @@ export default function EventSettingsPage() {
 
         {loading ? (
           <div className="rounded-lg bg-parchment px-4 py-5 text-sm text-stone-500">
-            Memuat pengaturan event...
+            Loading event settings...
           </div>
         ) : (
           <div className="space-y-6">
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                Foto Hero Landscape
+                Landscape Hero Image
               </label>
               <div className="overflow-hidden rounded-xl border border-stone-200 bg-stone-50">
                 {form.heroImage ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={form.heroImage}
-                    alt="Preview foto hero"
+                    alt="Hero image preview"
                     className="h-48 w-full object-cover"
                   />
                 ) : (
                   <div className="flex h-48 flex-col items-center justify-center text-stone-400">
                     <ImageIcon className="h-8 w-8" />
-                    <p className="mt-2 text-sm">Belum ada foto hero</p>
+                    <p className="mt-2 text-sm">No hero image yet</p>
                   </div>
                 )}
               </div>
@@ -241,8 +241,8 @@ export default function EventSettingsPage() {
                 className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90"
               />
               <p className="mt-2 text-xs text-stone-400">
-                Gunakan gambar landscape. Sistem akan crop otomatis agar pas di
-                header halaman utama.
+                Use a landscape image. The system will crop it automatically to
+                fit the public page header.
               </p>
             </div>
 
@@ -277,10 +277,10 @@ export default function EventSettingsPage() {
         >
           <Save className="h-4 w-4" />
           {saving
-            ? "Menyimpan..."
+            ? "Saving..."
             : imageProcessing
-              ? "Memproses Gambar..."
-              : "Simpan Pengaturan"}
+              ? "Processing Image..."
+              : "Save Settings"}
         </button>
       </form>
     </AdminShell>

@@ -15,7 +15,7 @@ const QR_FORMATS = [Html5QrcodeSupportedFormats.QR_CODE];
 
 export default function QRScanner({
   onDetected,
-  prompt = "Arahkan kamera ke QR code",
+  prompt = "Point the camera at the QR code",
   autoStart = true,
   active = true,
 }: Props) {
@@ -36,7 +36,7 @@ export default function QRScanner({
       {needsManualStart && active && (
         <div className="mt-2 text-center">
           <button type="button" onClick={() => void startScanner()} className="btn-gold text-sm">
-            Mulai Kamera
+            Start Camera
           </button>
         </div>
       )}

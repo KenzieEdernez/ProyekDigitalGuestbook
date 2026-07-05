@@ -73,7 +73,7 @@ async function createQrImageBlob({
   invitationBarcode: string;
 }) {
   const svg = qrElement?.querySelector("svg");
-  if (!svg) throw new Error("QR code belum siap.");
+  if (!svg) throw new Error("QR code is not ready.");
 
   const svgText = new XMLSerializer().serializeToString(svg);
   const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`;
@@ -83,7 +83,7 @@ async function createQrImageBlob({
   canvas.width = 900;
   canvas.height = 1200;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Browser tidak mendukung export gambar.");
+  if (!ctx) throw new Error("Browser does not support image export.");
 
   ctx.fillStyle = "#f7f3ea";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -99,7 +99,7 @@ async function createQrImageBlob({
   ctx.textAlign = "center";
   ctx.fillStyle = "#c5a059";
   ctx.font = "700 24px Arial";
-  ctx.fillText("KONFIRMASI KEHADIRAN", 450, 145);
+  ctx.fillText("ATTENDANCE CONFIRMATION", 450, 145);
 
   ctx.fillStyle = "#14213d";
   ctx.font = "700 42px Georgia";
@@ -121,7 +121,7 @@ async function createQrImageBlob({
 
   ctx.fillStyle = "#78716c";
   ctx.font = "24px Arial";
-  ctx.fillText(`${guest.pax} Tamu`, 450, 925);
+  ctx.fillText(`${guest.pax} Guest${guest.pax > 1 ? "s" : ""}`, 450, 925);
 
   ctx.fillStyle = "#14213d";
   ctx.font = "700 28px 'Courier New'";
@@ -129,12 +129,12 @@ async function createQrImageBlob({
 
   ctx.fillStyle = "#78716c";
   ctx.font = "20px Arial";
-  ctx.fillText("Tunjukkan QR code ini di pintu masuk untuk check-in", 450, 1045);
+  ctx.fillText("Show this QR code at the entrance for check-in", 450, 1045);
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
-      else reject(new Error("Gagal membuat gambar QR code."));
+      else reject(new Error("Failed to create QR code image."));
     }, "image/png");
   });
 }
@@ -208,7 +208,7 @@ export function RegistrationConfirmation({
     try {
       await downloadQrImage();
     } catch {
-      alert("Gagal menyimpan gambar QR code.");
+      alert("Failed to save QR code image.");
     }
   };
 
@@ -220,14 +220,14 @@ export function RegistrationConfirmation({
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           title: `${event.name} - QR Code`,
-          text: `QR code check-in untuk ${guest.name}`,
+          text: `Check-in QR code for ${guest.name}`,
           files: [file],
         });
         return;
       }
 
       await downloadQrImage();
-      alert("Browser ini belum mendukung share gambar. QR code sudah di-download.");
+      alert("This browser does not support image sharing. The QR code has been downloaded.");
     } catch {
       // user cancelled or image generation failed
     }
@@ -240,10 +240,10 @@ export function RegistrationConfirmation({
           <CheckCircle2 className="h-6 w-6 text-white" />
         </div>
         <h2 className="font-serif text-2xl font-bold text-white">
-          Registrasi Dikonfirmasi
+          Registration Confirmed
         </h2>
         <p className="mt-2 text-sm text-white/70">
-          Anda resmi terdaftar di daftar tamu {event.name}
+          You are officially registered for {event.name}
         </p>
       </div>
 
@@ -253,13 +253,13 @@ export function RegistrationConfirmation({
         </div>
         <p className="mt-4 flex items-center justify-center gap-2 text-xs text-stone-500">
           <Info className="h-3.5 w-3.5 shrink-0" />
-          Tunjukkan QR code ini di pintu masuk untuk check-in
+          Show this QR code at the entrance for check-in
         </p>
 
         <div className="mt-8 grid grid-cols-3 gap-3">
           <div className="rounded-lg bg-parchment p-3 text-center">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
-              Nama Tamu
+              Guest Name
             </p>
             <p className="mt-1 text-sm font-bold text-navy">{guest.name}</p>
           </div>
@@ -273,17 +273,17 @@ export function RegistrationConfirmation({
           </div>
           <div className="rounded-lg bg-parchment p-3 text-center">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
-              Jumlah
+              Party Size
             </p>
             <p className="mt-1 text-sm font-bold text-navy">
-              {guest.pax} Tamu
+              {guest.pax} Guest{guest.pax > 1 ? "s" : ""}
             </p>
           </div>
         </div>
 
         <div className="relative mt-6 overflow-hidden rounded-xl border border-stone-100 bg-parchment/50 p-5">
           <h3 className="font-serif text-lg font-bold text-navy">
-            Detail Acara
+            Event Details
           </h3>
           <div className="mt-4 space-y-3 text-sm text-stone-600">
             <div className="flex items-center gap-3">
@@ -306,14 +306,14 @@ export function RegistrationConfirmation({
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button onClick={handleSave} className="btn-navy py-3 text-xs">
             <Download className="h-4 w-4" />
-            Simpan
+            Save
           </button>
           <button
             onClick={handleShare}
             className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-navy px-4 py-3 text-xs font-semibold uppercase tracking-wide text-navy transition hover:bg-navy/5"
           >
             <Share2 className="h-4 w-4" />
-            Bagikan
+            Share
           </button>
         </div>
       </div>
@@ -332,14 +332,13 @@ export function DeclinedMessage({ name }: { name: string }) {
       <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-parchment">
         <span className="text-3xl">🙏</span>
       </div>
-      <h2 className="font-serif text-3xl font-bold text-navy">Terima Kasih</h2>
+      <h2 className="font-serif text-3xl font-bold text-navy">Thank You</h2>
       <p className="mt-4 leading-relaxed text-stone-600">
-        Terima kasih atas konfirmasinya, <strong>{name}</strong>. Kami
-        menghargai waktu Anda dan mohon maaf apabila ada hal yang kurang
-        berkenan.
+        Thank you for your confirmation, <strong>{name}</strong>. We appreciate
+        your time and hope to see you on another occasion.
       </p>
       <p className="mt-4 text-sm text-stone-400">
-        Semoga kita bisa bertemu di kesempatan lain.
+        Wishing you all the best.
       </p>
     </div>
   );
@@ -349,37 +348,51 @@ export function EventInfoCards({ event }: { event: ResolvedEvent }) {
   const cards = [
     {
       icon: Calendar,
-      label: "Tanggal & Waktu",
+      label: "Date & Time",
       line1: event.dateDisplay,
       line2: event.time,
     },
     {
-      icon: MapPin,
-      label: "Lokasi",
-      line1: event.location,
-      line2: event.address,
-    },
-    {
       icon: Clock,
       label: "Dress Code",
-      line1: event.dressCode,
-      line2: event.dressNote,
+      line1: event.dressLadies,
+      line2: event.dressGentlemen,
+      dressCode: true,
+    },
+    {
+      icon: MapPin,
+      label: "Location",
+      line1: event.location,
+      line2: event.address,
     },
   ];
 
   return (
     <div className="mt-8 grid gap-4 sm:grid-cols-3">
-      {cards.map(({ icon: Icon, label, line1, line2 }) => (
+      {cards.map(({ icon: Icon, label, line1, line2, dressCode }) => (
         <div
           key={label}
-          className="rounded-xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm"
+          className="rounded-xl border border-white/10 bg-white/10 p-5 text-center backdrop-blur-sm"
         >
           <Icon className="mb-3 h-5 w-5 text-royal" />
           <p className="text-[10px] font-semibold uppercase tracking-widest text-white/60">
             {label}
           </p>
-          <p className="mt-2 text-sm font-semibold text-white">{line1}</p>
-          <p className="text-xs text-white/70">{line2}</p>
+          {dressCode ? (
+            <div className="mt-2 space-y-1 text-sm text-white">
+              <p>
+                <strong>Ladies:</strong> {line1}
+              </p>
+              <p>
+                <strong>Gentlemen:</strong> {line2}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="mt-2 text-sm font-semibold text-white">{line1}</p>
+              <p className="text-xs text-white/70">{line2}</p>
+            </>
+          )}
         </div>
       ))}
     </div>

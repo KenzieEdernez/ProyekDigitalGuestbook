@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "Digital Guestbook | EdernDigital",
-  description: "Konfirmasi kehadiran dan digital guestbook untuk acara Anda",
+  description: "Attendance confirmation and digital guestbook for your event",
 };
 
 export const viewport: Viewport = {

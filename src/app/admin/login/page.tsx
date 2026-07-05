@@ -30,14 +30,14 @@ function AdminLoginForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Login gagal.");
+        setError(data.error || "Login failed.");
         return;
       }
 
       router.replace(next);
       router.refresh();
     } catch {
-      setError("Gagal terhubung ke server.");
+      setError("Failed to connect to the server.");
     } finally {
       setLoading(false);
     }
@@ -51,10 +51,10 @@ function AdminLoginForm() {
             <LockKeyhole className="h-7 w-7 text-royal" />
           </div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-royal">
-            Area Panitia
+            Staff Area
           </p>
           <h1 className="mt-2 font-serif text-3xl font-bold text-navy">
-            Login Panitia
+            Staff Login
           </h1>
           <p className="mt-2 text-sm text-stone-500">{eventSettings.name}</p>
         </div>
@@ -93,7 +93,7 @@ function AdminLoginForm() {
         </div>
 
         <button disabled={loading} className="btn-navy mt-6 w-full py-4">
-          {loading ? "Memproses..." : "Masuk"}
+          {loading ? "Processing..." : "Login"}
         </button>
       </form>
     </main>

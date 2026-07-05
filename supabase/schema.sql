@@ -29,9 +29,17 @@ create table if not exists public.event_settings (
   address text not null,
   dress_code text not null,
   dress_note text not null,
+  dress_ladies text,
+  dress_gentlemen text,
   hero_image text,
   updated_at timestamptz not null default now()
 );
+
+alter table public.event_settings
+add column if not exists dress_ladies text;
+
+alter table public.event_settings
+add column if not exists dress_gentlemen text;
 
 alter table public.event_settings
 add column if not exists hero_image text;
