@@ -33,20 +33,24 @@ function StatCard({
     <div className="card-premium p-6">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
             {label}
           </p>
           <p className={`mt-2 font-serif text-4xl font-bold ${accent}`}>
             {value}
           </p>
-          {sub && <p className="mt-1 text-xs text-stone-500">{sub}</p>}
+          {sub && (
+            <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
+              {sub}
+            </p>
+          )}
         </div>
-        <div className="rounded-lg bg-parchment p-3">
+        <div className="rounded-lg bg-parchment p-3 dark:bg-navy-700">
           <Icon className="h-5 w-5 text-royal" />
         </div>
       </div>
       {bar !== undefined && (
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-stone-100">
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-stone-100 dark:bg-navy-700">
           <div
             className="h-full rounded-full bg-emerald-500 transition-all"
             style={{ width: `${Math.min(bar, 100)}%` }}
@@ -153,17 +157,17 @@ export default function AdminDashboard() {
 
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="card-premium xl:col-span-2 p-6">
-          <h2 className="font-serif text-xl font-bold text-navy">
+          <h2 className="font-serif text-xl font-bold text-navy dark:text-stone-100">
             Arrival Trend
           </h2>
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-stone-500 dark:text-stone-400">
             Guest check-in pace throughout the event
           </p>
           <div className="mt-8 flex h-48 items-end gap-2">
             {hourlyData.map(({ hour, count }) => (
               <div key={hour} className="flex flex-1 flex-col items-center gap-2">
                 <div
-                  className="w-full rounded-t bg-navy/80 transition-all hover:bg-royal"
+                  className="w-full rounded-t bg-navy/80 transition-all hover:bg-royal dark:bg-royal/70 dark:hover:bg-royal"
                   style={{
                     height: `${Math.max(8, (count / Math.max(...hourlyData.map((h) => h.count), 1)) * 160)}px`,
                   }}
@@ -175,16 +179,16 @@ export default function AdminDashboard() {
         </div>
 
         <div className="card-premium p-6">
-          <h2 className="font-serif text-xl font-bold text-navy">
+          <h2 className="font-serif text-xl font-bold text-navy dark:text-stone-100">
             Live Activity
           </h2>
           <div className="mt-4 space-y-4">
             {recentActivity.length === 0 ? (
-              <p className="text-sm text-stone-400">No activity yet</p>
+              <p className="text-sm text-stone-400 dark:text-stone-500">No activity yet</p>
             ) : (
               recentActivity.map((g) => (
                 <div key={g.id} className="flex items-center gap-3">
-                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-parchment">
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-parchment dark:bg-navy-700">
                     {g.photo_url ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
@@ -199,7 +203,7 @@ export default function AdminDashboard() {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-navy">
+                    <p className="truncate text-sm font-semibold text-navy dark:text-stone-100">
                       {g.name}
                     </p>
                     <p className="text-xs text-stone-400">
@@ -223,12 +227,12 @@ export default function AdminDashboard() {
       </div>
 
       <div className="card-premium mt-6 overflow-hidden">
-        <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4 dark:border-stone-700">
           <div>
-            <h2 className="font-serif text-xl font-bold text-navy">
+            <h2 className="font-serif text-xl font-bold text-navy dark:text-stone-100">
               Guests Waiting for Check-in
             </h2>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-stone-500 dark:text-stone-400">
               Registered guests who have not arrived yet
             </p>
           </div>
@@ -238,7 +242,7 @@ export default function AdminDashboard() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-stone-50 text-left">
+            <thead className="bg-stone-50 text-left dark:bg-navy-900/50">
               <tr>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-stone-400">
                   Name
@@ -259,13 +263,15 @@ export default function AdminDashboard() {
             </thead>
             <tbody>
               {pendingGuests.slice(0, 5).map((g) => (
-                <tr key={g.id} className="border-t border-stone-50">
-                  <td className="px-6 py-4 font-medium text-navy">{g.name}</td>
-                  <td className="px-6 py-4 font-mono text-xs text-stone-500">
+                <tr key={g.id} className="border-t border-stone-50 dark:border-stone-800">
+                  <td className="px-6 py-4 font-medium text-navy dark:text-stone-100">
+                    {g.name}
+                  </td>
+                  <td className="px-6 py-4 font-mono text-xs text-stone-500 dark:text-stone-400">
                     {formatRegNumber(g.invitation_barcode)}
                   </td>
                   <td className="px-6 py-4">{g.pax}</td>
-                  <td className="px-6 py-4 text-stone-500">
+                  <td className="px-6 py-4 text-stone-500 dark:text-stone-400">
                     {new Date(g.created_at).toLocaleString("id-ID", {
                       day: "numeric",
                       month: "short",
@@ -285,7 +291,7 @@ export default function AdminDashboard() {
               ))}
               {pendingGuests.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-stone-400">
+                  <td colSpan={5} className="px-6 py-8 text-center text-stone-400 dark:text-stone-500">
                     All guests have checked in
                   </td>
                 </tr>

@@ -4,6 +4,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { useState } from "react";
 import { LockKeyhole } from "lucide-react";
+import ThemeToggle from "@/components/admin/ThemeToggle";
+import { AdminThemeProvider } from "@/components/admin/AdminThemeProvider";
 import { useEventSettings } from "@/hooks/useEventSettings";
 
 function AdminLoginForm() {
@@ -44,7 +46,10 @@ function AdminLoginForm() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-cream px-6 py-10">
+    <main className="relative flex min-h-screen items-center justify-center bg-cream px-6 py-10 dark:bg-navy-900">
+      <div className="absolute right-6 top-6">
+        <ThemeToggle />
+      </div>
       <form onSubmit={handleSubmit} className="card-premium w-full max-w-md p-8">
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-royal/15">
@@ -53,21 +58,23 @@ function AdminLoginForm() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-royal">
             Staff Area
           </p>
-          <h1 className="mt-2 font-serif text-3xl font-bold text-navy">
+          <h1 className="mt-2 font-serif text-3xl font-bold text-navy dark:text-stone-100">
             Staff Login
           </h1>
-          <p className="mt-2 text-sm text-stone-500">{eventSettings.name}</p>
+          <p className="mt-2 text-sm text-stone-500 dark:text-stone-400">
+            {eventSettings.name}
+          </p>
         </div>
 
         {error && (
-          <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
             {error}
           </div>
         )}
 
         <div className="mt-6 space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
               Username
             </label>
             <input
@@ -79,7 +86,7 @@ function AdminLoginForm() {
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
               Password
             </label>
             <input
@@ -102,8 +109,10 @@ function AdminLoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={null}>
-      <AdminLoginForm />
-    </Suspense>
+    <AdminThemeProvider>
+      <Suspense fallback={null}>
+        <AdminLoginForm />
+      </Suspense>
+    </AdminThemeProvider>
   );
 }

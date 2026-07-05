@@ -10,13 +10,13 @@ const statusConfig: Record<
   string,
   { label: string; className: string }
 > = {
-  pending: { label: "Pending", className: "bg-amber-100 text-amber-800" },
-  checked_in: { label: "Checked-in", className: "bg-emerald-100 text-emerald-800" },
+  pending: { label: "Pending", className: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" },
+  checked_in: { label: "Checked-in", className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300" },
   souvenir_claimed: {
     label: "Souvenir OK",
-    className: "bg-emerald-100 text-emerald-800",
+    className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
   },
-  declined: { label: "Declined", className: "bg-stone-100 text-stone-600" },
+  declined: { label: "Declined", className: "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300" },
 };
 
 const souvenirConfig: Record<string, { label: string; className: string }> = {
@@ -325,7 +325,7 @@ export default function GuestListPage() {
         <>
           <button
             onClick={exportPrintableReport}
-            className="inline-flex items-center gap-2 rounded-lg border border-stone-200 px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-stone-200 px-4 py-2 text-sm font-medium text-stone-600 transition hover:bg-stone-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-navy-700"
           >
             <Download className="h-4 w-4" />
             Export / Print
@@ -333,7 +333,7 @@ export default function GuestListPage() {
           <button
             onClick={handleDeleteAll}
             disabled={deletingAll || guests.length === 0}
-            className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/40"
           >
             <Trash2 className="h-4 w-4" />
             {deletingAll ? "Deleting..." : "Delete All Data"}
@@ -368,7 +368,7 @@ export default function GuestListPage() {
       <div className="card-premium overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-sm">
-            <thead className="border-b border-stone-100 bg-stone-50">
+            <thead className="border-b border-stone-100 bg-stone-50 dark:border-stone-700 dark:bg-navy-900/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-stone-400">
                   Guest Name
@@ -403,11 +403,11 @@ export default function GuestListPage() {
                 return (
                   <tr
                     key={guest.id}
-                    className="border-b border-stone-50 transition hover:bg-stone-50/50"
+                    className="border-b border-stone-50 transition hover:bg-stone-50/50 dark:border-stone-800 dark:hover:bg-navy-900/40"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-parchment text-xs font-bold text-royal">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-parchment text-xs font-bold text-royal dark:bg-navy-700">
                           {guest.photo_url ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
                             <img
@@ -420,7 +420,7 @@ export default function GuestListPage() {
                           )}
                         </div>
                         <div>
-                          <p className="font-semibold text-navy">{guest.name}</p>
+                          <p className="font-semibold text-navy dark:text-stone-100">{guest.name}</p>
                           <p className="text-xs text-stone-400">
                             {guest.phone || formatRegNumber(guest.invitation_barcode)}
                           </p>
@@ -489,10 +489,10 @@ export default function GuestListPage() {
               <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
                 {s.label}
               </p>
-              <p className="mt-1 font-serif text-3xl font-bold text-navy">
+              <p className="mt-1 font-serif text-3xl font-bold text-navy dark:text-stone-100">
                 {s.value}
               </p>
-              <p className="text-xs text-stone-500">{s.sub}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">{s.sub}</p>
             </div>
           ))}
         </div>

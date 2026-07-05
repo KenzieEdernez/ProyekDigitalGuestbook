@@ -198,27 +198,27 @@ export default function EventSettingsPage() {
     >
       <form onSubmit={handleSubmit} className="card-premium max-w-3xl p-6">
         {message && (
-          <div className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
             {message}
           </div>
         )}
         {error && (
-          <div className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
             {error}
           </div>
         )}
 
         {loading ? (
-          <div className="rounded-lg bg-parchment px-4 py-5 text-sm text-stone-500">
+          <div className="rounded-lg bg-parchment px-4 py-5 text-sm text-stone-500 dark:bg-navy-700 dark:text-stone-300">
             Loading event settings...
           </div>
         ) : (
           <div className="space-y-6">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
                 Landscape Hero Image
               </label>
-              <div className="overflow-hidden rounded-xl border border-stone-200 bg-stone-50">
+              <div className="overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
                 {form.heroImage ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -227,7 +227,7 @@ export default function EventSettingsPage() {
                     className="h-48 w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-48 flex-col items-center justify-center text-stone-400">
+                  <div className="flex h-48 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
                     <ImageIcon className="h-8 w-8" />
                     <p className="mt-2 text-sm">No hero image yet</p>
                   </div>
@@ -238,7 +238,7 @@ export default function EventSettingsPage() {
                 accept="image/*"
                 onChange={handleHeroImageChange}
                 disabled={saving || imageProcessing}
-                className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90"
+                className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
               />
               <p className="mt-2 text-xs text-stone-400">
                 Use a landscape image. The system will crop it automatically to
@@ -249,7 +249,7 @@ export default function EventSettingsPage() {
             <div className="grid gap-5 md:grid-cols-2">
               {fields.map((field) => (
                 <div key={field.key}>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
                     {field.label}
                   </label>
                   <input
