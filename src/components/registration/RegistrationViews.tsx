@@ -236,7 +236,7 @@ export function RegistrationConfirmation({
   return (
     <div className="mx-auto max-w-lg overflow-hidden rounded-2xl bg-white shadow-card-lg">
       <div className="bg-navy px-8 py-10 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-royal">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500">
           <CheckCircle2 className="h-6 w-6 text-white" />
         </div>
         <h2 className="font-serif text-2xl font-bold text-white">
@@ -257,28 +257,38 @@ export function RegistrationConfirmation({
         </p>
 
         <div className="mt-8 grid grid-cols-3 gap-3">
-          <div className="rounded-lg bg-parchment p-3 text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
-              Guest Name
-            </p>
-            <p className="mt-1 text-sm font-bold text-navy">{guest.name}</p>
-          </div>
-          <div className="rounded-lg bg-parchment p-3 text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
-              No. Reg
-            </p>
-            <p className="mt-1 text-sm font-bold text-navy">
-              {formatRegNumber(guest.invitation_barcode)}
-            </p>
-          </div>
-          <div className="rounded-lg bg-parchment p-3 text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
-              Party Size
-            </p>
-            <p className="mt-1 text-sm font-bold text-navy">
-              {guest.pax} Guest{guest.pax > 1 ? "s" : ""}
-            </p>
-          </div>
+          {[
+            { label: "Guest Name", value: guest.name },
+            {
+              label: "No. Reg",
+              value: formatRegNumber(guest.invitation_barcode),
+              compact: true,
+            },
+            {
+              label: "Party Size",
+              value: `${guest.pax} Guest${guest.pax > 1 ? "s" : ""}`,
+            },
+          ].map(({ label, value, compact }) => (
+            <div
+              key={label}
+              className="flex min-h-[92px] flex-col rounded-lg bg-parchment p-3"
+            >
+              <p className="text-center text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                {label}
+              </p>
+              <div className="flex flex-1 items-center justify-center px-1 py-2">
+                <p
+                  className={`text-center font-bold text-navy ${
+                    compact
+                      ? "break-all text-[11px] leading-snug"
+                      : "text-sm leading-snug"
+                  }`}
+                >
+                  {value}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="relative mt-6 overflow-hidden rounded-xl border border-stone-100 bg-parchment/50 p-5">
@@ -286,18 +296,20 @@ export function RegistrationConfirmation({
             Event Details
           </h3>
           <div className="mt-4 space-y-3 text-sm text-stone-600">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-4 w-4 text-royal" />
+            <div className="flex items-start gap-3">
+              <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-royal" />
               <span>{event.dateDisplay}</span>
             </div>
-            <div className="flex items-center gap-3">
-              <Clock className="h-4 w-4 text-royal" />
+            <div className="flex items-start gap-3">
+              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-royal" />
               <span>{event.time}</span>
             </div>
-            <div className="flex items-center gap-3">
-              <MapPin className="h-4 w-4 text-royal" />
-              <span>
-                {event.location}, {event.address}
+            <div className="flex items-start gap-3">
+              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-royal" />
+              <span className="leading-relaxed">
+                {event.location}
+                <br />
+                {event.address}
               </span>
             </div>
           </div>
