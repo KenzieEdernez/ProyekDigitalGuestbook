@@ -427,7 +427,7 @@ export default function GuestListPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">{guest.pax}</td>
+                    <td className="px-6 py-4 text-stone-700 dark:text-stone-200">{guest.pax}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`badge ${statusConfig[guest.status]?.className}`}
@@ -435,7 +435,7 @@ export default function GuestListPage() {
                         {statusConfig[guest.status]?.label}
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs">
+                    <td className="px-6 py-4 font-mono text-xs text-stone-600 dark:text-stone-300">
                       {guest.angpao_number ? `#${guest.angpao_number}` : "-"}
                     </td>
                     <td className="px-6 py-4">

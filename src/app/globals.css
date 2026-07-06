@@ -28,6 +28,79 @@
   .badge {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide;
   }
+
+  /* Admin / staff dark mode readability */
+  .dark .text-navy {
+    @apply text-stone-100;
+  }
+
+  .dark .text-stone-600 {
+    @apply text-stone-300;
+  }
+
+  .dark .text-emerald-600 {
+    @apply text-emerald-400;
+  }
+
+  .dark .text-emerald-700 {
+    @apply text-emerald-300;
+  }
+
+  .dark .text-amber-600 {
+    @apply text-amber-400;
+  }
+
+  .dark .text-red-600 {
+    @apply text-red-400;
+  }
+
+  .dark .text-red-700 {
+    @apply text-red-300;
+  }
+
+  .dark thead.bg-stone-50 {
+    @apply bg-navy-900/80;
+  }
+
+  .dark .bg-stone-50:not(.badge):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]) {
+    @apply bg-navy-900/50;
+  }
+
+  .dark .border-stone-100 {
+    @apply border-stone-700;
+  }
+
+  .dark .border-stone-50 {
+    @apply border-stone-800;
+  }
+
+  .dark .border-stone-200 {
+    @apply border-stone-700;
+  }
+
+  .dark .bg-parchment {
+    @apply bg-navy-800/60;
+  }
+
+  .dark .bg-parchment\/50 {
+    @apply bg-navy-800/40;
+  }
+
+  .dark .bg-emerald-100 {
+    @apply bg-emerald-900/40;
+  }
+
+  .dark .bg-red-50 {
+    @apply bg-red-950/40;
+  }
+
+  .dark .hover\:bg-stone-50:hover {
+    @apply bg-navy-700;
+  }
+
+  .dark .hover\:bg-navy\/5:hover {
+    @apply bg-navy-700/50;
+  }
 }
 
 @layer utilities {

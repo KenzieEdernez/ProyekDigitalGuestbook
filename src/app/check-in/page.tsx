@@ -281,7 +281,7 @@ export default function CheckInPage() {
   return (
     <AdminShell title="Check-in List">
       {error && (
-        <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </div>
       )}
@@ -317,7 +317,7 @@ export default function CheckInPage() {
 
           <button
             onClick={handlePrintSticker}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-navy px-4 py-4 text-sm font-semibold uppercase tracking-wide text-navy transition hover:bg-navy/5"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-navy px-4 py-4 text-sm font-semibold uppercase tracking-wide text-navy transition hover:bg-navy/5 dark:border-stone-500 dark:text-stone-100 dark:hover:bg-navy-700/50"
           >
             <Printer className="h-5 w-5" />
             Print Envelope & Souvenir Sticker
@@ -404,7 +404,7 @@ export default function CheckInPage() {
                     <input
                       readOnly
                       value={formatRegNumber(guest.invitation_barcode)}
-                      className="input-field bg-stone-50 font-mono"
+                      className="input-field bg-stone-50 font-mono dark:bg-navy-900"
                     />
                   </div>
 
@@ -412,7 +412,7 @@ export default function CheckInPage() {
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-stone-400">
                       Number of Guests
                     </label>
-                    <input readOnly value={`${guest.pax} Guest${guest.pax > 1 ? "s" : ""}`} className="input-field bg-stone-50" />
+                    <input readOnly value={`${guest.pax} Guest${guest.pax > 1 ? "s" : ""}`} className="input-field bg-stone-50 dark:bg-navy-900" />
                   </div>
 
                   <div>
@@ -429,7 +429,7 @@ export default function CheckInPage() {
                           className={`rounded-lg border px-4 py-3 text-sm font-bold transition ${
                             envelopeSection === section
                               ? "border-royal bg-royal text-white shadow-md"
-                              : "border-stone-200 bg-white text-navy hover:bg-stone-50"
+                              : "border-stone-200 bg-white text-navy hover:bg-stone-50 dark:border-stone-600 dark:bg-navy-900 dark:text-stone-100 dark:hover:bg-navy-700"
                           }`}
                         >
                           Envelope Section {section}

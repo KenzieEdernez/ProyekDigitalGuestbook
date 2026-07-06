@@ -50,7 +50,13 @@ export function AdminThemeProvider({ children }: { children: React.ReactNode }) 
 
   return (
     <AdminThemeContext.Provider value={{ theme, toggleTheme, ready }}>
-      <div className={theme === "dark" ? "dark min-h-screen" : "min-h-screen"}>
+      <div
+        className={
+          theme === "dark"
+            ? "dark min-h-screen bg-navy-900 text-stone-100"
+            : "min-h-screen bg-cream text-navy-800"
+        }
+      >
         {children}
       </div>
     </AdminThemeContext.Provider>

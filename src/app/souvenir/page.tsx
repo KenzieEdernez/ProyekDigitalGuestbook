@@ -162,7 +162,7 @@ export default function SouvenirPage() {
       subtitle="Manage souvenir distribution and track guest pickups"
     >
       {error && (
-        <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </div>
       )}
@@ -173,7 +173,7 @@ export default function SouvenirPage() {
             <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
           <h2 className="font-serif text-2xl font-bold text-navy">Souvenir Collected Successfully</h2>
-          <p className="mt-2 text-stone-600">{claimedGuest.name}</p>
+          <p className="mt-2 text-stone-600 dark:text-stone-300">{claimedGuest.name}</p>
           <p className="text-sm text-stone-400">
             Envelope {claimedGuest.angpao_number} · {claimedGuest.pax} guest{claimedGuest.pax > 1 ? "s" : ""}
           </p>
@@ -255,7 +255,7 @@ export default function SouvenirPage() {
             )}
 
             <div className="card-premium overflow-hidden">
-              <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4">
+              <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4 dark:border-stone-700">
                 <h2 className="font-serif text-lg font-bold text-navy">Transaction Log</h2>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone-400" />
@@ -264,12 +264,12 @@ export default function SouvenirPage() {
                     placeholder="Search guest..."
                     value={searchLog}
                     onChange={(e) => setSearchLog(e.target.value)}
-                    className="rounded-lg border border-stone-200 py-1.5 pl-8 pr-3 text-xs outline-none focus:border-royal"
+                    className="input-field py-1.5 pl-8 pr-3 text-xs"
                   />
                 </div>
               </div>
               <table className="w-full text-sm">
-                <thead className="bg-stone-50 text-left">
+                <thead className="bg-stone-50 text-left dark:bg-navy-900/80">
                   <tr>
                     <th className="px-6 py-3 text-xs font-semibold uppercase text-stone-400">Time</th>
                     <th className="px-6 py-3 text-xs font-semibold uppercase text-stone-400">Guest</th>
@@ -278,8 +278,8 @@ export default function SouvenirPage() {
                 </thead>
                 <tbody>
                   {transactions.map((g) => (
-                    <tr key={g.id} className="border-t border-stone-50">
-                      <td className="px-6 py-3 text-stone-500">
+                    <tr key={g.id} className="border-t border-stone-50 dark:border-stone-800">
+                      <td className="px-6 py-3 text-stone-500 dark:text-stone-400">
                         {new Date(g.souvenir_claimed_at!).toLocaleTimeString("id-ID", {
                           hour: "2-digit",
                           minute: "2-digit",

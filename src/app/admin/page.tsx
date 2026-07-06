@@ -19,7 +19,7 @@ function StatCard({
   value,
   sub,
   icon: Icon,
-  accent = "text-navy",
+  accent = "text-navy dark:text-stone-100",
   bar,
 }: {
   label: string;
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
             value={stats.checked_in + stats.souvenir_claimed}
             sub={`${stats.total_pax_checked_in} pax`}
             icon={UserCheck}
-            accent="text-emerald-600"
+            accent="text-emerald-600 dark:text-emerald-400"
             bar={checkInRate}
           />
           <StatCard
@@ -150,7 +150,7 @@ export default function AdminDashboard() {
             value={stats.pending}
             sub="Not arrived yet"
             icon={TrendingUp}
-            accent="text-amber-600"
+            accent="text-amber-600 dark:text-amber-400"
           />
         </div>
       )}
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
                   <td className="px-6 py-4 font-mono text-xs text-stone-500 dark:text-stone-400">
                     {formatRegNumber(g.invitation_barcode)}
                   </td>
-                  <td className="px-6 py-4">{g.pax}</td>
+                  <td className="px-6 py-4 text-stone-700 dark:text-stone-200">{g.pax}</td>
                   <td className="px-6 py-4 text-stone-500 dark:text-stone-400">
                     {new Date(g.created_at).toLocaleString("id-ID", {
                       day: "numeric",
