@@ -33,10 +33,18 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
 };
 
 export function mergeEventSettings(settings?: Partial<EventSettings>) {
-  return {
+  const merged = {
     ...EVENT,
     ...DEFAULT_EVENT_SETTINGS,
     ...settings,
+  };
+
+  const normalizedTime = formatEventTimeAt(merged.timeFrom || merged.time);
+
+  return {
+    ...merged,
+    timeFrom: normalizedTime || merged.timeFrom,
+    time: normalizedTime,
   };
 }
 

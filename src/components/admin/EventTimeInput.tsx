@@ -74,7 +74,7 @@ export default function EventTimeInput({
       <p className="mt-2 text-xs text-stone-400">
         Public page will show:{" "}
         <span className="font-semibold text-stone-600 dark:text-stone-300">
-          At {timeFrom || "—"}
+          {timeFrom || "—"}
         </span>
       </p>
     </div>

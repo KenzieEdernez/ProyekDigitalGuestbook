@@ -4,6 +4,7 @@ import {
   parseLegacyTimeValue,
   parseTime12,
   formatTime12,
+  stripTimePrefix,
 } from "./event-time";
 import type { EventSettings } from "@/types/event";
 
@@ -61,7 +62,7 @@ function resolveTimeFields(input: Partial<EventSettings> & Record<string, unknow
   const rawFrom = textValue(input.timeFrom ?? input.time_from);
   const legacyTime = textValue(input.time);
 
-  let timeFrom = rawFrom;
+  let timeFrom = rawFrom ? stripTimePrefix(rawFrom) : "";
   if (!timeFrom && legacyTime) {
     timeFrom = parseLegacyTimeValue(legacyTime);
   }
@@ -71,7 +72,7 @@ function resolveTimeFields(input: Partial<EventSettings> & Record<string, unknow
     timeFrom = formatTime12(fromParts);
   }
 
-  const time = formatEventTimeAt(timeFrom);
+  const time = formatEventTimeAt(timeFrom || legacyTime);
   return { timeFrom, time };
 }
 

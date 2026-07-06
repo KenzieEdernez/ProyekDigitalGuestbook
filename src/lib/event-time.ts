@@ -10,10 +10,16 @@ export function formatTime12({ hour, minute, period }: TimeParts) {
   return `${hour}:${String(minute).padStart(2, "0")} ${period}`;
 }
 
+export function stripTimePrefix(value: string) {
+  return value.trim().replace(/^at\s+/i, "");
+}
+
 export function formatEventTimeAt(timeFrom: string) {
-  const trimmed = timeFrom.trim();
-  if (!trimmed) return "";
-  return `At ${trimmed}`;
+  const cleaned = stripTimePrefix(timeFrom);
+  if (!cleaned) return "";
+
+  const parts = parseTime12(cleaned);
+  return parts ? formatTime12(parts) : cleaned;
 }
 
 function to12Hour(hour24: number, minute: number): TimeParts {
