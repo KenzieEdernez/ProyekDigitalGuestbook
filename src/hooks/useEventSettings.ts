@@ -8,6 +8,7 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   name: "",
   date: "",
   dateDisplay: "",
+  timeFrom: "",
   time: "",
   location: "",
   address: "",

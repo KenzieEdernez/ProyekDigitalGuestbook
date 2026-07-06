@@ -1,4 +1,10 @@
 import { getPhotoBucket, getSupabaseAdmin } from "./supabase-server";
+import {
+  formatEventTimeAt,
+  parseLegacyTimeValue,
+  parseTime12,
+  formatTime12,
+} from "./event-time";
 import type { EventSettings } from "@/types/event";
 
 function toDateInputValue(value?: string) {
@@ -14,7 +20,7 @@ function formatDateDisplay(date: string) {
   const parsed = new Date(`${date}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return "";
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -51,13 +57,33 @@ async function saveHeroImage(value: string) {
   return data.publicUrl;
 }
 
+function resolveTimeFields(input: Partial<EventSettings> & Record<string, unknown>) {
+  const rawFrom = textValue(input.timeFrom ?? input.time_from);
+  const legacyTime = textValue(input.time);
+
+  let timeFrom = rawFrom;
+  if (!timeFrom && legacyTime) {
+    timeFrom = parseLegacyTimeValue(legacyTime);
+  }
+
+  const fromParts = parseTime12(timeFrom);
+  if (fromParts) {
+    timeFrom = formatTime12(fromParts);
+  }
+
+  const time = formatEventTimeAt(timeFrom);
+  return { timeFrom, time };
+}
+
 function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown>): EventSettings {
   const date = toDateInputValue(textValue(input.date));
+  const { timeFrom, time } = resolveTimeFields(input);
   const settings = {
     name: textValue(input.name),
     date,
     dateDisplay: formatDateDisplay(date),
-    time: textValue(input.time),
+    timeFrom,
+    time,
     location: textValue(input.location),
     address: textValue(input.address),
     dressLadies: textValue(
@@ -75,7 +101,7 @@ function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown
   const requiredFields = [
     settings.name,
     settings.date,
-    settings.time,
+    settings.timeFrom,
     settings.location,
     settings.address,
     settings.dressLadies,
@@ -117,6 +143,7 @@ export async function saveEventSettings(
     name: settings.name,
     date: settings.date,
     time: settings.time,
+    time_from: settings.timeFrom,
     location: settings.location,
     address: settings.address,
     dress_code: settings.dressLadies,

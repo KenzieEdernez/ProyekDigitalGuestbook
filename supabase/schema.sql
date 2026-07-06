@@ -87,6 +87,9 @@ add column if not exists dress_gentlemen text;
 alter table public.event_settings
 add column if not exists hero_image text;
 
+alter table public.event_settings
+add column if not exists time_from text;
+
 alter table public.guests enable row level security;
 alter table public.event_settings enable row level security;
 alter table public.envelope_counters enable row level security;

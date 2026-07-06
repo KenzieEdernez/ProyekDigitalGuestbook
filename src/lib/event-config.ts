@@ -1,14 +1,16 @@
 import type { EventSettings } from "@/types/event";
+import { formatEventTimeAt } from "@/lib/event-time";
 
 export const EVENT = {
   name: "Gala Excellence 2024",
   tagline:
-    "Kehadiran Anda diminta untuk malam penuh keistimewaan dan perayaan.",
+    "Your presence is cordially requested for an evening of celebration and joy.",
   organizer: "EdernDigital",
-  organizerTagline: "Digital guestbook dan event system.",
+  organizerTagline: "Digital guestbook and event system.",
   supportEmail: "support@ederndigital.com",
-  date: "Sabtu, 14 Desember 2024",
-  time: "19:00 - 00:00",
+  date: "Saturday, 14 December 2024",
+  timeFrom: "7:00 PM",
+  time: formatEventTimeAt("7:00 PM"),
   location: "The Imperial Grand Hall",
   address: "450 Prestige Blvd, Jakarta",
   dressLadies: "Evening dress",
@@ -21,6 +23,7 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   name: EVENT.name,
   date: "2024-12-14",
   dateDisplay: EVENT.date,
+  timeFrom: EVENT.timeFrom,
   time: EVENT.time,
   location: EVENT.location,
   address: EVENT.address,

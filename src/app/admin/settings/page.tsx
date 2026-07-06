@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { ImageIcon, Save } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
+import EventTimeInput from "@/components/admin/EventTimeInput";
+import { formatEventTimeAt } from "@/lib/event-time";
 import type { EventSettings } from "@/types/event";
 
 const EMPTY_EVENT_SETTINGS: EventSettings = {
   name: "",
   date: "",
   dateDisplay: "",
+  timeFrom: "",
   time: "",
   location: "",
   address: "",
@@ -88,11 +91,6 @@ const fields: Array<{
     label: "Date",
     placeholder: "Select event date",
     type: "date",
-  },
-  {
-    key: "time",
-    label: "Time",
-    placeholder: "Example: 19:00 - 00:00",
   },
   {
     key: "location",
@@ -248,7 +246,10 @@ export default function EventSettingsPage() {
 
             <div className="grid gap-5 md:grid-cols-2">
               {fields.map((field) => (
-                <div key={field.key}>
+                <div
+                  key={field.key}
+                  className={field.key === "address" ? "md:col-span-2" : undefined}
+                >
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
                     {field.label}
                   </label>
@@ -267,6 +268,18 @@ export default function EventSettingsPage() {
                   />
                 </div>
               ))}
+
+              <EventTimeInput
+                timeFrom={form.timeFrom}
+                disabled={saving}
+                onChange={(timeFrom) =>
+                  setForm((current) => ({
+                    ...current,
+                    timeFrom,
+                    time: formatEventTimeAt(timeFrom),
+                  }))
+                }
+              />
             </div>
           </div>
         )}

@@ -119,7 +119,7 @@ export default function AdminDashboard() {
   return (
     <AdminShell
       title="Event Overview"
-      subtitle={`Real-time monitoring untuk ${eventSettings.name}`}
+      subtitle={`Real-time monitoring for ${eventSettings.name}`}
     >
       {stats && (
         <div className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
