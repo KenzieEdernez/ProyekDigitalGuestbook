@@ -296,16 +296,16 @@ export function RegistrationConfirmation({
             Event Details
           </h3>
           <div className="mt-4 space-y-3 text-sm text-stone-600">
-            <div className="flex items-start gap-3">
-              <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-royal" />
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 shrink-0 text-royal" />
               <span>{event.dateDisplay}</span>
             </div>
-            <div className="flex items-start gap-3">
-              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-royal" />
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 shrink-0 text-royal" />
               <span>{event.time}</span>
             </div>
-            <div className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-royal" />
+            <div className="flex items-center gap-3">
+              <MapPin className="h-5 w-5 shrink-0 text-royal" />
               <span className="leading-relaxed">
                 {event.location}
                 <br />
