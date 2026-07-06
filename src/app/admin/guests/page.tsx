@@ -1,10 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Search, Download, Trash2 } from "lucide-react";
+import { Search, Download, Trash2, Pencil, X } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
 import type { Guest, GuestStats } from "@/types/guest";
 import { formatRegNumber } from "@/lib/event-config";
+
+type EditForm = {
+  name: string;
+  phone: string;
+  address: string;
+  pax: number;
+  attending: boolean;
+};
 
 const statusConfig: Record<
   string,
@@ -52,6 +60,16 @@ export default function GuestListPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [deletingAll, setDeletingAll] = useState(false);
+  const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
+  const [editForm, setEditForm] = useState<EditForm>({
+    name: "",
+    phone: "",
+    address: "",
+    pax: 1,
+    attending: true,
+  });
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState("");
 
   const fetchData = useCallback(async () => {
     const res = await fetch("/api/guests");
@@ -283,6 +301,65 @@ export default function GuestListPage() {
     fetchData();
   };
 
+  const openEdit = (guest: Guest) => {
+    setEditingGuest(guest);
+    setEditForm({
+      name: guest.name,
+      phone: guest.phone ?? "",
+      address: guest.address ?? "",
+      pax: guest.pax,
+      attending: guest.status !== "declined",
+    });
+    setEditError("");
+  };
+
+  const closeEdit = () => {
+    if (saving) return;
+    setEditingGuest(null);
+    setEditError("");
+  };
+
+  const handleSaveEdit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!editingGuest) return;
+
+    setSaving(true);
+    setEditError("");
+
+    try {
+      const canChangeAttendance =
+        editingGuest.status === "pending" || editingGuest.status === "declined";
+
+      const res = await fetch(`/api/guests/${editingGuest.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editForm.name,
+          phone: editForm.phone,
+          address: editForm.address,
+          pax: editForm.pax,
+          ...(canChangeAttendance ? { attending: editForm.attending } : {}),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setEditError(data.error || "Failed to update guest.");
+        return;
+      }
+
+      setEditingGuest(null);
+      await fetchData();
+    } catch {
+      setEditError("Failed to connect to the server.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const canEditAttendance =
+    editingGuest?.status === "pending" || editingGuest?.status === "declined";
+
   const handleDeleteAll = async () => {
     if (guests.length === 0) return;
     if (!confirm(`Delete all ${guests.length} guest records? This action cannot be undone.`)) {
@@ -446,12 +523,21 @@ export default function GuestListPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleDelete(guest.id)}
-                        className="text-xs text-red-400 hover:text-red-600"
-                      >
-                        Hapus
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => openEdit(guest)}
+                          className="inline-flex items-center gap-1 text-xs text-royal hover:text-navy dark:hover:text-stone-100"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(guest.id)}
+                          className="text-xs text-red-400 hover:text-red-600"
+                        >
+                          Hapus
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -495,6 +581,167 @@ export default function GuestListPage() {
               <p className="text-xs text-stone-500 dark:text-stone-400">{s.sub}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {editingGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="card-premium w-full max-w-lg p-6">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h3 className="font-serif text-xl font-bold text-navy dark:text-stone-100">
+                  Edit Guest
+                </h3>
+                <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                  {formatRegNumber(editingGuest.invitation_barcode)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeEdit}
+                disabled={saving}
+                className="rounded-lg p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-navy-700"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Guest Name
+                </label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, name: e.target.value }))
+                  }
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={editForm.phone}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, phone: e.target.value }))
+                  }
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  value={editForm.address}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, address: e.target.value }))
+                  }
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Number of Guests
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={5}
+                  value={editForm.pax}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      pax: Math.min(5, Math.max(1, parseInt(e.target.value) || 1)),
+                    }))
+                  }
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              {canEditAttendance ? (
+                <div>
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Attendance
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditForm((f) => ({ ...f, attending: true }))
+                      }
+                      className={`rounded-lg py-3 text-xs font-bold uppercase tracking-wide transition ${
+                        editForm.attending
+                          ? "bg-navy text-white shadow-md"
+                          : "bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-navy-700 dark:text-stone-300 dark:hover:bg-navy-600"
+                      }`}
+                    >
+                      Attending
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditForm((f) => ({ ...f, attending: false }))
+                      }
+                      className={`rounded-lg py-3 text-xs font-bold uppercase tracking-wide transition ${
+                        !editForm.attending
+                          ? "bg-navy text-white shadow-md"
+                          : "bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-navy-700 dark:text-stone-300 dark:hover:bg-navy-600"
+                      }`}
+                    >
+                      Not Attending
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-lg bg-stone-50 px-4 py-3 text-sm text-stone-600 dark:bg-navy-900/50 dark:text-stone-300">
+                  Status:{" "}
+                  <span className="font-semibold">
+                    {statusConfig[editingGuest.status]?.label}
+                  </span>
+                  . Attendance cannot be changed after check-in.
+                </div>
+              )}
+
+              {editError && (
+                <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-300">
+                  {editError}
+                </p>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeEdit}
+                  disabled={saving}
+                  className="rounded-lg border border-stone-200 px-4 py-2.5 text-sm font-semibold text-stone-600 transition hover:bg-stone-50 disabled:opacity-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-navy-700"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn-navy px-5 py-2.5 text-sm disabled:opacity-50"
+                >
+                  {saving ? "Menyimpan..." : "Simpan"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </AdminShell>

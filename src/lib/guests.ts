@@ -7,6 +7,7 @@ import type {
   GuestStats,
   ImportGuestRow,
   RegisterGuestInput,
+  UpdateGuestInput,
 } from "@/types/guest";
 
 function rowToGuest(row: Record<string, unknown>): Guest {
@@ -299,6 +300,83 @@ export async function deleteGuest(id: string): Promise<boolean> {
   const { error } = await supabase.from("guests").delete().eq("id", id);
   if (error) throw new Error(error.message);
   return true;
+}
+
+export async function getGuestById(id: string): Promise<Guest | null> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("guests")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return data ? rowToGuest(data as Record<string, unknown>) : null;
+}
+
+export async function updateGuest(
+  id: string,
+  input: UpdateGuestInput
+): Promise<Guest> {
+  const supabase = getSupabaseAdmin();
+  const existing = await getGuestById(id);
+
+  if (!existing) {
+    throw new Error("Guest not found.");
+  }
+
+  const name = (input.name ?? existing.name).trim();
+  const address = (input.address ?? existing.address ?? "").trim();
+  const phone = (input.phone ?? existing.phone ?? "").trim();
+  const pax = Math.min(5, Math.max(1, input.pax ?? existing.pax));
+
+  if (!name) {
+    throw new Error("Name is required.");
+  }
+  if (!address) {
+    throw new Error("Address is required.");
+  }
+  if (!phone) {
+    throw new Error("Phone number is required.");
+  }
+
+  const update: Record<string, unknown> = {
+    name,
+    address,
+    phone,
+    pax,
+  };
+
+  if (input.attending !== undefined) {
+    if (
+      existing.status === "checked_in" ||
+      existing.status === "souvenir_claimed"
+    ) {
+      throw new Error(
+        "Cannot change attendance for guests who have already checked in."
+      );
+    }
+
+    if (input.attending) {
+      update.status = "pending";
+      if (!existing.invitation_barcode) {
+        update.invitation_barcode = await generateInvitationBarcode();
+      }
+    } else {
+      update.status = "declined";
+      update.invitation_barcode = null;
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("guests")
+    .update(update)
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) throw new Error(error.message);
+  return rowToGuest(data as Record<string, unknown>);
 }
 
 export async function deleteAllGuests(): Promise<number> {

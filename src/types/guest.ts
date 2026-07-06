@@ -53,3 +53,11 @@ export interface RegisterGuestInput {
   pax: number;
   attending: boolean;
 }
+
+export interface UpdateGuestInput {
+  name?: string;
+  address?: string;
+  phone?: string;
+  pax?: number;
+  attending?: boolean;
+}
