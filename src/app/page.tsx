@@ -13,15 +13,33 @@ import type { Guest } from "@/types/guest";
 
 type Step = "form" | "success" | "declined";
 
+const REGISTRATION_ERROR =
+  "Please complete the Guest Registration Form by providing the required guest information and a contact mobile number.";
+
+const QR_INFO_MESSAGE =
+  "After submitting the Guest Registration Form, a unique digital QR code will be issued for you or your group. Kindly present your QR code at reception desk upon your arrival for your smooth check-in.";
+
+function isRegistrationComplete(
+  form: { name: string; phone: string; email: string; pax: string },
+  attending: boolean
+) {
+  const nameOk = form.name.trim().length > 0;
+  const phoneOk = form.phone.trim().length > 0;
+  const emailOk = form.email.trim().length > 0;
+  const paxNum = Number(form.pax);
+  const paxOk = attending ? paxNum >= 1 && paxNum <= 4 : true;
+  return nameOk && phoneOk && emailOk && paxOk;
+}
+
 export default function RegistrationPage() {
   const eventSettings = useEventSettings();
   const [step, setStep] = useState<Step>("form");
   const [attending, setAttending] = useState(true);
   const [form, setForm] = useState({
     name: "",
-    address: "",
     phone: "",
-    pax: 1,
+    email: "",
+    pax: "",
   });
   const [guest, setGuest] = useState<Guest | null>(null);
   const [loading, setLoading] = useState(false);
@@ -62,8 +80,8 @@ export default function RegistrationPage() {
     e.preventDefault();
     setError(null);
 
-    if (!form.name.trim() || !form.address.trim() || !form.phone.trim()) {
-      setError("Name, address, and phone number are required.");
+    if (!isRegistrationComplete(form, attending)) {
+      setError(REGISTRATION_ERROR);
       return;
     }
 
@@ -72,7 +90,13 @@ export default function RegistrationPage() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, attending }),
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          email: form.email,
+          pax: attending ? Number(form.pax) : 1,
+          attending,
+        }),
       });
       const data = await res.json();
 
@@ -119,6 +143,8 @@ export default function RegistrationPage() {
     );
   }
 
+  const formComplete = isRegistrationComplete(form, attending);
+
   return (
     <main className="min-h-screen">
       {/* Hero */}
@@ -131,9 +157,6 @@ export default function RegistrationPage() {
           <h1 className="font-serif text-4xl font-bold text-white md:text-5xl lg:text-6xl">
             {eventSettings.name}
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-balance text-sm leading-relaxed text-white/80 md:text-base">
-            {eventSettings.tagline}
-          </p>
         </div>
       </section>
 
@@ -152,7 +175,7 @@ export default function RegistrationPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5 px-8 py-6">
               {error && (
-                <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
                   {error}
                 </div>
               )}
@@ -164,9 +187,10 @@ export default function RegistrationPage() {
                 <input
                   type="text"
                   value={form.name}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, name: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    setError(null);
+                    setForm((f) => ({ ...f, name: e.target.value }));
+                  }}
                   placeholder="Enter your full name"
                   className="input-field"
                 />
@@ -174,14 +198,15 @@ export default function RegistrationPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Phone Number
+                  WhatsApp Number
                 </label>
                 <input
                   type="tel"
                   value={form.phone}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, phone: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    setError(null);
+                    setForm((f) => ({ ...f, phone: e.target.value }));
+                  }}
                   placeholder="08xxxxxxxxxx"
                   className="input-field"
                 />
@@ -189,37 +214,45 @@ export default function RegistrationPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Address
+                  Email Address
                 </label>
                 <input
-                  type="text"
-                  value={form.address}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, address: e.target.value }))
-                  }
-                  placeholder="Full address"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => {
+                    setError(null);
+                    setForm((f) => ({ ...f, email: e.target.value }));
+                  }}
+                  placeholder="you@example.com"
                   className="input-field"
                 />
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Number of Guests
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  value={form.pax}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      pax: Math.max(1, parseInt(e.target.value) || 1),
-                    }))
-                  }
-                  placeholder="Enter number of guests"
-                  className="input-field"
-                />
-              </div>
+              {attending && (
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    Number of Guests
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={4}
+                    value={form.pax}
+                    onChange={(e) => {
+                      setError(null);
+                      const raw = e.target.value;
+                      if (!raw) {
+                        setForm((f) => ({ ...f, pax: "" }));
+                        return;
+                      }
+                      const next = Math.min(4, Math.max(1, parseInt(raw) || 0));
+                      setForm((f) => ({ ...f, pax: String(next) }));
+                    }}
+                    placeholder="Enter number of guests (max 4)"
+                    className="input-field"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500">
@@ -228,7 +261,10 @@ export default function RegistrationPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => setAttending(true)}
+                    onClick={() => {
+                      setError(null);
+                      setAttending(true);
+                    }}
                     className={`rounded-lg py-3.5 text-xs font-bold uppercase tracking-wide transition ${
                       attending
                         ? "bg-navy text-white shadow-md"
@@ -239,7 +275,10 @@ export default function RegistrationPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setAttending(false)}
+                    onClick={() => {
+                      setError(null);
+                      setAttending(false);
+                    }}
                     className={`rounded-lg py-3.5 text-xs font-bold uppercase tracking-wide transition ${
                       !attending
                         ? "bg-navy text-white shadow-md"
@@ -251,13 +290,11 @@ export default function RegistrationPage() {
                 </div>
               </div>
 
-              {attending && (
+              {attending && formComplete && (
                 <div className="flex gap-3 rounded-lg bg-parchment p-4">
                   <Info className="mt-0.5 h-4 w-4 shrink-0 text-royal" />
                   <p className="text-xs leading-relaxed text-stone-600">
-                    After submitting, a unique digital QR code will be created
-                    for your group. Show this code at reception for priority
-                    check-in.
+                    {QR_INFO_MESSAGE}
                   </p>
                 </div>
               )}

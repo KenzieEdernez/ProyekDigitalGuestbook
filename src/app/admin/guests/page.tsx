@@ -9,7 +9,7 @@ import { formatRegNumber } from "@/lib/event-config";
 type EditForm = {
   name: string;
   phone: string;
-  address: string;
+  email: string;
   pax: number;
   attending: boolean;
 };
@@ -64,7 +64,7 @@ export default function GuestListPage() {
   const [editForm, setEditForm] = useState<EditForm>({
     name: "",
     phone: "",
-    address: "",
+    email: "",
     pax: 1,
     attending: true,
   });
@@ -91,6 +91,7 @@ export default function GuestListPage() {
       !q ||
       g.name.toLowerCase().includes(q) ||
       g.phone?.toLowerCase().includes(q) ||
+      g.email?.toLowerCase().includes(q) ||
       g.invitation_barcode?.toLowerCase().includes(q) ||
       g.angpao_number?.toLowerCase().includes(q);
     return matchFilter && matchSearch;
@@ -116,7 +117,7 @@ export default function GuestListPage() {
               <strong>${escapeHtml(guest.name)}</strong>
               <small>${escapeHtml(guest.phone || "-")}</small>
             </td>
-            <td>${escapeHtml(guest.address || "-")}</td>
+            <td>${escapeHtml(guest.email || "-")}</td>
             <td class="center">${guest.pax}</td>
             <td>${escapeHtml(formatRegNumber(guest.invitation_barcode))}</td>
             <td>${escapeHtml(guest.angpao_number || "-")}</td>
@@ -261,7 +262,7 @@ export default function GuestListPage() {
                 <tr>
                   <th>No</th>
                   <th>Name / Phone</th>
-                  <th>Address</th>
+                  <th>Email</th>
                   <th>Pax</th>
                   <th>No. Reg</th>
                   <th>Angpao</th>
@@ -306,7 +307,7 @@ export default function GuestListPage() {
     setEditForm({
       name: guest.name,
       phone: guest.phone ?? "",
-      address: guest.address ?? "",
+      email: guest.email ?? "",
       pax: guest.pax,
       attending: guest.status !== "declined",
     });
@@ -336,7 +337,7 @@ export default function GuestListPage() {
         body: JSON.stringify({
           name: editForm.name,
           phone: editForm.phone,
-          address: editForm.address,
+          email: editForm.email,
           pax: editForm.pax,
           ...(canChangeAttendance ? { attending: editForm.attending } : {}),
         }),
@@ -499,7 +500,7 @@ export default function GuestListPage() {
                         <div>
                           <p className="font-semibold text-navy dark:text-stone-100">{guest.name}</p>
                           <p className="text-xs text-stone-400">
-                            {guest.phone || formatRegNumber(guest.invitation_barcode)}
+                            {guest.phone || guest.email || formatRegNumber(guest.invitation_barcode)}
                           </p>
                         </div>
                       </div>
@@ -625,7 +626,7 @@ export default function GuestListPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Phone Number
+                  WhatsApp Number
                 </label>
                 <input
                   type="tel"
@@ -640,13 +641,13 @@ export default function GuestListPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Address
+                  Email Address
                 </label>
                 <input
-                  type="text"
-                  value={editForm.address}
+                  type="email"
+                  value={editForm.email}
                   onChange={(e) =>
-                    setEditForm((f) => ({ ...f, address: e.target.value }))
+                    setEditForm((f) => ({ ...f, email: e.target.value }))
                   }
                   className="input-field"
                   required
@@ -660,12 +661,12 @@ export default function GuestListPage() {
                 <input
                   type="number"
                   min={1}
-                  max={5}
+                  max={4}
                   value={editForm.pax}
                   onChange={(e) =>
                     setEditForm((f) => ({
                       ...f,
-                      pax: Math.min(5, Math.max(1, parseInt(e.target.value) || 1)),
+                      pax: Math.min(4, Math.max(1, parseInt(e.target.value) || 1)),
                     }))
                   }
                   className="input-field"

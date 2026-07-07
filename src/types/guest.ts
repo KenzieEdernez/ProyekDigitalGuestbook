@@ -12,6 +12,7 @@ export interface Guest {
   name: string;
   address: string | null;
   phone: string | null;
+  email: string | null;
   pax: number;
   angpao_number: string | null;
   souvenir_barcode: string | null;
@@ -48,16 +49,16 @@ export interface ImportGuestRow {
 
 export interface RegisterGuestInput {
   name: string;
-  address: string;
   phone: string;
+  email: string;
   pax: number;
   attending: boolean;
 }
 
 export interface UpdateGuestInput {
   name?: string;
-  address?: string;
   phone?: string;
+  email?: string;
   pax?: number;
   attending?: boolean;
 }

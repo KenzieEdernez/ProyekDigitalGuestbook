@@ -99,22 +99,32 @@ async function generateSouvenirBarcode(): Promise<string> {
   return barcode;
 }
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 export async function registerGuest(input: RegisterGuestInput): Promise<Guest> {
   const supabase = getSupabaseAdmin();
   const id = uuidv4();
   const name = input.name.trim();
-  const address = input.address.trim();
   const phone = input.phone.trim();
-  const pax = Math.min(5, Math.max(1, input.pax || 1));
+  const email = input.email.trim();
+  const pax = Math.min(4, Math.max(1, input.pax || 1));
 
   if (!name) {
     throw new Error("Name is required.");
   }
-  if (!address) {
-    throw new Error("Address is required.");
-  }
   if (!phone) {
     throw new Error("Phone number is required.");
+  }
+  if (!email) {
+    throw new Error("Email is required.");
+  }
+  if (!isValidEmail(email)) {
+    throw new Error("Invalid email address.");
+  }
+  if (input.attending && (!input.pax || input.pax < 1 || input.pax > 4)) {
+    throw new Error("Number of guests must be between 1 and 4.");
   }
 
   const row = {
@@ -123,9 +133,10 @@ export async function registerGuest(input: RegisterGuestInput): Promise<Guest> {
       ? await generateInvitationBarcode()
       : null,
     name,
-    address,
+    address: null,
     phone,
-    pax,
+    email,
+    pax: input.attending ? pax : 1,
     status: input.attending ? "pending" : "declined",
   };
 
@@ -326,24 +337,27 @@ export async function updateGuest(
   }
 
   const name = (input.name ?? existing.name).trim();
-  const address = (input.address ?? existing.address ?? "").trim();
   const phone = (input.phone ?? existing.phone ?? "").trim();
-  const pax = Math.min(5, Math.max(1, input.pax ?? existing.pax));
+  const email = (input.email ?? existing.email ?? "").trim();
+  const pax = Math.min(4, Math.max(1, input.pax ?? existing.pax));
 
   if (!name) {
     throw new Error("Name is required.");
   }
-  if (!address) {
-    throw new Error("Address is required.");
-  }
   if (!phone) {
     throw new Error("Phone number is required.");
+  }
+  if (!email) {
+    throw new Error("Email is required.");
+  }
+  if (!isValidEmail(email)) {
+    throw new Error("Invalid email address.");
   }
 
   const update: Record<string, unknown> = {
     name,
-    address,
     phone,
+    email,
     pax,
   };
 

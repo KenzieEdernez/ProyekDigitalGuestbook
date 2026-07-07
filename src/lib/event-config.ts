@@ -3,8 +3,6 @@ import { formatEventTimeAt } from "@/lib/event-time";
 
 export const EVENT = {
   name: "Gala Excellence 2024",
-  tagline:
-    "Your presence is cordially requested for an evening of celebration and joy.",
   organizer: "EdernDigital",
   organizerTagline: "Digital guestbook and event system.",
   supportEmail: "support@ederndigital.com",

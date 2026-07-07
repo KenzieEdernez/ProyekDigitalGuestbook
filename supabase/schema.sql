@@ -4,6 +4,7 @@ create table if not exists public.guests (
   name text not null,
   address text,
   phone text,
+  email text,
   pax integer not null default 1,
   angpao_number text,
   souvenir_barcode text unique,
@@ -89,6 +90,9 @@ add column if not exists hero_image text;
 
 alter table public.event_settings
 add column if not exists time_from text;
+
+alter table public.guests
+add column if not exists email text;
 
 alter table public.guests enable row level security;
 alter table public.event_settings enable row level security;

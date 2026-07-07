@@ -28,9 +28,9 @@ export async function POST(request: Request) {
 
     const guest = await registerGuest({
       name: body.name ?? "",
-      address: body.address ?? "",
       phone: body.phone ?? "",
-      pax: Number(body.pax) || 1,
+      email: body.email ?? "",
+      pax: Number(body.pax) || 0,
       attending: Boolean(body.attending),
     });
 
