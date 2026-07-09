@@ -16,54 +16,51 @@ interface HomeSectionProps {
   event: EventSettings;
   wedding: WeddingSettings;
   guestName: string | null;
+  settingsReady: boolean;
+  settingsAvailable: boolean;
 }
 
-function resolveEventDetails(event: EventSettings, wedding: WeddingSettings) {
-  const ceremony = wedding.ceremonies[0];
+function resolveAdminEventDetails(
+  event: EventSettings,
+  wedding: WeddingSettings
+) {
+  if (!event.date || !event.timeFrom) return null;
+
   const coupleName = getCoupleDisplayName(wedding);
 
-  if (event.date) {
-    return {
-      date: event.date,
-      time: event.timeFrom || ceremony?.time || "9:00 AM",
-      location:
-        [event.location, event.address].filter(Boolean).join(", ") ||
-        [ceremony?.location, ceremony?.address].filter(Boolean).join(", "),
-      title: `${coupleName} Wedding`,
-      description: event.name || ceremony?.title || "Wedding celebration",
-    };
-  }
-
-  if (ceremony?.date) {
-    return {
-      date: ceremony.date,
-      time: ceremony.time || "9:00 AM",
-      location: [ceremony.location, ceremony.address].filter(Boolean).join(", "),
-      title: ceremony.title || `${coupleName} Wedding`,
-      description: ceremony.title || "Wedding celebration",
-    };
-  }
-
-  return null;
+  return {
+    date: event.date,
+    time: event.timeFrom,
+    location: [event.location, event.address].filter(Boolean).join(", "),
+    title: `${coupleName} Wedding`,
+    description: event.name || "Wedding celebration",
+    dateLabel: event.dateDisplay || event.date,
+  };
 }
 
 export default function HomeSection({
   event,
   wedding,
   guestName,
+  settingsReady,
+  settingsAvailable,
 }: HomeSectionProps) {
   const [scrollY, setScrollY] = useState(0);
-  const eventDetails = useMemo(
-    () => resolveEventDetails(event, wedding),
-    [
-      event.date,
-      event.timeFrom,
-      event.location,
-      event.address,
-      event.name,
-      wedding.ceremonies,
-    ]
-  );
+  const eventDetails = useMemo(() => {
+    if (!settingsReady || !settingsAvailable) return null;
+    return resolveAdminEventDetails(event, wedding);
+  }, [
+    settingsReady,
+    settingsAvailable,
+    event.date,
+    event.dateDisplay,
+    event.timeFrom,
+    event.location,
+    event.address,
+    event.name,
+    wedding.groom.name,
+    wedding.bride.name,
+  ]);
   const countdownTarget = useMemo(
     () =>
       eventDetails
@@ -143,7 +140,15 @@ export default function HomeSection({
             <p className="mb-5 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/40">
               Countdown to Our Big Day
             </p>
-            <CountdownTimer target={countdownTarget} />
+            {eventDetails && (
+              <p className="mb-4 text-xs text-white/55">
+                {eventDetails.dateLabel} · {eventDetails.time}
+              </p>
+            )}
+            <CountdownTimer
+              target={countdownTarget}
+              settingsReady={settingsReady}
+            />
           </div>
         </Reveal>
 

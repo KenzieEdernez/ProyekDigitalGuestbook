@@ -225,6 +225,8 @@ export default function InvitationApp() {
               event={eventSettings}
               wedding={wedding}
               guestName={guestName}
+              settingsReady={eventSettings.settingsReady}
+              settingsAvailable={eventSettings.settingsAvailable}
             />
 
             <WaveDivider fill="#f9f0ed" />

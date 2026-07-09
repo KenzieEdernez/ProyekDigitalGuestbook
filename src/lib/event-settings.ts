@@ -6,6 +6,7 @@ import {
   formatTime12,
   stripTimePrefix,
 } from "./event-time";
+import { isoDateFromLocalDate, localDateFromIso } from "./event-datetime";
 import type { EventSettings } from "@/types/event";
 
 function toDateInputValue(value?: string) {
@@ -14,12 +15,12 @@ function toDateInputValue(value?: string) {
 
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "";
-  return parsed.toISOString().slice(0, 10);
+  return isoDateFromLocalDate(parsed);
 }
 
 function formatDateDisplay(date: string) {
-  const parsed = new Date(`${date}T00:00:00`);
-  if (Number.isNaN(parsed.getTime())) return "";
+  const parsed = localDateFromIso(date);
+  if (!parsed) return "";
 
   return new Intl.DateTimeFormat("en-GB", {
     weekday: "long",

@@ -5,9 +5,10 @@ import { getCountdownTimeLeft } from "@/lib/event-datetime";
 
 interface CountdownTimerProps {
   target: Date | null;
+  settingsReady?: boolean;
 }
 
-export default function CountdownTimer({ target }: CountdownTimerProps) {
+export default function CountdownTimer({ target, settingsReady = true }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState(() =>
     target ? getCountdownTimeLeft(target) : null
   );
@@ -30,10 +31,18 @@ export default function CountdownTimer({ target }: CountdownTimerProps) {
     return () => clearInterval(timer);
   }, [target?.getTime()]);
 
+  if (!settingsReady) {
+    return (
+      <p className="text-center text-sm text-white/50">
+        Loading countdown...
+      </p>
+    );
+  }
+
   if (!target || !timeLeft) {
     return (
       <p className="text-center text-sm text-white/50">
-        Set the event date in admin settings to start the countdown.
+        Set the event date and time in Admin → Event Settings, then save.
       </p>
     );
   }
