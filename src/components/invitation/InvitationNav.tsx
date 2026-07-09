@@ -11,6 +11,7 @@ interface InvitationNavProps {
   coupleName: string;
   onNavigate: (section: InvitationSection) => void;
   musicPlaying: boolean;
+  musicAvailable?: boolean;
   onToggleMusic: () => void;
 }
 
@@ -19,6 +20,7 @@ export default function InvitationNav({
   coupleName,
   onNavigate,
   musicPlaying,
+  musicAvailable = false,
   onToggleMusic,
 }: InvitationNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -89,21 +91,23 @@ export default function InvitationNav({
         onNavigate={handleNav}
       />
 
-      <button
-        onClick={onToggleMusic}
-        className={`fixed bottom-6 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border shadow-card transition-all duration-500 ease-out-expo hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8 ${
-          musicPlaying
-            ? "border-royal/40 bg-royal/10"
-            : "border-stone-200 bg-white hover:border-royal/30"
-        }`}
-        aria-label={musicPlaying ? "Mute music" : "Play music"}
-      >
-        {musicPlaying ? (
-          <Volume2 className="h-4 w-4 animate-pulse-soft text-royal" />
-        ) : (
-          <VolumeX className="h-4 w-4 text-stone-400" />
-        )}
-      </button>
+      {musicAvailable && (
+        <button
+          onClick={onToggleMusic}
+          className={`fixed bottom-6 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border shadow-card transition-all duration-500 ease-out-expo hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8 ${
+            musicPlaying
+              ? "border-royal/40 bg-royal/10"
+              : "border-stone-200 bg-white hover:border-royal/30"
+          }`}
+          aria-label={musicPlaying ? "Mute music" : "Play music"}
+        >
+          {musicPlaying ? (
+            <Volume2 className="h-4 w-4 animate-pulse-soft text-royal" />
+          ) : (
+            <VolumeX className="h-4 w-4 text-stone-400" />
+          )}
+        </button>
+      )}
     </>
   );
 }

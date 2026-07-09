@@ -7,6 +7,7 @@ import type { WeddingSettings } from "@/types/wedding";
 export function useWeddingSettings() {
   const [settings, setSettings] = useState<WeddingSettings>(DEFAULT_WEDDING);
   const [ready, setReady] = useState(false);
+  const [musicAvailable, setMusicAvailable] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -18,9 +19,13 @@ export function useWeddingSettings() {
         const data = await res.json();
         if (!cancelled && data.settings) {
           setSettings(mergeWeddingSettings(data.settings));
+          setMusicAvailable(Boolean(data.musicAvailable));
         }
       } catch {
-        if (!cancelled) setSettings(DEFAULT_WEDDING);
+        if (!cancelled) {
+          setSettings(DEFAULT_WEDDING);
+          setMusicAvailable(false);
+        }
       } finally {
         if (!cancelled) setReady(true);
       }
@@ -32,5 +37,5 @@ export function useWeddingSettings() {
     };
   }, []);
 
-  return { wedding: settings, weddingReady: ready };
+  return { wedding: settings, weddingReady: ready, musicAvailable };
 }

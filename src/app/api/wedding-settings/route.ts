@@ -1,12 +1,20 @@
 import { NextResponse } from "next/server";
 import { isAdminLoggedIn } from "@/lib/admin-auth";
-import { getWeddingSettings, saveWeddingSettings } from "@/lib/wedding-settings";
+import {
+  getWeddingSettings,
+  hasConfiguredMusic,
+  saveWeddingSettings,
+} from "@/lib/wedding-settings";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const settings = await getWeddingSettings();
   return NextResponse.json(
-    { settings: await getWeddingSettings() },
+    {
+      settings,
+      musicAvailable: hasConfiguredMusic(settings),
+    },
     { headers: { "Cache-Control": "no-store" } }
   );
 }

@@ -48,7 +48,7 @@ function musicExtensionFromMime(mimeType: string) {
 
 async function saveMusic(value: string) {
   const trimmed = textValue(value);
-  if (!trimmed) return DEFAULT_WEDDING.musicUrl;
+  if (!trimmed) return "";
   if (!trimmed.startsWith("data:")) return trimmed;
 
   const matches = trimmed.match(/^data:([^;]+);base64,(.+)$/);
@@ -63,16 +63,24 @@ async function saveMusic(value: string) {
   }
 
   const buffer = Buffer.from(matches[2], "base64");
+  return uploadMusicBuffer(buffer, mimeType);
+}
+
+export async function uploadMusicBuffer(
+  buffer: Buffer,
+  mimeType: string
+): Promise<string> {
   if (buffer.length > MAX_MUSIC_BYTES) {
     throw new Error("Music file must be under 12MB.");
   }
 
   const supabase = getSupabaseAdmin();
   const bucket = getPhotoBucket();
-  const ext = musicExtensionFromMime(mimeType);
+  const normalizedMime = mimeType.toLowerCase();
+  const ext = musicExtensionFromMime(normalizedMime);
   const filename = `wedding/music/${Date.now()}-${uuidv4().slice(0, 8)}.${ext}`;
-  const contentType = mimeType.startsWith("audio/")
-    ? mimeType
+  const contentType = normalizedMime.startsWith("audio/")
+    ? normalizedMime
     : "audio/mpeg";
 
   const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
@@ -218,6 +226,58 @@ export async function getWeddingSettings(): Promise<WeddingSettings> {
   } catch {
     return DEFAULT_WEDDING;
   }
+}
+
+function parseSupabaseStoragePath(url: string) {
+  const publicMatch = url.match(
+    /\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/
+  );
+  if (publicMatch) {
+    return {
+      bucket: publicMatch[1],
+      path: decodeURIComponent(publicMatch[2]),
+    };
+  }
+
+  const signedMatch = url.match(/\/storage\/v1\/object\/sign\/([^/]+)\/(.+?)\?/);
+  if (signedMatch) {
+    return {
+      bucket: signedMatch[1],
+      path: decodeURIComponent(signedMatch[2]),
+    };
+  }
+
+  return null;
+}
+
+export async function getMusicPlaybackUrl(): Promise<string | null> {
+  const settings = await getWeddingSettings();
+  const raw = textValue(settings.musicUrl);
+  if (!raw || raw.startsWith("data:")) return null;
+  if (raw.startsWith("/")) return raw;
+
+  const storagePath = parseSupabaseStoragePath(raw);
+  if (!storagePath) return raw;
+
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase.storage
+      .from(storagePath.bucket)
+      .createSignedUrl(storagePath.path, 60 * 60 * 24 * 7);
+
+    if (!error && data?.signedUrl) {
+      return data.signedUrl;
+    }
+  } catch {
+    // fall through to raw public URL
+  }
+
+  return raw;
+}
+
+export function hasConfiguredMusic(settings: WeddingSettings) {
+  const raw = textValue(settings.musicUrl);
+  return Boolean(raw && !raw.startsWith("data:"));
 }
 
 export async function saveWeddingSettings(

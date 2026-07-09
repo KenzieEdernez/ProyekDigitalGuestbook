@@ -65,7 +65,7 @@ export const DEFAULT_WEDDING: WeddingSettings = {
     city: "South Jakarta, 12190",
     phone: "+62 812-3456-7890",
   },
-  musicUrl: "/music/wedding.mp3",
+  musicUrl: "",
 };
 
 /** @deprecated Use DEFAULT_WEDDING or merged settings from API */
@@ -118,6 +118,9 @@ export function mergeWeddingSettings(
     gallery: stored.gallery ?? DEFAULT_WEDDING.gallery,
     gifts: stored.gifts?.length ? stored.gifts : DEFAULT_WEDDING.gifts,
     giftAddress: { ...DEFAULT_WEDDING.giftAddress, ...stored.giftAddress },
-    musicUrl: stored.musicUrl?.trim() || DEFAULT_WEDDING.musicUrl,
+    musicUrl:
+      stored.musicUrl !== undefined
+        ? stored.musicUrl.trim()
+        : DEFAULT_WEDDING.musicUrl,
   };
 }

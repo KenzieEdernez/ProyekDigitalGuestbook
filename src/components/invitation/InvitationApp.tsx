@@ -33,7 +33,7 @@ type Phase = "cover" | "curtain" | "open";
 
 export default function InvitationApp() {
   const eventSettings = useEventSettings();
-  const { wedding, weddingReady } = useWeddingSettings();
+  const { wedding, weddingReady, musicAvailable } = useWeddingSettings();
   const searchParams = useSearchParams();
   const guestName = parseGuestName(searchParams);
 
@@ -114,16 +114,32 @@ export default function InvitationApp() {
     }, 1100);
   };
 
-  const toggleMusic = () => {
-    if (!audioRef.current) return;
+  const toggleMusic = async () => {
+    const audio = audioRef.current;
+    if (!audio || !musicAvailable) return;
+
     if (musicPlaying) {
-      audioRef.current.pause();
+      audio.pause();
       setMusicPlaying(false);
-    } else {
-      audioRef.current.play().catch(() => {});
+      return;
+    }
+
+    try {
+      audio.load();
+      await audio.play();
       setMusicPlaying(true);
+    } catch {
+      setMusicPlaying(false);
     }
   };
+
+  useEffect(() => {
+    setMusicPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.load();
+    }
+  }, [musicAvailable]);
 
   if (!eventSettings.settingsReady || !weddingReady) {
     return (
@@ -183,20 +199,25 @@ export default function InvitationApp() {
       {phase === "open" && (
         <div className="invitation-app invitation-app-enter bg-champagne">
           <ScrollProgress />
-          <audio
-            ref={audioRef}
-            key={wedding.musicUrl}
-            src={wedding.musicUrl}
-            loop
-            preload="none"
-          />
+          {musicAvailable && (
+            <audio
+              ref={audioRef}
+              src="/api/wedding-music"
+              loop
+              preload="metadata"
+              onEnded={() => setMusicPlaying(false)}
+              onPause={() => setMusicPlaying(false)}
+              onPlay={() => setMusicPlaying(true)}
+            />
+          )}
 
           <InvitationNav
             active={activeSection}
             coupleName={getCoupleDisplayName(wedding)}
             onNavigate={navigateTo}
             musicPlaying={musicPlaying}
-            onToggleMusic={toggleMusic}
+            musicAvailable={musicAvailable}
+            onToggleMusic={() => void toggleMusic()}
           />
 
           <main>

@@ -21,27 +21,15 @@ type Tab = "couple" | "story" | "events" | "gallery" | "gifts" | "music" | "wish
 
 const MAX_MUSIC_BYTES = 12 * 1024 * 1024;
 
-function readMusicFile(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const isAudio =
-      file.type.startsWith("audio/") ||
-      file.name.toLowerCase().endsWith(".mp3");
+function isLocalPreviewUrl(url: string) {
+  return url.startsWith("blob:") || url.startsWith("data:");
+}
 
-    if (!isAudio) {
-      reject(new Error("Please upload an MP3 or audio file."));
-      return;
-    }
-
-    if (file.size > MAX_MUSIC_BYTES) {
-      reject(new Error("Music file must be under 12MB."));
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("Failed to read music file."));
-    reader.readAsDataURL(file);
-  });
+function buildSavePayload(form: WeddingSettings): WeddingSettings {
+  return {
+    ...form,
+    musicUrl: isLocalPreviewUrl(form.musicUrl) ? "" : form.musicUrl,
+  };
 }
 
 function readImageFile(file: File) {
@@ -120,7 +108,7 @@ export default function WeddingContentSettings() {
       const res = await fetch("/api/wedding-settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(buildSavePayload(form)),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -129,8 +117,10 @@ export default function WeddingContentSettings() {
       }
       setForm(data.settings);
       setMessage("Wedding content saved successfully.");
-    } catch {
-      setError("Failed to connect to the server.");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to connect to the server."
+      );
     } finally {
       setSaving(false);
     }
@@ -202,15 +192,52 @@ export default function WeddingContentSettings() {
 
   const handleMusicUpload = async (file: File | undefined) => {
     if (!file) return;
+
+    const isAudio =
+      file.type.startsWith("audio/") ||
+      file.name.toLowerCase().endsWith(".mp3");
+
+    if (!isAudio) {
+      setError("Please upload an MP3 or audio file.");
+      return;
+    }
+
+    if (file.size > MAX_MUSIC_BYTES) {
+      setError("Music file must be under 12MB.");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setForm((f) => ({ ...f, musicUrl: previewUrl }));
     setMusicProcessing(true);
     setError(null);
+    setMessage(null);
+
     try {
-      const dataUrl = await readMusicFile(file);
-      setForm((f) => ({ ...f, musicUrl: dataUrl }));
-      setMessage("Music file ready. Click Save Wedding Content to apply.");
+      const body = new FormData();
+      body.append("file", file);
+
+      const res = await fetch("/api/wedding-music/upload", {
+        method: "POST",
+        body,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Failed to upload music.");
+        setForm((f) => ({ ...f, musicUrl: "" }));
+        return;
+      }
+
+      setForm(data.settings);
+      setMessage("Music uploaded and saved successfully.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to process music file.");
+      setError(
+        err instanceof Error ? err.message : "Failed to upload music file."
+      );
+      setForm((f) => ({ ...f, musicUrl: "" }));
     } finally {
+      URL.revokeObjectURL(previewUrl);
       setMusicProcessing(false);
     }
   };
@@ -707,7 +734,8 @@ export default function WeddingContentSettings() {
                 className="block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700"
               />
               <p className="mt-2 text-xs text-stone-400">
-                MP3 recommended. Maximum file size 12MB.
+                MP3 recommended. Maximum file size 12MB. Uploads directly to
+                Supabase — no need to click Save again for music.
               </p>
             </div>
 
@@ -734,15 +762,10 @@ export default function WeddingContentSettings() {
 
             <button
               type="button"
-              onClick={() =>
-                setForm((f) => ({
-                  ...f,
-                  musicUrl: DEFAULT_WEDDING.musicUrl,
-                }))
-              }
+              onClick={() => setForm((f) => ({ ...f, musicUrl: "" }))}
               className="text-sm font-semibold text-stone-500 transition hover:text-red-500"
             >
-              Reset to default music
+              Remove music
             </button>
           </div>
         )}
