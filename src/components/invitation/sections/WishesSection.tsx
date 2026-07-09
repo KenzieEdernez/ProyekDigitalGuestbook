@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Heart, MessageCircle, Send } from "lucide-react";
+import Reveal from "@/components/invitation/Reveal";
+import SectionHeader from "@/components/invitation/SectionHeader";
 import type { Wish } from "@/types/wish";
 
 interface WishesSectionProps {
@@ -67,145 +69,146 @@ export default function WishesSection({ defaultName }: WishesSectionProps) {
   };
 
   return (
-    <section id="wishes" className="invitation-section bg-parchment px-6 py-24">
+    <section id="wishes" className="invitation-section bg-parchment px-6 py-28">
       <div className="mx-auto max-w-4xl">
-        <header className="mb-14 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-royal">
-            Ucapan & Doa
-          </p>
-          <h2 className="mt-3 font-serif text-3xl font-bold text-navy md:text-4xl">
-            Wishes
-          </h2>
-          <p className="mx-auto mt-4 max-w-md text-sm text-stone-500">
-            Kirimkan ucapan dan doa restu untuk kami berdua.
-          </p>
-        </header>
+        <SectionHeader
+          label="Ucapan & Doa"
+          title="Wishes"
+          subtitle="Kirimkan ucapan dan doa restu untuk kami berdua."
+        />
 
         <div className="grid gap-10 lg:grid-cols-2">
-          {/* Form */}
-          <div className="card-premium p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-600">
-                  Ucapan berhasil dikirim. Terima kasih!
-                </div>
-              )}
-
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Nama
-                </label>
-                <input
-                  type="text"
-                  value={form.guest_name}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, guest_name: e.target.value }))
-                  }
-                  placeholder="Nama Anda"
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Kehadiran
-                </label>
-                <select
-                  value={form.attendance}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, attendance: e.target.value }))
-                  }
-                  className="input-field"
-                >
-                  <option value="hadir">Hadir</option>
-                  <option value="tidak_hadir">Tidak Hadir</option>
-                  <option value="ragu">Masih Ragu</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Ucapan
-                </label>
-                <textarea
-                  value={form.message}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, message: e.target.value }))
-                  }
-                  placeholder="Tuliskan ucapan dan doa Anda..."
-                  rows={4}
-                  maxLength={500}
-                  className="input-field resize-none"
-                  required
-                />
-                <p className="mt-1 text-right text-[10px] text-stone-400">
-                  {form.message.length}/500
-                </p>
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="btn-gold w-full"
-              >
-                <Send className="h-4 w-4" />
-                {submitting ? "Mengirim..." : "Kirim Ucapan"}
-              </button>
-            </form>
-          </div>
-
-          {/* Wishes wall */}
-          <div className="max-h-[520px] space-y-4 overflow-y-auto pr-2">
-            {loading && (
-              <p className="text-center text-sm text-stone-400">
-                Memuat ucapan...
-              </p>
-            )}
-
-            {!loading && wishes.length === 0 && (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300 py-16 text-center">
-                <MessageCircle className="mb-3 h-8 w-8 text-stone-300" />
-                <p className="text-sm text-stone-400">
-                  Belum ada ucapan. Jadilah yang pertama!
-                </p>
-              </div>
-            )}
-
-            {wishes.map((wish) => (
-              <div
-                key={wish.id}
-                className="rounded-xl border border-royal/15 bg-white p-5 shadow-card"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-navy">{wish.guest_name}</p>
-                    <p className="text-[10px] text-stone-400">
-                      {new Date(wish.created_at).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </p>
+          <Reveal direction="left" delay={100}>
+            <div className="glass-card-light overflow-hidden p-7">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {error && (
+                  <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 animate-scale-in">
+                    {error}
                   </div>
-                  {wish.attendance === "hadir" && (
-                    <span className="badge bg-emerald-50 text-emerald-600">
-                      <Heart className="mr-1 h-3 w-3" />
-                      Hadir
-                    </span>
-                  )}
+                )}
+                {success && (
+                  <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-600 animate-scale-in">
+                    Ucapan berhasil dikirim. Terima kasih!
+                  </div>
+                )}
+
+                <div>
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                    Nama
+                  </label>
+                  <input
+                    type="text"
+                    value={form.guest_name}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, guest_name: e.target.value }))
+                    }
+                    placeholder="Nama Anda"
+                    className="input-field"
+                    required
+                  />
                 </div>
-                <p className="mt-3 text-sm leading-relaxed text-stone-600">
-                  {wish.message}
-                </p>
-              </div>
-            ))}
-          </div>
+
+                <div>
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                    Kehadiran
+                  </label>
+                  <select
+                    value={form.attendance}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, attendance: e.target.value }))
+                    }
+                    className="input-field"
+                  >
+                    <option value="hadir">Hadir</option>
+                    <option value="tidak_hadir">Tidak Hadir</option>
+                    <option value="ragu">Masih Ragu</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                    Ucapan
+                  </label>
+                  <textarea
+                    value={form.message}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, message: e.target.value }))
+                    }
+                    placeholder="Tuliskan ucapan dan doa Anda..."
+                    rows={4}
+                    maxLength={500}
+                    className="input-field resize-none"
+                    required
+                  />
+                  <p className="mt-1 text-right text-[10px] text-stone-400">
+                    {form.message.length}/500
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-invite-primary w-full"
+                >
+                  <Send className="h-4 w-4" />
+                  {submitting ? "Mengirim..." : "Kirim Ucapan"}
+                </button>
+              </form>
+            </div>
+          </Reveal>
+
+          <Reveal direction="right" delay={200}>
+            <div className="max-h-[560px] space-y-4 overflow-y-auto pr-1 scrollbar-thin">
+              {loading && (
+                <div className="flex items-center justify-center py-16">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-royal/30 border-t-royal" />
+                </div>
+              )}
+
+              {!loading && wishes.length === 0 && (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-royal/20 bg-white/50 py-20 text-center">
+                  <MessageCircle className="mb-4 h-10 w-10 text-royal/30" />
+                  <p className="text-sm text-stone-400">
+                    Belum ada ucapan.
+                    <br />
+                    Jadilah yang pertama!
+                  </p>
+                </div>
+              )}
+
+              {wishes.map((wish, i) => (
+                <div
+                  key={wish.id}
+                  className="rounded-2xl border border-royal/10 bg-white p-5 shadow-soft transition-all duration-500 hover:-translate-y-0.5 hover:shadow-card"
+                  style={{
+                    animationDelay: `${i * 60}ms`,
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-navy">{wish.guest_name}</p>
+                      <p className="text-[10px] text-stone-400">
+                        {new Date(wish.created_at).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    {wish.attendance === "hadir" && (
+                      <span className="badge bg-emerald-50 text-emerald-600">
+                        <Heart className="mr-1 h-3 w-3" />
+                        Hadir
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-stone-600">
+                    {wish.message}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </div>
     </section>

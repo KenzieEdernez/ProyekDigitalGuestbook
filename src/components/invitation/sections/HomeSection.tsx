@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import CountdownTimer from "@/components/invitation/CountdownTimer";
+import Reveal from "@/components/invitation/Reveal";
 import { getCoupleDisplayName, WEDDING } from "@/lib/wedding-config";
 import type { mergeEventSettings } from "@/lib/event-config";
 
@@ -18,56 +20,86 @@ export default function HomeSection({
   guestName,
   onNavigateRsvp,
 }: HomeSectionProps) {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <section
-      id="home"
-      className="invitation-section relative min-h-screen"
-    >
+    <section id="home" className="invitation-section relative min-h-screen overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url('${event.heroImage}')` }}
+        className="absolute inset-0 bg-cover bg-center will-change-transform"
+        style={{
+          backgroundImage: `url('${event.heroImage}')`,
+          transform: `scale(1.05) translateY(${scrollY * 0.25}px)`,
+        }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/70 via-navy-900/40 to-cream" />
+      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/75 via-navy-900/35 to-champagne" />
+      <div className="absolute inset-0 bg-radial-gold opacity-60" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-4xl flex-col items-center justify-center px-6 py-24 text-center">
-        <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-royal-200">
-          Undangan Pernikahan
-        </p>
+      <div className="relative mx-auto flex min-h-screen max-w-4xl flex-col items-center justify-center px-6 py-28 text-center">
+        <Reveal direction="blur" duration={900}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-royal-200">
+            Undangan Pernikahan
+          </p>
+        </Reveal>
 
-        <h2 className="mt-4 font-serif text-4xl font-bold text-white md:text-6xl">
-          {getCoupleDisplayName()}
-        </h2>
+        <Reveal direction="up" delay={150} duration={1000}>
+          <h2 className="mt-5 font-display text-5xl font-light leading-[1.1] text-white md:text-7xl">
+            {getCoupleDisplayName()}
+          </h2>
+        </Reveal>
 
-        <div className="my-6 flex items-center gap-4">
-          <span className="h-px w-16 bg-royal/50" />
-          <Heart className="h-4 w-4 fill-royal text-royal" />
-          <span className="h-px w-16 bg-royal/50" />
-        </div>
+        <Reveal direction="scale" delay={300}>
+          <div className="my-8 flex items-center gap-5">
+            <span className="h-px w-20 bg-gradient-to-r from-transparent to-royal/60" />
+            <Heart className="h-4 w-4 fill-royal/80 text-royal animate-pulse-soft" />
+            <span className="h-px w-20 bg-gradient-to-l from-transparent to-royal/60" />
+          </div>
+        </Reveal>
 
         {guestName && (
-          <p className="text-sm text-white/80">
-            Untuk <span className="font-serif text-lg text-white">{guestName}</span>
-          </p>
+          <Reveal direction="up" delay={400}>
+            <p className="text-sm font-light text-white/70">
+              Untuk{" "}
+              <span className="font-display text-xl text-white">
+                {guestName}
+              </span>
+            </p>
+          </Reveal>
         )}
 
-        <p className="mt-6 max-w-md text-sm leading-relaxed text-white/70">
-          {WEDDING.quote}
-        </p>
-        <p className="mt-2 text-xs italic text-royal-200">{WEDDING.quoteSource}</p>
+        <Reveal direction="up" delay={500}>
+          <blockquote className="mt-8 max-w-md">
+            <p className="text-sm font-light italic leading-relaxed text-white/60">
+              &ldquo;{WEDDING.quote}&rdquo;
+            </p>
+            <cite className="mt-3 block text-[10px] not-italic tracking-widest text-royal/70">
+              {WEDDING.quoteSource}
+            </cite>
+          </blockquote>
+        </Reveal>
 
-        <div className="mt-12 w-full max-w-md">
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.3em] text-white/50">
-            Menuju Hari Bahagia
-          </p>
-          <CountdownTimer targetDate={event.date} />
-        </div>
+        <Reveal direction="up" delay={650}>
+          <div className="mt-14 w-full max-w-lg">
+            <p className="mb-5 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/40">
+              Menuju Hari Bahagia
+            </p>
+            <CountdownTimer targetDate={event.date} />
+          </div>
+        </Reveal>
 
-        <button
-          onClick={onNavigateRsvp}
-          className="btn-gold mt-10 px-10"
-        >
-          Konfirmasi Kehadiran
-        </button>
+        <Reveal direction="up" delay={800}>
+          <button
+            onClick={onNavigateRsvp}
+            className="btn-invite-primary mt-12 px-12"
+          >
+            Konfirmasi Kehadiran
+          </button>
+        </Reveal>
       </div>
     </section>
   );

@@ -24,11 +24,14 @@ export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState(() =>
     getTimeLeft(new Date(targetDate))
   );
+  const [tick, setTick] = useState(false);
 
   useEffect(() => {
     const target = new Date(targetDate);
     const timer = setInterval(() => {
       setTimeLeft(getTimeLeft(target));
+      setTick(true);
+      setTimeout(() => setTick(false), 300);
     }, 1000);
     return () => clearInterval(timer);
   }, [targetDate]);
@@ -42,7 +45,7 @@ export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
 
   if (timeLeft.ended) {
     return (
-      <p className="text-center font-serif text-lg text-royal">
+      <p className="text-center font-display text-2xl text-royal animate-pulse-soft">
         Hari bahagia telah tiba!
       </p>
     );
@@ -53,12 +56,14 @@ export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
       {units.map(({ label, value }) => (
         <div
           key={label}
-          className="rounded-xl border border-royal/20 bg-white/80 px-2 py-4 text-center backdrop-blur-sm"
+          className={`countdown-unit rounded-2xl border border-white/10 bg-white/10 px-2 py-5 text-center backdrop-blur-md ${
+            tick && label === "Detik" ? "scale-105" : ""
+          }`}
         >
-          <p className="font-serif text-2xl font-bold text-navy md:text-3xl">
+          <p className="font-display text-3xl font-light text-white md:text-4xl">
             {String(value).padStart(2, "0")}
           </p>
-          <p className="mt-1 text-[9px] font-semibold uppercase tracking-widest text-stone-400">
+          <p className="mt-2 text-[8px] font-bold uppercase tracking-[0.25em] text-white/40">
             {label}
           </p>
         </div>

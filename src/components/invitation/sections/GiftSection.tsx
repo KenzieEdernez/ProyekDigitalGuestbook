@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Check, Copy, Gift, MapPin, Phone } from "lucide-react";
+import Reveal from "@/components/invitation/Reveal";
+import SectionHeader from "@/components/invitation/SectionHeader";
 import { WEDDING } from "@/lib/wedding-config";
 
 export default function GiftSection() {
@@ -18,85 +20,83 @@ export default function GiftSection() {
   };
 
   return (
-    <section id="gift" className="invitation-section bg-white px-6 py-24">
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-14 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-royal">
-            Tanda Kasih
-          </p>
-          <h2 className="mt-3 font-serif text-3xl font-bold text-navy md:text-4xl">
-            Wedding Gift
-          </h2>
-          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-stone-500">
-            Kehadiran dan doa restu Anda adalah hadiah terindah. Namun jika
-            ingin memberikan tanda kasih, berikut informasinya.
-          </p>
-        </header>
+    <section id="gift" className="invitation-section relative bg-champagne px-6 py-28">
+      <div className="absolute inset-0 bg-radial-gold opacity-30" />
 
-        <div className="mb-8 flex justify-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-parchment">
-            <Gift className="h-8 w-8 text-royal" />
+      <div className="relative mx-auto max-w-3xl">
+        <SectionHeader
+          label="Tanda Kasih"
+          title="Wedding Gift"
+          subtitle="Kehadiran dan doa restu Anda adalah hadiah terindah. Namun jika ingin memberikan tanda kasih, berikut informasinya."
+        />
+
+        <Reveal direction="scale" delay={100}>
+          <div className="mb-10 flex justify-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-royal/20 bg-white shadow-glow">
+              <Gift className="h-9 w-9 text-royal" />
+            </div>
           </div>
-        </div>
+        </Reveal>
 
         <div className="space-y-4">
-          {WEDDING.gifts.map((account) => {
+          {WEDDING.gifts.map((account, i) => {
             const key = `${account.bank}-${account.accountNumber}`;
             return (
-              <div
-                key={key}
-                className="card-premium flex items-center justify-between gap-4 p-6"
-              >
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-royal">
-                    {account.bank}
-                  </p>
-                  <p className="mt-1 font-semibold text-navy">
-                    {account.accountName}
-                  </p>
-                  <p className="mt-1 font-mono text-lg font-bold tracking-wider text-navy">
-                    {account.accountNumber}
-                  </p>
+              <Reveal key={key} direction="up" delay={i * 100}>
+                <div className="glass-card-light group flex items-center justify-between gap-4 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-card">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-royal">
+                      {account.bank}
+                    </p>
+                    <p className="mt-1 font-medium text-navy">
+                      {account.accountName}
+                    </p>
+                    <p className="mt-1 font-mono text-xl font-bold tracking-wider text-navy">
+                      {account.accountNumber}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      copyToClipboard(account.accountNumber, key)
+                    }
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-royal/15 bg-white transition-all duration-300 hover:border-royal/40 hover:bg-royal/5 active:scale-90"
+                  >
+                    {copied === key ? (
+                      <Check className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <Copy className="h-4 w-4 text-stone-400 transition-colors group-hover:text-royal" />
+                    )}
+                  </button>
                 </div>
-                <button
-                  onClick={() =>
-                    copyToClipboard(account.accountNumber, key)
-                  }
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-stone-200 transition hover:border-royal hover:bg-royal/5"
-                >
-                  {copied === key ? (
-                    <Check className="h-4 w-4 text-emerald-500" />
-                  ) : (
-                    <Copy className="h-4 w-4 text-stone-400" />
-                  )}
-                </button>
-              </div>
+              </Reveal>
             );
           })}
         </div>
 
-        <div className="mt-8 rounded-2xl border border-royal/20 bg-parchment/50 p-6">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-royal">
-            Kirim Kado Fisik
-          </p>
-          <div className="mt-4 space-y-3 text-sm text-stone-600">
-            <p className="font-semibold text-navy">
-              {WEDDING.giftAddress.name}
+        <Reveal direction="up" delay={250}>
+          <div className="mt-8 overflow-hidden rounded-2xl border border-royal/15 bg-white/60 p-7 backdrop-blur-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-royal">
+              Kirim Kado Fisik
             </p>
-            <div className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-royal" />
-              <span>
-                {WEDDING.giftAddress.address}
-                <br />
-                {WEDDING.giftAddress.city}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Phone className="h-4 w-4 shrink-0 text-royal" />
-              <span>{WEDDING.giftAddress.phone}</span>
+            <div className="mt-5 space-y-4 text-sm text-stone-600">
+              <p className="font-display text-xl text-navy">
+                {WEDDING.giftAddress.name}
+              </p>
+              <div className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-royal" />
+                <span>
+                  {WEDDING.giftAddress.address}
+                  <br />
+                  {WEDDING.giftAddress.city}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="h-4 w-4 shrink-0 text-royal" />
+                <span>{WEDDING.giftAddress.phone}</span>
+              </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

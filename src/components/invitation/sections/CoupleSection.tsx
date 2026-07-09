@@ -1,54 +1,60 @@
 "use client";
 
 import { Instagram } from "lucide-react";
+import Reveal from "@/components/invitation/Reveal";
+import SectionHeader from "@/components/invitation/SectionHeader";
 import { WEDDING } from "@/lib/wedding-config";
 
 export default function CoupleSection() {
   return (
-    <section id="couple" className="invitation-section bg-cream px-6 py-24">
-      <div className="mx-auto max-w-5xl">
-        <header className="mb-16 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-royal">
-            Mempelai
-          </p>
-          <h2 className="mt-3 font-serif text-3xl font-bold text-navy md:text-4xl">
-            Bride & Groom
-          </h2>
-          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-stone-500">
-            Dua hati yang dipersatukan dalam cinta dan kasih sayang, siap
-            melangkah menuju jenjang baru bersama.
-          </p>
-        </header>
+    <section id="couple" className="invitation-section relative bg-blush px-6 py-28">
+      <div className="absolute inset-0 bg-radial-gold opacity-40" />
 
-        <div className="grid gap-12 md:grid-cols-2">
+      <div className="relative mx-auto max-w-5xl">
+        <SectionHeader
+          label="Mempelai"
+          title="Bride & Groom"
+          subtitle="Dua hati yang dipersatukan dalam cinta dan kasih sayang, siap melangkah menuju jenjang baru bersama."
+        />
+
+        <div className="relative grid gap-8 md:grid-cols-2 md:gap-12">
+          {/* Center ampersand */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 md:block">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-royal/30 bg-white/90 font-display text-3xl text-royal shadow-glow backdrop-blur-sm">
+              &
+            </div>
+          </div>
+
           {[WEDDING.groom, WEDDING.bride].map((person, i) => (
-            <div
+            <Reveal
               key={person.name}
-              className={`group relative ${i === 1 ? "md:mt-16" : ""}`}
+              direction={i === 0 ? "left" : "right"}
+              delay={i * 150}
+              duration={900}
+              className={i === 1 ? "md:mt-20" : ""}
             >
-              <div className="card-premium overflow-hidden">
+              <div className="group overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-royal/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-card-lg">
                 <div className="relative aspect-[3/4] overflow-hidden">
                   <img
                     src={person.photo}
                     alt={person.fullName}
-                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-royal-200">
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-7">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-royal-200">
                       {i === 0 ? "The Groom" : "The Bride"}
                     </p>
-                    <h3 className="mt-1 font-serif text-2xl font-bold">
+                    <h3 className="mt-2 font-display text-3xl font-light text-white">
                       {person.fullName}
                     </h3>
-                    <p className="mt-1 text-sm text-white/70">
-                      @{person.nickname}
-                    </p>
                   </div>
                 </div>
-                <div className="space-y-3 p-6">
-                  <p className="text-sm text-stone-600">
-                    <span className="font-semibold text-navy">Putra dari</span>
+                <div className="space-y-4 p-6">
+                  <p className="text-sm leading-relaxed text-stone-500">
+                    <span className="font-semibold text-navy">
+                      {i === 0 ? "Putra" : "Putri"} dari
+                    </span>
                     <br />
                     {person.father}
                     <br />
@@ -58,45 +64,53 @@ export default function CoupleSection() {
                     href={`https://instagram.com/${person.instagram.replace("@", "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs font-semibold text-royal transition hover:text-royal-600"
+                    className="inline-flex items-center gap-2 rounded-full border border-royal/20 px-4 py-2 text-xs font-semibold text-royal transition-all duration-300 hover:border-royal/50 hover:bg-royal/5 active:scale-95"
                   >
-                    <Instagram className="h-4 w-4" />
+                    <Instagram className="h-3.5 w-3.5" />
                     {person.instagram}
                   </a>
                 </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
 
-        {/* Love story timeline */}
-        <div className="mt-20">
-          <h3 className="mb-10 text-center font-serif text-2xl font-bold text-navy">
-            Kisah Cinta Kami
-          </h3>
+        {/* Love story */}
+        <div className="mt-24">
+          <Reveal direction="up">
+            <h3 className="mb-12 text-center font-display text-3xl font-light text-navy">
+              Kisah Cinta Kami
+            </h3>
+          </Reveal>
+
           <div className="relative mx-auto max-w-2xl">
-            <div className="absolute left-4 top-0 bottom-0 w-px bg-royal/30 md:left-1/2" />
+            <div className="absolute bottom-0 left-4 top-0 w-px bg-gradient-to-b from-transparent via-royal/30 to-transparent md:left-1/2" />
+
             {WEDDING.loveStory.map((item, i) => (
-              <div
+              <Reveal
                 key={item.year}
+                direction={i % 2 === 0 ? "left" : "right"}
+                delay={i * 100}
                 className={`relative mb-10 flex items-start gap-6 md:gap-0 ${
                   i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
                 }`}
               >
                 <div className="hidden flex-1 md:block" />
-                <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-royal bg-cream md:absolute md:left-1/2 md:-translate-x-1/2">
+                <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-royal/40 bg-white shadow-sm md:absolute md:left-1/2 md:-translate-x-1/2">
                   <span className="h-2 w-2 rounded-full bg-royal" />
                 </div>
-                <div className="flex-1 rounded-xl border border-royal/15 bg-white p-5 shadow-card md:max-w-[calc(50%-2rem)]">
-                  <p className="text-xs font-bold text-royal">{item.year}</p>
-                  <h4 className="mt-1 font-serif text-lg font-bold text-navy">
+                <div className="glass-card-light flex-1 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-card md:max-w-[calc(50%-2.5rem)]">
+                  <p className="text-xs font-bold tracking-widest text-royal">
+                    {item.year}
+                  </p>
+                  <h4 className="mt-1 font-display text-xl text-navy">
                     {item.title}
                   </h4>
                   <p className="mt-2 text-sm leading-relaxed text-stone-500">
                     {item.text}
                   </p>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
