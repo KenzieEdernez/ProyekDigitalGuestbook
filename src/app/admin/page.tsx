@@ -8,6 +8,7 @@ import {
   Gift,
   TrendingUp,
   Check,
+  Download,
 } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
 import type { Guest, GuestStats } from "@/types/guest";
@@ -116,10 +117,70 @@ export default function AdminDashboard() {
 
   const hourlyData = buildHourlyChart(guests);
 
+  const exportReport = async () => {
+    let wishes: Array<{
+      guest_name: string;
+      message: string;
+      attendance?: string | null;
+      created_at: string;
+    }> = [];
+    try {
+      const res = await fetch("/api/wishes");
+      if (res.ok) {
+        const data = await res.json();
+        wishes = data.wishes ?? [];
+      }
+    } catch {
+      // continue
+    }
+
+    const escape = (v: unknown) =>
+      String(v ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    const guestRows = guests
+      .map(
+        (g, i) => `<tr><td>${i + 1}</td><td>${escape(g.name)}</td><td>${escape(g.email)}</td><td>${g.pax}</td><td>${escape(g.status)}</td></tr>`
+      )
+      .join("");
+    const wishRows = wishes
+      .map(
+        (w, i) =>
+          `<tr><td>${i + 1}</td><td>${escape(w.guest_name)}</td><td>${escape(w.message)}</td><td>${escape(w.attendance || "-")}</td></tr>`
+      )
+      .join("");
+
+    const html = `<!doctype html><html><head><meta charset="utf-8"/><title>Event Report</title>
+      <style>body{font-family:Arial,sans-serif;padding:24px}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #ddd;padding:8px;font-size:12px}th{background:#14213d;color:#fff}</style>
+      </head><body><h1>Event Report</h1><h2>Guests</h2><table><thead><tr><th>No</th><th>Name</th><th>Email</th><th>Pax</th><th>Status</th></tr></thead><tbody>${guestRows}</tbody></table>
+      <h2>Guest Wishes</h2><table><thead><tr><th>No</th><th>Name</th><th>Message</th><th>Attendance</th></tr></thead><tbody>${wishRows || '<tr><td colspan="4">No wishes</td></tr>'}</tbody></table>
+      <script>window.onload=()=>{window.print()}</script></body></html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) {
+      alert("Popup blocked. Allow popups to export.");
+      return;
+    }
+    win.document.write(html);
+    win.document.close();
+  };
+
   return (
     <AdminShell
       title="Event Overview"
       subtitle={`Real-time monitoring for ${eventSettings.name}`}
+      actions={
+        <button
+          type="button"
+          onClick={() => void exportReport()}
+          className="inline-flex items-center gap-2 rounded-lg border border-stone-200 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-navy transition hover:bg-stone-50 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-navy-700"
+        >
+          <Download className="h-4 w-4" />
+          Export Report
+        </button>
+      }
     >
       {stats && (
         <div className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -140,7 +201,7 @@ export default function AdminDashboard() {
           <StatCard
             label="Souvenirs Collected"
             value={stats.souvenir_claimed}
-            sub={`${souvenirRate}% distribusi`}
+            sub={`${souvenirRate}% distributed`}
             icon={Gift}
             accent="text-royal"
             bar={souvenirRate}

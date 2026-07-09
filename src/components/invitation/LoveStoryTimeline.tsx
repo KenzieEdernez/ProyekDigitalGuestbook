@@ -3,12 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Heart, Sparkles } from "lucide-react";
 import Reveal from "@/components/invitation/Reveal";
-import { WEDDING } from "@/lib/wedding-config";
+import type { LoveStoryItem } from "@/types/wedding";
 
-export default function LoveStoryTimeline() {
+interface LoveStoryTimelineProps {
+  loveStory: LoveStoryItem[];
+}
+
+export default function LoveStoryTimeline({ loveStory }: LoveStoryTimelineProps) {
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState<"left" | "right">("right");
-  const total = WEDDING.loveStory.length;
+  const total = loveStory.length;
 
   const goTo = useCallback(
     (index: number, dir: "left" | "right") => {
@@ -26,7 +30,7 @@ export default function LoveStoryTimeline() {
     return () => clearInterval(timer);
   }, [goNext]);
 
-  const item = WEDDING.loveStory[active];
+  const item = loveStory[active];
 
   return (
     <div className="mt-28">
@@ -46,7 +50,7 @@ export default function LoveStoryTimeline() {
         {/* Slide track */}
         <div className="love-story-slider relative overflow-hidden rounded-3xl">
           <div
-            key={item.year}
+            key={item.id}
             className={`love-story-slide love-story-slide-${direction} relative min-h-[320px] border border-royal/15 bg-white p-8 shadow-card md:min-h-[360px] md:p-12`}
           >
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-royal/[0.04] via-transparent to-blush/60" />
@@ -107,7 +111,7 @@ export default function LoveStoryTimeline() {
 
         {/* Dots */}
         <div className="mt-8 flex items-center justify-center gap-2">
-          {WEDDING.loveStory.map((story, i) => (
+          {loveStory.map((story, i) => (
             <button
               key={story.year}
               type="button"

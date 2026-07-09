@@ -1,4 +1,6 @@
-export const WEDDING = {
+import type { WeddingSettings } from "@/types/wedding";
+
+export const DEFAULT_WEDDING: WeddingSettings = {
   groom: {
     name: "William",
     fullName: "William Alexander",
@@ -24,82 +26,37 @@ export const WEDDING = {
   quoteSource: "QS. Ar-Rum: 21",
   loveStory: [
     {
-      year: "2019",
-      title: "First Meeting",
-      text: "We met at a campus event. A brief conversation turned into an unforgettable evening.",
-    },
-    {
-      year: "2021",
-      title: "Building Commitment",
-      text: "Through distance and time, we chose to walk together toward the future.",
-    },
-    {
+      id: "story-1",
       year: "2024",
-      title: "The Proposal",
-      text: "Beneath the Paris sunset, William proposed to Jessica — and she said yes.",
-    },
-    {
-      year: "2025",
-      title: "Our Big Day",
-      text: "Now we invite you to be part of the most special day of our lives.",
+      title: "Our Beginning",
+      text: "Every love story is beautiful, but ours is our favorite. This is where our journey began.",
     },
   ],
   ceremonies: [
     {
-      id: "akad",
-      title: "Holy Matrimony",
+      id: "ceremony-1",
+      title: "Wedding Ceremony",
       date: "Thursday, December 12, 2025",
       time: "09:00 AM",
-      location: "Al-Ikhlas Mosque",
-      address: "45 Merdeka Street, South Jakarta",
-      mapUrl: "https://maps.google.com",
-    },
-    {
-      id: "resepsi",
-      title: "Wedding Reception",
-      date: "Thursday, December 12, 2025",
-      time: "11:00 AM – 02:00 PM",
-      location: "Grand Ballroom, Hotel Mulia",
-      address: "Asia Afrika Senayan, Central Jakarta",
+      location: "Grand Ballroom",
+      address: "Jakarta, Indonesia",
       mapUrl: "https://maps.google.com",
     },
   ],
   gallery: [
     {
+      id: "gallery-1",
       src: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80&auto=format&fit=crop",
       alt: "Prewedding 1",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1522673606300-8d9631af15b2?w=800&q=80&auto=format&fit=crop",
-      alt: "Prewedding 2",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80&auto=format&fit=crop",
-      alt: "Prewedding 3",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=80&auto=format&fit=crop",
-      alt: "Prewedding 4",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&q=80&auto=format&fit=crop",
-      alt: "Prewedding 5",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&q=80&auto=format&fit=crop",
-      alt: "Prewedding 6",
+      orientation: "landscape",
     },
   ],
   gifts: [
     {
+      id: "gift-1",
       bank: "BCA",
       accountName: "William Alexander",
       accountNumber: "1234567890",
-    },
-    {
-      bank: "Mandiri",
-      accountName: "Jessica Marie",
-      accountNumber: "0987654321",
     },
   ],
   giftAddress: {
@@ -109,7 +66,10 @@ export const WEDDING = {
     phone: "+62 812-3456-7890",
   },
   musicUrl: "/music/wedding.mp3",
-} as const;
+};
+
+/** @deprecated Use DEFAULT_WEDDING or merged settings from API */
+export const WEDDING = DEFAULT_WEDDING;
 
 export type InvitationSection =
   | "home"
@@ -130,8 +90,8 @@ export const NAV_ITEMS: { id: InvitationSection; label: string }[] = [
   { id: "gift", label: "Gift" },
 ];
 
-export function getCoupleDisplayName() {
-  return `${WEDDING.groom.name} & ${WEDDING.bride.name}`;
+export function getCoupleDisplayName(wedding: WeddingSettings = DEFAULT_WEDDING) {
+  return `${wedding.groom.name} & ${wedding.bride.name}`;
 }
 
 export function parseGuestName(searchParams: URLSearchParams | null) {
@@ -139,4 +99,25 @@ export function parseGuestName(searchParams: URLSearchParams | null) {
   const to = searchParams.get("to");
   if (!to) return null;
   return decodeURIComponent(to.replace(/\+/g, " ")).trim() || null;
+}
+
+export function mergeWeddingSettings(
+  stored: Partial<WeddingSettings> | null | undefined
+): WeddingSettings {
+  if (!stored) return DEFAULT_WEDDING;
+
+  return {
+    groom: { ...DEFAULT_WEDDING.groom, ...stored.groom },
+    bride: { ...DEFAULT_WEDDING.bride, ...stored.bride },
+    quote: stored.quote?.trim() || DEFAULT_WEDDING.quote,
+    quoteSource: stored.quoteSource?.trim() || DEFAULT_WEDDING.quoteSource,
+    loveStory:
+      stored.loveStory?.length ? stored.loveStory : DEFAULT_WEDDING.loveStory,
+    ceremonies:
+      stored.ceremonies?.length ? stored.ceremonies : DEFAULT_WEDDING.ceremonies,
+    gallery: stored.gallery ?? DEFAULT_WEDDING.gallery,
+    gifts: stored.gifts?.length ? stored.gifts : DEFAULT_WEDDING.gifts,
+    giftAddress: { ...DEFAULT_WEDDING.giftAddress, ...stored.giftAddress },
+    musicUrl: stored.musicUrl?.trim() || DEFAULT_WEDDING.musicUrl,
+  };
 }

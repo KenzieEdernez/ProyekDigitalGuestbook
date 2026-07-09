@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ImageIcon, Save } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
+import WeddingContentSettings from "@/components/admin/WeddingContentSettings";
 import EventTimeInput from "@/components/admin/EventTimeInput";
 import { formatEventTimeAt } from "@/lib/event-time";
 import type { EventSettings } from "@/types/event";
@@ -192,9 +193,9 @@ export default function EventSettingsPage() {
   return (
     <AdminShell
       title="Event Settings"
-      subtitle="Manage date, time, location, dress code, and hero image for the guest form"
+      subtitle="Manage event details and all wedding invitation content"
     >
-      <form onSubmit={handleSubmit} className="card-premium max-w-3xl p-6">
+      <form onSubmit={handleSubmit} className="card-premium mb-8 max-w-3xl p-6">
         {message && (
           <div className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
             {message}
@@ -296,6 +297,13 @@ export default function EventSettingsPage() {
               : "Save Settings"}
         </button>
       </form>
+
+      <div className="max-w-5xl">
+        <h2 className="mb-4 font-serif text-2xl font-bold text-navy dark:text-stone-100">
+          Wedding Invitation Content
+        </h2>
+        <WeddingContentSettings />
+      </div>
     </AdminShell>
   );
 }

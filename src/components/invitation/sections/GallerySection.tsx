@@ -4,9 +4,13 @@ import { useEffect, useState } from "react";
 import { X, ZoomIn } from "lucide-react";
 import Reveal from "@/components/invitation/Reveal";
 import SectionHeader from "@/components/invitation/SectionHeader";
-import { WEDDING } from "@/lib/wedding-config";
+import type { GalleryImage } from "@/types/wedding";
 
-export default function GallerySection() {
+interface GallerySectionProps {
+  gallery: GalleryImage[];
+}
+
+export default function GallerySection({ gallery }: GallerySectionProps) {
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [lightboxVisible, setLightboxVisible] = useState(false);
 
@@ -37,28 +41,43 @@ export default function GallerySection() {
           subtitle="Beautiful moments from our journey together that we'd love to share with you."
         />
 
-        <div className="columns-2 gap-4 md:columns-3">
-          {WEDDING.gallery.map((photo, i) => (
-            <Reveal key={photo.src} direction="scale" delay={i * 80}>
-              <button
-                onClick={() => setLightbox(photo.src)}
-                className="gallery-item group relative mb-4 block w-full overflow-hidden rounded-2xl ring-1 ring-royal/10"
+        {gallery.length === 0 ? (
+          <p className="text-center text-sm text-stone-500">
+            Photos will appear here once added from admin settings.
+          </p>
+        ) : (
+          <div className="grid auto-rows-[180px] grid-cols-2 gap-4 md:grid-cols-4 md:auto-rows-[220px]">
+            {gallery.map((photo, i) => (
+              <Reveal
+                key={photo.id}
+                direction="scale"
+                delay={i * 80}
+                className={
+                  photo.orientation === "portrait"
+                    ? "row-span-2"
+                    : "col-span-2 md:col-span-2"
+                }
               >
-                <img
-                  src={photo.src}
-                  alt={photo.alt}
-                  className="w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-navy/0 transition-all duration-500 group-hover:bg-navy/40">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/0 transition-all duration-500 group-hover:scale-100 group-hover:bg-white/20">
-                    <ZoomIn className="h-5 w-5 text-white opacity-0 transition-all duration-500 group-hover:opacity-100" />
+                <button
+                  onClick={() => setLightbox(photo.src)}
+                  className="gallery-item group relative block h-full w-full overflow-hidden rounded-2xl ring-1 ring-royal/10"
+                >
+                  <img
+                    src={photo.src}
+                    alt={photo.alt}
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-navy/0 transition-all duration-500 group-hover:bg-navy/40">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/0 transition-all duration-500 group-hover:scale-100 group-hover:bg-white/20">
+                      <ZoomIn className="h-5 w-5 text-white opacity-0 transition-all duration-500 group-hover:opacity-100" />
+                    </div>
                   </div>
-                </div>
-              </button>
-            </Reveal>
-          ))}
-        </div>
+                </button>
+              </Reveal>
+            ))}
+          </div>
+        )}
       </div>
 
       {lightbox && (

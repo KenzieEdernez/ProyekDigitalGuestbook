@@ -1,0 +1,203 @@
+import { getPhotoBucket, getSupabaseAdmin } from "./supabase-server";
+import { DEFAULT_WEDDING, mergeWeddingSettings } from "./wedding-config";
+import type {
+  CeremonyItem,
+  CoupleProfile,
+  GalleryImage,
+  GiftAccount,
+  LoveStoryItem,
+  WeddingSettings,
+} from "@/types/wedding";
+import { v4 as uuidv4 } from "uuid";
+
+function textValue(value: unknown) {
+  return String(value ?? "").trim();
+}
+
+async function saveImage(value: string, folder: string) {
+  if (!value.startsWith("data:image/")) return value;
+
+  const matches = value.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!matches) throw new Error("Invalid image format.");
+
+  const ext = matches[1] === "jpeg" ? "jpg" : matches[1];
+  const buffer = Buffer.from(matches[2], "base64");
+  const supabase = getSupabaseAdmin();
+  const bucket = getPhotoBucket();
+  const filename = `wedding/${folder}/${Date.now()}-${uuidv4().slice(0, 8)}.${ext}`;
+
+  const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
+    contentType: `image/${ext === "jpg" ? "jpeg" : ext}`,
+    upsert: true,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
+  return data.publicUrl;
+}
+
+function sanitizeCouple(input: Partial<CoupleProfile>, fallback: CoupleProfile): CoupleProfile {
+  return {
+    name: textValue(input.name) || fallback.name,
+    fullName: textValue(input.fullName) || fallback.fullName,
+    nickname: textValue(input.nickname) || fallback.nickname,
+    father: textValue(input.father) || fallback.father,
+    mother: textValue(input.mother) || fallback.mother,
+    photo: textValue(input.photo) || fallback.photo,
+    instagram: textValue(input.instagram) || fallback.instagram,
+  };
+}
+
+function sanitizeLoveStory(items: LoveStoryItem[] | undefined): LoveStoryItem[] {
+  if (!items?.length) return DEFAULT_WEDDING.loveStory;
+  return items
+    .map((item) => ({
+      id: textValue(item.id) || uuidv4(),
+      year: textValue(item.year),
+      title: textValue(item.title),
+      text: textValue(item.text),
+    }))
+    .filter((item) => item.title && item.text);
+}
+
+function sanitizeCeremonies(items: CeremonyItem[] | undefined): CeremonyItem[] {
+  if (!items?.length) return DEFAULT_WEDDING.ceremonies;
+  return items
+    .map((item) => ({
+      id: textValue(item.id) || uuidv4(),
+      title: textValue(item.title),
+      date: textValue(item.date),
+      time: textValue(item.time),
+      location: textValue(item.location),
+      address: textValue(item.address),
+      mapUrl: textValue(item.mapUrl) || "https://maps.google.com",
+    }))
+    .filter((item) => item.title);
+}
+
+function sanitizeGallery(items: GalleryImage[] | undefined): GalleryImage[] {
+  if (!items?.length) return [];
+  return items
+    .map((item) => ({
+      id: textValue(item.id) || uuidv4(),
+      src: textValue(item.src),
+      alt: textValue(item.alt) || "Prewedding photo",
+      orientation:
+        item.orientation === "portrait"
+          ? ("portrait" as const)
+          : ("landscape" as const),
+    }))
+    .filter((item) => item.src);
+}
+
+function sanitizeGifts(items: GiftAccount[] | undefined): GiftAccount[] {
+  if (!items?.length) return DEFAULT_WEDDING.gifts;
+  return items
+    .map((item) => ({
+      id: textValue(item.id) || uuidv4(),
+      bank: textValue(item.bank),
+      accountName: textValue(item.accountName),
+      accountNumber: textValue(item.accountNumber),
+    }))
+    .filter((item) => item.bank && item.accountNumber);
+}
+
+function sanitizeSettings(input: Partial<WeddingSettings>): WeddingSettings {
+  const settings: WeddingSettings = {
+    groom: sanitizeCouple(input.groom ?? {}, DEFAULT_WEDDING.groom),
+    bride: sanitizeCouple(input.bride ?? {}, DEFAULT_WEDDING.bride),
+    quote: textValue(input.quote) || DEFAULT_WEDDING.quote,
+    quoteSource: textValue(input.quoteSource) || DEFAULT_WEDDING.quoteSource,
+    loveStory: sanitizeLoveStory(input.loveStory),
+    ceremonies: sanitizeCeremonies(input.ceremonies),
+    gallery: sanitizeGallery(input.gallery),
+    gifts: sanitizeGifts(input.gifts),
+    giftAddress: {
+      name: textValue(input.giftAddress?.name) || DEFAULT_WEDDING.giftAddress.name,
+      address:
+        textValue(input.giftAddress?.address) || DEFAULT_WEDDING.giftAddress.address,
+      city: textValue(input.giftAddress?.city) || DEFAULT_WEDDING.giftAddress.city,
+      phone: textValue(input.giftAddress?.phone) || DEFAULT_WEDDING.giftAddress.phone,
+    },
+    musicUrl: textValue(input.musicUrl) || DEFAULT_WEDDING.musicUrl,
+  };
+
+  if (!settings.loveStory.length) {
+    throw new Error("At least one love story item is required.");
+  }
+  if (!settings.ceremonies.length) {
+    throw new Error("At least one wedding event is required.");
+  }
+
+  return settings;
+}
+
+async function persistImages(settings: WeddingSettings): Promise<WeddingSettings> {
+  const groomPhoto = await saveImage(settings.groom.photo, "couple");
+  const bridePhoto = await saveImage(settings.bride.photo, "couple");
+  const gallery = await Promise.all(
+    settings.gallery.map(async (item) => ({
+      ...item,
+      src: await saveImage(item.src, "gallery"),
+    }))
+  );
+
+  return {
+    ...settings,
+    groom: { ...settings.groom, photo: groomPhoto },
+    bride: { ...settings.bride, photo: bridePhoto },
+    gallery,
+  };
+}
+
+export async function getWeddingSettings(): Promise<WeddingSettings> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("event_settings")
+      .select("wedding_content")
+      .eq("id", "default")
+      .maybeSingle();
+
+    if (error) throw error;
+    return mergeWeddingSettings(
+      (data?.wedding_content as Partial<WeddingSettings> | null) ?? null
+    );
+  } catch {
+    return DEFAULT_WEDDING;
+  }
+}
+
+export async function saveWeddingSettings(
+  input: Partial<WeddingSettings>
+): Promise<WeddingSettings> {
+  const settings = sanitizeSettings(input);
+  const withImages = await persistImages(settings);
+  const supabase = getSupabaseAdmin();
+
+  const { data: existing, error: readError } = await supabase
+    .from("event_settings")
+    .select("id")
+    .eq("id", "default")
+    .maybeSingle();
+
+  if (readError) throw new Error(readError.message);
+
+  if (!existing) {
+    throw new Error(
+      "Save event settings first before editing wedding content."
+    );
+  }
+
+  const { error } = await supabase
+    .from("event_settings")
+    .update({
+      wedding_content: withImages,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", "default");
+
+  if (error) throw new Error(error.message);
+  return withImages;
+}

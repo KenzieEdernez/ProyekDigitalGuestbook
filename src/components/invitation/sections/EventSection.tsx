@@ -3,16 +3,17 @@
 import { Calendar, Clock, ExternalLink, MapPin } from "lucide-react";
 import Reveal from "@/components/invitation/Reveal";
 import SectionHeader from "@/components/invitation/SectionHeader";
-import { WEDDING } from "@/lib/wedding-config";
+import type { CeremonyItem } from "@/types/wedding";
 import type { mergeEventSettings } from "@/lib/event-config";
 
 type EventSettings = ReturnType<typeof mergeEventSettings>;
 
 interface EventSectionProps {
   event: EventSettings;
+  ceremonies: CeremonyItem[];
 }
 
-export default function EventSection({ event }: EventSectionProps) {
+export default function EventSection({ event, ceremonies }: EventSectionProps) {
   return (
     <section
       id="event"
@@ -29,13 +30,9 @@ export default function EventSection({ event }: EventSectionProps) {
         />
 
         <div className="space-y-6">
-          {WEDDING.ceremonies.map((ceremony, i) => (
+          {ceremonies.map((ceremony, i) => (
             <Reveal key={ceremony.id} direction="up" delay={i * 120}>
               <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-all duration-500 hover:border-royal/30 hover:bg-white/8">
-                <div className="absolute -right-4 -top-6 font-display text-[7rem] font-light leading-none text-white/[0.03] transition-all duration-700 group-hover:text-white/[0.06]">
-                  {String(i + 1).padStart(2, "0")}
-                </div>
-
                 <h3 className="font-display text-3xl font-light text-royal">
                   {ceremony.title}
                 </h3>
@@ -80,15 +77,17 @@ export default function EventSection({ event }: EventSectionProps) {
                   </div>
                 </div>
 
-                <a
-                  href={ceremony.mapUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-7 inline-flex items-center gap-2 rounded-full border border-royal/30 px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-royal transition-all duration-300 hover:bg-royal/15 active:scale-95"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Open in Maps
-                </a>
+                {ceremony.mapUrl && (
+                  <a
+                    href={ceremony.mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-7 inline-flex items-center gap-2 rounded-full border border-royal/30 px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-royal transition-all duration-300 hover:bg-royal/15 active:scale-95"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    Open in Maps
+                  </a>
+                )}
               </div>
             </Reveal>
           ))}

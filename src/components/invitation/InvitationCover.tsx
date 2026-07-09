@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { ChevronDown, Sparkles } from "lucide-react";
-import { getCoupleDisplayName } from "@/lib/wedding-config";
 
 interface InvitationCoverProps {
   guestName: string | null;
   heroImage: string;
   weddingDate: string;
+  coupleName: string;
   onOpen: () => void;
   isExiting?: boolean;
 }
@@ -16,6 +16,7 @@ export default function InvitationCover({
   guestName,
   heroImage,
   weddingDate,
+  coupleName,
   onOpen,
   isExiting = false,
 }: InvitationCoverProps) {
@@ -97,7 +98,7 @@ export default function InvitationCover({
             transition: "all 1s cubic-bezier(0.16,1,0.3,1)",
           }}
         >
-          {getCoupleDisplayName()}
+          {coupleName}
         </h1>
 
         <div className="my-8 flex items-center gap-4">

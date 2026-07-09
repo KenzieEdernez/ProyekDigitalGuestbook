@@ -4,19 +4,22 @@ import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import CountdownTimer from "@/components/invitation/CountdownTimer";
 import Reveal from "@/components/invitation/Reveal";
-import { getCoupleDisplayName, WEDDING } from "@/lib/wedding-config";
+import { getCoupleDisplayName } from "@/lib/wedding-config";
+import type { WeddingSettings } from "@/types/wedding";
 import type { mergeEventSettings } from "@/lib/event-config";
 
 type EventSettings = ReturnType<typeof mergeEventSettings>;
 
 interface HomeSectionProps {
   event: EventSettings;
+  wedding: WeddingSettings;
   guestName: string | null;
   onNavigateRsvp: () => void;
 }
 
 export default function HomeSection({
   event,
+  wedding,
   guestName,
   onNavigateRsvp,
 }: HomeSectionProps) {
@@ -49,7 +52,7 @@ export default function HomeSection({
 
         <Reveal direction="up" delay={150} duration={1000}>
           <h2 className="mt-5 font-display text-5xl font-light leading-[1.1] text-white md:text-7xl">
-            {getCoupleDisplayName()}
+            {getCoupleDisplayName(wedding)}
           </h2>
         </Reveal>
 
@@ -75,10 +78,10 @@ export default function HomeSection({
         <Reveal direction="up" delay={500}>
           <blockquote className="mt-8 max-w-md">
             <p className="text-sm font-light italic leading-relaxed text-white/60">
-              &ldquo;{WEDDING.quote}&rdquo;
+              &ldquo;{wedding.quote}&rdquo;
             </p>
             <cite className="mt-3 block text-[10px] not-italic tracking-widest text-royal/70">
-              {WEDDING.quoteSource}
+              {wedding.quoteSource}
             </cite>
           </blockquote>
         </Reveal>

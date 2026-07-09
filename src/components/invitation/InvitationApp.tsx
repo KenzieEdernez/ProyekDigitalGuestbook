@@ -16,11 +16,8 @@ import GiftSection from "@/components/invitation/sections/GiftSection";
 import WishLettersSection from "@/components/invitation/sections/WishLettersSection";
 import Reveal from "@/components/invitation/Reveal";
 import { useEventSettings } from "@/hooks/useEventSettings";
-import {
-  getCoupleDisplayName,
-  parseGuestName,
-  type InvitationSection,
-} from "@/lib/wedding-config";
+import { useWeddingSettings } from "@/hooks/useWeddingSettings";
+import { getCoupleDisplayName, parseGuestName, type InvitationSection } from "@/lib/wedding-config";
 
 const SECTION_IDS: InvitationSection[] = [
   "home",
@@ -36,6 +33,7 @@ type Phase = "cover" | "curtain" | "open";
 
 export default function InvitationApp() {
   const eventSettings = useEventSettings();
+  const { wedding, weddingReady } = useWeddingSettings();
   const searchParams = useSearchParams();
   const guestName = parseGuestName(searchParams);
 
@@ -117,7 +115,7 @@ export default function InvitationApp() {
     }
   };
 
-  if (!eventSettings.settingsReady) {
+  if (!eventSettings.settingsReady || !weddingReady) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-champagne px-6">
         <div className="text-center animate-fade-in">
@@ -167,6 +165,7 @@ export default function InvitationApp() {
           guestName={guestName}
           heroImage={eventSettings.heroImage}
           weddingDate={eventSettings.dateDisplay}
+          coupleName={getCoupleDisplayName(wedding)}
           onOpen={handleOpen}
         />
       )}
@@ -174,7 +173,7 @@ export default function InvitationApp() {
       {phase === "open" && (
         <div className="invitation-app invitation-app-enter bg-champagne">
           <ScrollProgress />
-          <audio ref={audioRef} loop preload="none" />
+          <audio ref={audioRef} src={wedding.musicUrl} loop preload="none" />
 
           <InvitationNav
             active={activeSection}
@@ -186,16 +185,17 @@ export default function InvitationApp() {
           <main>
             <HomeSection
               event={eventSettings}
+              wedding={wedding}
               guestName={guestName}
               onNavigateRsvp={() => navigateTo("rsvp")}
             />
 
             <WaveDivider fill="#f9f0ed" />
-            <CoupleSection />
+            <CoupleSection wedding={wedding} />
             <WaveDivider fill="#1a2332" flip />
-            <EventSection event={eventSettings} />
+            <EventSection event={eventSettings} ceremonies={wedding.ceremonies} />
             <WaveDivider fill="#f3efe6" />
-            <GallerySection />
+            <GallerySection gallery={wedding.gallery} />
             <WaveDivider fill="#f8f6f2" />
             <RsvpSection
               event={eventSettings}
@@ -203,7 +203,7 @@ export default function InvitationApp() {
               onNavigateWishes={() => navigateTo("wishes")}
             />
             <WaveDivider fill="#faf7f2" />
-            <GiftSection />
+            <GiftSection gifts={wedding.gifts} giftAddress={wedding.giftAddress} />
             <WaveDivider fill="#f5f0ea" />
             <WishLettersSection onNavigateRsvp={() => navigateTo("rsvp")} />
           </main>
@@ -212,7 +212,7 @@ export default function InvitationApp() {
             <div className="absolute inset-0 bg-radial-gold opacity-50" />
             <Reveal direction="scale" className="relative">
               <p className="font-display text-3xl font-light text-navy">
-                {getCoupleDisplayName()}
+                {getCoupleDisplayName(wedding)}
               </p>
               <div className="ornament-line mx-auto my-5 max-w-xs" />
               <p className="text-sm text-stone-500">

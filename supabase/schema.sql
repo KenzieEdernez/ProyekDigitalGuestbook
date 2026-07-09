@@ -91,6 +91,9 @@ add column if not exists hero_image text;
 alter table public.event_settings
 add column if not exists time_from text;
 
+alter table public.event_settings
+add column if not exists wedding_content jsonb;
+
 alter table public.guests
 add column if not exists email text;
 

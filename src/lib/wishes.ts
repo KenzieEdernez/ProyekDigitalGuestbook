@@ -49,3 +49,15 @@ export async function createWish(input: CreateWishInput): Promise<Wish> {
   if (error) throw new Error(error.message);
   return rowToWish(data as Record<string, unknown>);
 }
+
+export async function deleteAllWishes(): Promise<number> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("wishes")
+    .delete()
+    .neq("id", "")
+    .select("id");
+
+  if (error) throw new Error(error.message);
+  return data?.length ?? 0;
+}

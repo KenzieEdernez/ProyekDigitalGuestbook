@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createWish, getWishes } from "@/lib/wishes";
+import { isAdminLoggedIn } from "@/lib/admin-auth";
+import { createWish, deleteAllWishes, getWishes } from "@/lib/wishes";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { CreateWishInput } from "@/types/wish";
 
@@ -49,6 +50,28 @@ export async function POST(request: Request) {
           error instanceof Error ? error.message : "Failed to send wish.",
       },
       { status: 400 }
+    );
+  }
+}
+
+export async function DELETE() {
+  if (!(await isAdminLoggedIn())) {
+    return NextResponse.json(
+      { error: "You must be logged in as staff." },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const deleted = await deleteAllWishes();
+    return NextResponse.json({ deleted });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to delete wishes.",
+      },
+      { status: 500 }
     );
   }
 }

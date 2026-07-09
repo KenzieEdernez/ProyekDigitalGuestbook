@@ -4,9 +4,14 @@ import { useState } from "react";
 import { Check, Copy, Gift, MapPin, Phone } from "lucide-react";
 import Reveal from "@/components/invitation/Reveal";
 import SectionHeader from "@/components/invitation/SectionHeader";
-import { WEDDING } from "@/lib/wedding-config";
+import type { GiftAccount, GiftAddress } from "@/types/wedding";
 
-export default function GiftSection() {
+interface GiftSectionProps {
+  gifts: GiftAccount[];
+  giftAddress: GiftAddress;
+}
+
+export default function GiftSection({ gifts, giftAddress }: GiftSectionProps) {
   const [copied, setCopied] = useState<string | null>(null);
 
   const copyToClipboard = async (text: string, key: string) => {
@@ -39,10 +44,10 @@ export default function GiftSection() {
         </Reveal>
 
         <div className="space-y-4">
-          {WEDDING.gifts.map((account, i) => {
+          {gifts.map((account, i) => {
             const key = `${account.bank}-${account.accountNumber}`;
             return (
-              <Reveal key={key} direction="up" delay={i * 100}>
+              <Reveal key={account.id} direction="up" delay={i * 100}>
                 <div className="glass-card-light group flex items-center justify-between gap-4 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-card">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-royal">
@@ -80,19 +85,19 @@ export default function GiftSection() {
             </p>
             <div className="mt-5 space-y-4 text-sm text-stone-600">
               <p className="font-display text-xl text-navy">
-                {WEDDING.giftAddress.name}
+                {giftAddress.name}
               </p>
               <div className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-royal" />
                 <span>
-                  {WEDDING.giftAddress.address}
+                  {giftAddress.address}
                   <br />
-                  {WEDDING.giftAddress.city}
+                  {giftAddress.city}
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 shrink-0 text-royal" />
-                <span>{WEDDING.giftAddress.phone}</span>
+                <span>{giftAddress.phone}</span>
               </div>
             </div>
           </div>
