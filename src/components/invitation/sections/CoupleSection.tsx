@@ -3,6 +3,7 @@
 import { Instagram } from "lucide-react";
 import Reveal from "@/components/invitation/Reveal";
 import SectionHeader from "@/components/invitation/SectionHeader";
+import LoveStoryTimeline from "@/components/invitation/LoveStoryTimeline";
 import { WEDDING } from "@/lib/wedding-config";
 
 export default function CoupleSection() {
@@ -18,9 +19,8 @@ export default function CoupleSection() {
         />
 
         <div className="relative grid gap-8 md:grid-cols-2 md:gap-12">
-          {/* Center ampersand */}
           <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 md:block">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-royal/30 bg-white/90 font-display text-3xl text-royal shadow-glow backdrop-blur-sm">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-royal/30 bg-white/90 font-display text-3xl text-royal shadow-glow backdrop-blur-sm float-slow">
               &
             </div>
           </div>
@@ -75,45 +75,7 @@ export default function CoupleSection() {
           ))}
         </div>
 
-        {/* Love story */}
-        <div className="mt-24">
-          <Reveal direction="up">
-            <h3 className="mb-12 text-center font-display text-3xl font-light text-navy">
-              Kisah Cinta Kami
-            </h3>
-          </Reveal>
-
-          <div className="relative mx-auto max-w-2xl">
-            <div className="absolute bottom-0 left-4 top-0 w-px bg-gradient-to-b from-transparent via-royal/30 to-transparent md:left-1/2" />
-
-            {WEDDING.loveStory.map((item, i) => (
-              <Reveal
-                key={item.year}
-                direction={i % 2 === 0 ? "left" : "right"}
-                delay={i * 100}
-                className={`relative mb-10 flex items-start gap-6 md:gap-0 ${
-                  i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                }`}
-              >
-                <div className="hidden flex-1 md:block" />
-                <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-royal/40 bg-white shadow-sm md:absolute md:left-1/2 md:-translate-x-1/2">
-                  <span className="h-2 w-2 rounded-full bg-royal" />
-                </div>
-                <div className="glass-card-light flex-1 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-card md:max-w-[calc(50%-2.5rem)]">
-                  <p className="text-xs font-bold tracking-widest text-royal">
-                    {item.year}
-                  </p>
-                  <h4 className="mt-1 font-display text-xl text-navy">
-                    {item.title}
-                  </h4>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-500">
-                    {item.text}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
+        <LoveStoryTimeline />
       </div>
     </section>
   );
