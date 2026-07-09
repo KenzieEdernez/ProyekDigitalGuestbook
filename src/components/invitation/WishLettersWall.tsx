@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Heart, Mail, X } from "lucide-react";
 import type { Wish } from "@/types/wish";
 
@@ -9,15 +9,15 @@ interface WishLettersWallProps {
 }
 
 const BUBBLE_SIZE = 100;
+const BUBBLE_RADIUS = BUBBLE_SIZE / 2;
 
-type BubbleLayout = {
-  left: string;
-  top: string;
-  enterDelay: string;
-  delay: string;
-  duration: string;
-  floatClass: string;
-  drift: number;
+type BubblePhysics = {
+  id: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  paused: boolean;
 };
 
 function isAttending(attendance: string | null | undefined) {
@@ -38,10 +38,13 @@ function seededRandom(seed: number) {
   return x - Math.floor(x);
 }
 
-function scatterBubbles(wishes: Wish[]): BubbleLayout[] {
-  const margin = 11;
-  const radius = (BUBBLE_SIZE / 420) * 50;
-  const placed: { x: number; y: number; r: number }[] = [];
+function createBubblePhysics(
+  wishes: Wish[],
+  width: number,
+  height: number
+): BubblePhysics[] {
+  const margin = BUBBLE_RADIUS + 6;
+  const placed: { x: number; y: number }[] = [];
 
   return wishes.map((wish, index) => {
     const seed = hashString(wish.id);
@@ -49,44 +52,52 @@ function scatterBubbles(wishes: Wish[]): BubbleLayout[] {
     let x = margin;
     let y = margin;
 
-    for (let attempt = 0; attempt < 60; attempt++) {
+    for (let attempt = 0; attempt < 50; attempt++) {
       x =
         margin +
-        seededRandom(seed + attempt * 13 + index) * (100 - margin * 2);
+        seededRandom(seed + attempt * 13 + index) * (width - margin * 2);
       y =
         margin +
-        seededRandom(seed + attempt * 29 + index * 7) * (100 - margin * 2);
+        seededRandom(seed + attempt * 29 + index * 7) * (height - margin * 2);
 
       const collides = placed.some((p) => {
         const dx = x - p.x;
         const dy = y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        return dist < radius + p.r + 2;
+        return Math.sqrt(dx * dx + dy * dy) < BUBBLE_SIZE + 4;
       });
 
       if (!collides) break;
     }
 
-    placed.push({ x, y, r: radius });
+    placed.push({ x, y });
 
-    const floatVariant = Math.floor(seededRandom(seed + 3) * 3);
+    const speed = 0.5 + seededRandom(seed + 40) * 0.55;
+    const angle = seededRandom(seed + 41) * Math.PI * 2;
 
     return {
-      left: `${x}%`,
-      top: `${y}%`,
-      enterDelay: `${(index * 0.07 + seededRandom(seed + 2) * 0.15).toFixed(2)}s`,
-      delay: `${(seededRandom(seed + 5) * 2.5).toFixed(2)}s`,
-      duration: `${(4 + seededRandom(seed + 7) * 2.5).toFixed(2)}s`,
-      floatClass: `wish-bubble-float-${floatVariant}`,
-      drift: Math.floor(seededRandom(seed + 11) * 40) - 20,
+      id: wish.id,
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      paused: false,
     };
   });
+}
+
+function applyTransform(node: HTMLDivElement, x: number, y: number) {
+  node.style.transform = `translate3d(${x - BUBBLE_RADIUS}px, ${y - BUBBLE_RADIUS}px, 0)`;
 }
 
 export default function WishLettersWall({ refreshKey = 0 }: WishLettersWallProps) {
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Wish | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const physicsRef = useRef<BubblePhysics[]>([]);
+  const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -106,7 +117,87 @@ export default function WishLettersWall({ refreshKey = 0 }: WishLettersWallProps
     load();
   }, [refreshKey]);
 
-  const layouts = useMemo(() => scatterBubbles(wishes), [wishes]);
+  const initPhysics = useCallback(() => {
+    const box = containerRef.current;
+    if (!box || !wishes.length) return;
+
+    const width = box.clientWidth;
+    const height = box.clientHeight;
+    if (width <= 0 || height <= 0) return;
+
+    physicsRef.current = createBubblePhysics(wishes, width, height);
+
+    for (const bubble of physicsRef.current) {
+      const node = nodeRefs.current.get(bubble.id);
+      if (node) applyTransform(node, bubble.x, bubble.y);
+    }
+  }, [wishes]);
+
+  useEffect(() => {
+    initPhysics();
+
+    const box = containerRef.current;
+    if (!box) return;
+
+    const observer = new ResizeObserver(() => {
+      initPhysics();
+    });
+    observer.observe(box);
+
+    return () => observer.disconnect();
+  }, [initPhysics]);
+
+  useEffect(() => {
+    const step = () => {
+      const box = containerRef.current;
+      const bubbles = physicsRef.current;
+
+      if (box && bubbles.length) {
+        const width = box.clientWidth;
+        const height = box.clientHeight;
+        const pad = BUBBLE_RADIUS + 2;
+
+        for (const bubble of bubbles) {
+          if (bubble.paused) continue;
+
+          bubble.x += bubble.vx;
+          bubble.y += bubble.vy;
+
+          if (bubble.x <= pad) {
+            bubble.x = pad;
+            bubble.vx = Math.abs(bubble.vx) * 0.985;
+          } else if (bubble.x >= width - pad) {
+            bubble.x = width - pad;
+            bubble.vx = -Math.abs(bubble.vx) * 0.985;
+          }
+
+          if (bubble.y <= pad) {
+            bubble.y = pad;
+            bubble.vy = Math.abs(bubble.vy) * 0.985;
+          } else if (bubble.y >= height - pad) {
+            bubble.y = height - pad;
+            bubble.vy = -Math.abs(bubble.vy) * 0.985;
+          }
+
+          const node = nodeRefs.current.get(bubble.id);
+          if (node) applyTransform(node, bubble.x, bubble.y);
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(step);
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [wishes.length]);
+
+  const setBubblePaused = (id: string, paused: boolean) => {
+    const bubble = physicsRef.current.find((b) => b.id === id);
+    if (bubble) bubble.paused = paused;
+  };
 
   if (loading) {
     return (
@@ -130,7 +221,10 @@ export default function WishLettersWall({ refreshKey = 0 }: WishLettersWallProps
 
   return (
     <>
-      <div className="wish-bubble-field relative h-[420px] overflow-hidden rounded-3xl border border-royal/10 bg-gradient-to-br from-[#fffdf8] via-white/70 to-blush/50 md:h-[500px]">
+      <div
+        ref={containerRef}
+        className="wish-bubble-field relative h-[420px] overflow-hidden rounded-3xl border border-royal/10 bg-gradient-to-br from-[#fffdf8] via-white/70 to-blush/50 md:h-[500px]"
+      >
         <div className="wish-field-glow pointer-events-none absolute inset-0" />
         <div className="wish-field-dots pointer-events-none absolute inset-0" />
         <div className="wish-field-sparkle wish-field-sparkle-a pointer-events-none absolute" />
@@ -138,7 +232,6 @@ export default function WishLettersWall({ refreshKey = 0 }: WishLettersWallProps
         <div className="wish-field-sparkle wish-field-sparkle-c pointer-events-none absolute" />
 
         {wishes.map((wish, i) => {
-          const layout = layouts[i];
           const attending = isAttending(wish.attendance);
           const ringClass = wish.attendance
             ? attending
@@ -149,28 +242,29 @@ export default function WishLettersWall({ refreshKey = 0 }: WishLettersWallProps
           return (
             <div
               key={wish.id}
-              className={`wish-bubble-wrap ${layout.floatClass}`}
+              ref={(node) => {
+                if (node) nodeRefs.current.set(wish.id, node);
+                else nodeRefs.current.delete(wish.id);
+              }}
+              className="wish-bubble-wrap absolute left-0 top-0 will-change-transform"
               style={{
-                left: layout.left,
-                top: layout.top,
-                ["--enter-delay" as string]: layout.enterDelay,
-                ["--float-duration" as string]: layout.duration,
-                ["--bubble-drift" as string]: `${layout.drift}px`,
+                width: BUBBLE_SIZE,
+                height: BUBBLE_SIZE,
               }}
             >
               <button
                 type="button"
                 onClick={() => setSelected(wish)}
-                className={`wish-bubble ${ringClass} group relative flex items-center justify-center rounded-full text-center`}
+                onMouseEnter={() => setBubblePaused(wish.id, true)}
+                onMouseLeave={() => setBubblePaused(wish.id, false)}
+                className={`wish-bubble wish-bubble-pop-in ${ringClass} group relative flex h-full w-full items-center justify-center rounded-full text-center`}
                 style={{
-                  width: BUBBLE_SIZE,
-                  height: BUBBLE_SIZE,
+                  ["--enter-delay" as string]: `${(i * 0.06).toFixed(2)}s`,
                 }}
                 aria-label={`Open wish from ${wish.guest_name}`}
               >
                 <span className="wish-bubble-ring pointer-events-none absolute inset-0 rounded-full" />
-                <span className="wish-bubble-shine pointer-events-none absolute inset-1 rounded-full" />
-                <span className="wish-bubble-glow pointer-events-none absolute inset-0 rounded-full" />
+                <span className="wish-bubble-glass pointer-events-none absolute inset-[3px] rounded-full" />
                 <span className="wish-bubble-name relative z-10 px-2 font-display text-base font-semibold leading-tight text-navy">
                   {wish.guest_name.split(" ")[0]}
                 </span>
