@@ -37,6 +37,55 @@ async function saveImage(value: string, folder: string) {
   return data.publicUrl;
 }
 
+const MAX_MUSIC_BYTES = 12 * 1024 * 1024;
+
+function musicExtensionFromMime(mimeType: string) {
+  if (mimeType.includes("wav")) return "wav";
+  if (mimeType.includes("ogg")) return "ogg";
+  if (mimeType.includes("mp4") || mimeType.includes("m4a")) return "m4a";
+  return "mp3";
+}
+
+async function saveMusic(value: string) {
+  const trimmed = textValue(value);
+  if (!trimmed) return DEFAULT_WEDDING.musicUrl;
+  if (!trimmed.startsWith("data:")) return trimmed;
+
+  const matches = trimmed.match(/^data:([^;]+);base64,(.+)$/);
+  if (!matches) throw new Error("Invalid audio format.");
+
+  const mimeType = matches[1].toLowerCase();
+  if (
+    !mimeType.startsWith("audio/") &&
+    mimeType !== "application/octet-stream"
+  ) {
+    throw new Error("Please upload an MP3 or other supported audio file.");
+  }
+
+  const buffer = Buffer.from(matches[2], "base64");
+  if (buffer.length > MAX_MUSIC_BYTES) {
+    throw new Error("Music file must be under 12MB.");
+  }
+
+  const supabase = getSupabaseAdmin();
+  const bucket = getPhotoBucket();
+  const ext = musicExtensionFromMime(mimeType);
+  const filename = `wedding/music/${Date.now()}-${uuidv4().slice(0, 8)}.${ext}`;
+  const contentType = mimeType.startsWith("audio/")
+    ? mimeType
+    : "audio/mpeg";
+
+  const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
+    contentType,
+    upsert: true,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
+  return data.publicUrl;
+}
+
 function sanitizeCouple(input: Partial<CoupleProfile>, fallback: CoupleProfile): CoupleProfile {
   return {
     name: textValue(input.name) || fallback.name,
@@ -133,7 +182,7 @@ function sanitizeSettings(input: Partial<WeddingSettings>): WeddingSettings {
   return settings;
 }
 
-async function persistImages(settings: WeddingSettings): Promise<WeddingSettings> {
+async function persistMedia(settings: WeddingSettings): Promise<WeddingSettings> {
   const groomPhoto = await saveImage(settings.groom.photo, "couple");
   const bridePhoto = await saveImage(settings.bride.photo, "couple");
   const gallery = await Promise.all(
@@ -142,12 +191,14 @@ async function persistImages(settings: WeddingSettings): Promise<WeddingSettings
       src: await saveImage(item.src, "gallery"),
     }))
   );
+  const musicUrl = await saveMusic(settings.musicUrl);
 
   return {
     ...settings,
     groom: { ...settings.groom, photo: groomPhoto },
     bride: { ...settings.bride, photo: bridePhoto },
     gallery,
+    musicUrl,
   };
 }
 
@@ -173,7 +224,7 @@ export async function saveWeddingSettings(
   input: Partial<WeddingSettings>
 ): Promise<WeddingSettings> {
   const settings = sanitizeSettings(input);
-  const withImages = await persistImages(settings);
+  const withMedia = await persistMedia(settings);
   const supabase = getSupabaseAdmin();
 
   const { data: existing, error: readError } = await supabase
@@ -193,11 +244,11 @@ export async function saveWeddingSettings(
   const { error } = await supabase
     .from("event_settings")
     .update({
-      wedding_content: withImages,
+      wedding_content: withMedia,
       updated_at: new Date().toISOString(),
     })
     .eq("id", "default");
 
   if (error) throw new Error(error.message);
-  return withImages;
+  return withMedia;
 }

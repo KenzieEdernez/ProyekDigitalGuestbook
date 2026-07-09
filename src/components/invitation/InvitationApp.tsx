@@ -183,7 +183,13 @@ export default function InvitationApp() {
       {phase === "open" && (
         <div className="invitation-app invitation-app-enter bg-champagne">
           <ScrollProgress />
-          <audio ref={audioRef} src={wedding.musicUrl} loop preload="none" />
+          <audio
+            ref={audioRef}
+            key={wedding.musicUrl}
+            src={wedding.musicUrl}
+            loop
+            preload="none"
+          />
 
           <InvitationNav
             active={activeSection}

@@ -11,12 +11,38 @@ import {
   Gift,
   Users,
   Quote,
+  Music,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { DEFAULT_WEDDING } from "@/lib/wedding-config";
 import type { WeddingSettings } from "@/types/wedding";
 
-type Tab = "couple" | "story" | "events" | "gallery" | "gifts" | "wishes";
+type Tab = "couple" | "story" | "events" | "gallery" | "gifts" | "music" | "wishes";
+
+const MAX_MUSIC_BYTES = 12 * 1024 * 1024;
+
+function readMusicFile(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const isAudio =
+      file.type.startsWith("audio/") ||
+      file.name.toLowerCase().endsWith(".mp3");
+
+    if (!isAudio) {
+      reject(new Error("Please upload an MP3 or audio file."));
+      return;
+    }
+
+    if (file.size > MAX_MUSIC_BYTES) {
+      reject(new Error("Music file must be under 12MB."));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Failed to read music file."));
+    reader.readAsDataURL(file);
+  });
+}
 
 function readImageFile(file: File) {
   return new Promise<{ dataUrl: string; orientation: "portrait" | "landscape" }>(
@@ -57,6 +83,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "events", label: "Wedding Events", icon: Calendar },
   { id: "gallery", label: "Gallery", icon: ImageIcon },
   { id: "gifts", label: "Gifts", icon: Gift },
+  { id: "music", label: "Music", icon: Music },
   { id: "wishes", label: "Wishes", icon: Quote },
 ];
 
@@ -66,6 +93,7 @@ export default function WeddingContentSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingWishes, setDeletingWishes] = useState(false);
+  const [musicProcessing, setMusicProcessing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -169,6 +197,21 @@ export default function WeddingContentSettings() {
       setForm((f) => ({ ...f, gallery: [...f.gallery, ...items] }));
     } catch {
       setError("Failed to process gallery images.");
+    }
+  };
+
+  const handleMusicUpload = async (file: File | undefined) => {
+    if (!file) return;
+    setMusicProcessing(true);
+    setError(null);
+    try {
+      const dataUrl = await readMusicFile(file);
+      setForm((f) => ({ ...f, musicUrl: dataUrl }));
+      setMessage("Music file ready. Click Save Wedding Content to apply.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to process music file.");
+    } finally {
+      setMusicProcessing(false);
     }
   };
 
@@ -625,6 +668,85 @@ export default function WeddingContentSettings() {
           </div>
         )}
 
+        {tab === "music" && (
+          <div className="space-y-6">
+            <div className="rounded-xl border border-stone-200 bg-stone-50 p-5 dark:border-stone-700 dark:bg-navy-900">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-royal/10">
+                  <Music className="h-5 w-5 text-royal" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-navy dark:text-stone-100">
+                    Background Music
+                  </p>
+                  <p className="text-xs text-stone-500">
+                    Plays on the invitation page when guests tap the music button.
+                  </p>
+                </div>
+              </div>
+
+              {form.musicUrl ? (
+                <audio
+                  controls
+                  src={form.musicUrl}
+                  className="mb-4 w-full"
+                  preload="metadata"
+                />
+              ) : (
+                <p className="mb-4 text-sm text-stone-500">No music selected yet.</p>
+              )}
+
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Upload MP3
+              </label>
+              <input
+                type="file"
+                accept="audio/mpeg,audio/mp3,.mp3,audio/*"
+                disabled={saving || musicProcessing}
+                onChange={(e) => void handleMusicUpload(e.target.files?.[0])}
+                className="block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700"
+              />
+              <p className="mt-2 text-xs text-stone-400">
+                MP3 recommended. Maximum file size 12MB.
+              </p>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Or paste music URL
+              </label>
+              <input
+                className="input-field"
+                value={
+                  form.musicUrl.startsWith("data:")
+                    ? ""
+                    : form.musicUrl
+                }
+                placeholder="https://example.com/wedding-song.mp3"
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, musicUrl: e.target.value }))
+                }
+              />
+              <p className="mt-2 text-xs text-stone-400">
+                Use a direct link to an MP3 file hosted online, or upload above.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setForm((f) => ({
+                  ...f,
+                  musicUrl: DEFAULT_WEDDING.musicUrl,
+                }))
+              }
+              className="text-sm font-semibold text-stone-500 transition hover:text-red-500"
+            >
+              Reset to default music
+            </button>
+          </div>
+        )}
+
         {tab === "wishes" && (
           <div className="space-y-4">
             <p className="text-sm text-stone-600 dark:text-stone-300">
@@ -646,11 +768,15 @@ export default function WeddingContentSettings() {
           <button
             type="button"
             onClick={() => void handleSave()}
-            disabled={saving}
+            disabled={saving || musicProcessing}
             className="btn-navy mt-6 py-3"
           >
             <Save className="h-4 w-4" />
-            {saving ? "Saving..." : "Save Wedding Content"}
+            {saving
+              ? "Saving..."
+              : musicProcessing
+                ? "Processing Music..."
+                : "Save Wedding Content"}
           </button>
         )}
       </div>
