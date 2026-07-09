@@ -1,12 +1,34 @@
 "use client";
 
 import { useEffect } from "react";
-import { ArrowRight, X } from "lucide-react";
-import { NAV_ITEMS, getCoupleDisplayName, type InvitationSection } from "@/lib/wedding-config";
+import {
+  ArrowRight,
+  Calendar,
+  ClipboardCheck,
+  Gift,
+  Heart,
+  Home,
+  ImageIcon,
+  Mail,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { NAV_ITEMS, type InvitationSection } from "@/lib/wedding-config";
+
+const NAV_ICONS: Record<InvitationSection, React.ElementType> = {
+  home: Home,
+  couple: Heart,
+  event: Calendar,
+  gallery: ImageIcon,
+  rsvp: ClipboardCheck,
+  wishes: Mail,
+  gift: Gift,
+};
 
 interface MenuOverlayProps {
   open: boolean;
   active: InvitationSection;
+  coupleName: string;
   onClose: () => void;
   onNavigate: (section: InvitationSection) => void;
 }
@@ -14,16 +36,10 @@ interface MenuOverlayProps {
 export default function MenuOverlay({
   open,
   active,
+  coupleName,
   onClose,
   onNavigate,
 }: MenuOverlayProps) {
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && open) onClose();
@@ -34,7 +50,9 @@ export default function MenuOverlay({
 
   const handleNav = (section: InvitationSection) => {
     onClose();
-    setTimeout(() => onNavigate(section), 280);
+    requestAnimationFrame(() => {
+      setTimeout(() => onNavigate(section), 320);
+    });
   };
 
   return (
@@ -44,43 +62,45 @@ export default function MenuOverlay({
       }`}
       aria-hidden={!open}
     >
-      <div
-        className="menu-backdrop absolute inset-0 bg-navy-900/50 backdrop-blur-[2px] lg:bg-navy-900/40"
-        onClick={onClose}
-      />
+      <div className="menu-backdrop absolute inset-0" onClick={onClose} />
 
       <aside
-        className={`menu-panel absolute right-0 top-0 flex h-full w-[min(90vw,380px)] flex-col bg-navy/96 shadow-card-lg backdrop-blur-2xl lg:w-[420px] ${
+        className={`menu-panel absolute right-0 top-0 flex h-full w-[min(92vw,400px)] flex-col overflow-hidden lg:w-[440px] ${
           open ? "menu-panel-open" : "menu-panel-closed"
         }`}
       >
-        <div className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-royal/40 to-transparent" />
+        <div className="menu-panel-glow pointer-events-none absolute inset-0" />
+        <div className="pointer-events-none absolute -left-20 top-1/4 h-40 w-40 rounded-full bg-royal/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 bottom-1/4 h-32 w-32 rounded-full bg-blush/20 blur-3xl" />
 
-        <div className="flex items-center justify-between border-b border-white/10 px-6 py-5 lg:px-8 lg:py-6">
-          <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-royal/80">
-              Invitation Menu
-            </p>
-            <p className="mt-1 font-display text-xl font-light text-white lg:text-2xl">
-              {getCoupleDisplayName()}
+        <div className="relative flex items-center justify-between border-b border-white/10 px-6 py-5 lg:px-8 lg:py-6">
+          <div className="menu-header-reveal">
+            <div className="mb-2 flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-royal" />
+              <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-royal/90">
+                Navigation
+              </p>
+            </div>
+            <p className="font-display text-xl font-light text-white lg:text-2xl">
+              {coupleName}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="menu-close-btn group flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 transition-all duration-300 hover:border-royal/40 hover:bg-white/5 active:scale-95"
+            className="menu-close-btn group flex items-center gap-2.5 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 transition-all duration-300 hover:border-royal/50 hover:bg-royal/10 active:scale-95"
           >
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 transition-colors group-hover:text-royal">
               Close
             </span>
-            <X className="h-3.5 w-3.5 text-white/50 transition-colors group-hover:text-royal" />
+            <X className="h-4 w-4 text-white/50 transition-all duration-300 group-hover:rotate-90 group-hover:text-royal" />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-4 py-6 lg:px-6 lg:py-8">
-          <ul className="space-y-1.5">
+        <nav className="relative flex-1 overflow-y-auto px-4 py-6 lg:px-6 lg:py-8">
+          <ul className="space-y-2">
             {NAV_ITEMS.map(({ id, label }, i) => {
               const isActive = active === id;
-              const stepNum = String(i + 1).padStart(2, "0");
+              const Icon = NAV_ICONS[id];
               return (
                 <li
                   key={id}
@@ -89,29 +109,31 @@ export default function MenuOverlay({
                 >
                   <button
                     onClick={() => handleNav(id)}
-                    className={`group flex w-full items-center justify-between rounded-xl px-4 py-4 text-left transition-all duration-300 active:scale-[0.98] lg:px-5 lg:py-4 ${
+                    className={`menu-nav-btn group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl px-4 py-4 text-left transition-all duration-400 ease-out-expo active:scale-[0.98] lg:px-5 lg:py-4 ${
                       isActive
-                        ? "bg-royal/15 text-royal"
-                        : "text-white/60 hover:bg-white/5 hover:text-white"
+                        ? "bg-royal/15 text-royal shadow-[inset_3px_0_0_0_rgba(197,160,89,0.9)]"
+                        : "text-white/65 hover:bg-white/6 hover:text-white"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <span
-                        className={`flex h-9 w-9 items-center justify-center rounded-full border text-[10px] font-bold transition-all duration-300 ${
-                          isActive
-                            ? "border-royal/40 bg-royal/10 text-royal"
-                            : "border-white/10 text-white/30 group-hover:border-royal/20 group-hover:text-royal/60"
-                        }`}
-                      >
-                        {stepNum}
-                      </span>
-                      <span className="text-sm font-medium tracking-wide lg:text-base">
-                        {label}
-                      </span>
-                    </div>
-                    {isActive && (
-                      <ArrowRight className="h-4 w-4 text-royal animate-pulse-soft" />
-                    )}
+                    <span
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-400 ${
+                        isActive
+                          ? "border-royal/40 bg-royal/15 text-royal scale-105"
+                          : "border-white/10 bg-white/5 text-white/40 group-hover:border-royal/25 group-hover:text-royal/80"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="flex-1 text-sm font-medium tracking-wide lg:text-base">
+                      {label}
+                    </span>
+                    <ArrowRight
+                      className={`h-4 w-4 shrink-0 transition-all duration-400 ${
+                        isActive
+                          ? "translate-x-0 text-royal opacity-100"
+                          : "-translate-x-2 text-white/20 opacity-0 group-hover:translate-x-0 group-hover:text-royal/60 group-hover:opacity-100"
+                      }`}
+                    />
                   </button>
                 </li>
               );
@@ -119,10 +141,13 @@ export default function MenuOverlay({
           </ul>
         </nav>
 
-        <div className="border-t border-white/10 px-6 py-5">
-          <p className="text-center text-[9px] uppercase tracking-[0.3em] text-white/25">
-            EdernDigital
-          </p>
+        <div className="relative border-t border-white/10 px-6 py-6">
+          <div className="menu-footer-reveal text-center">
+            <div className="mx-auto mb-3 h-px w-16 bg-gradient-to-r from-transparent via-royal/50 to-transparent" />
+            <p className="text-[9px] uppercase tracking-[0.35em] text-white/30">
+              With love & gratitude
+            </p>
+          </div>
         </div>
       </aside>
     </div>

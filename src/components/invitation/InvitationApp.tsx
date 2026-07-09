@@ -44,19 +44,27 @@ export default function InvitationApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const navigateTo = useCallback((section: InvitationSection) => {
-    setIsNavigating(true);
-    setActiveSection(section);
-
-    const el = document.getElementById(section);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-    window.history.replaceState(null, "", `#${section}`);
-
-    if (navigateTimer.current) clearTimeout(navigateTimer.current);
-    navigateTimer.current = setTimeout(() => setIsNavigating(false), 800);
+  const cleanUrl = useCallback(() => {
+    const url = `${window.location.pathname}${window.location.search}`;
+    window.history.replaceState(null, "", url);
   }, []);
+
+  const navigateTo = useCallback(
+    (section: InvitationSection) => {
+      setIsNavigating(true);
+      setActiveSection(section);
+
+      const el = document.getElementById(section);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      cleanUrl();
+
+      if (navigateTimer.current) clearTimeout(navigateTimer.current);
+      navigateTimer.current = setTimeout(() => setIsNavigating(false), 800);
+    },
+    [cleanUrl]
+  );
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as InvitationSection;
@@ -65,9 +73,10 @@ export default function InvitationApp() {
       setActiveSection(hash);
       setTimeout(() => {
         document.getElementById(hash)?.scrollIntoView({ behavior: "auto" });
+        cleanUrl();
       }, 100);
     }
-  }, []);
+  }, [cleanUrl]);
 
   useEffect(() => {
     if (phase !== "open") return;
@@ -100,7 +109,8 @@ export default function InvitationApp() {
     setTimeout(() => {
       setPhase("open");
       window.scrollTo({ top: 0, behavior: "auto" });
-      setTimeout(() => navigateTo("home"), 100);
+      setActiveSection("home");
+      cleanUrl();
     }, 1100);
   };
 
@@ -177,6 +187,7 @@ export default function InvitationApp() {
 
           <InvitationNav
             active={activeSection}
+            coupleName={getCoupleDisplayName(wedding)}
             onNavigate={navigateTo}
             musicPlaying={musicPlaying}
             onToggleMusic={toggleMusic}

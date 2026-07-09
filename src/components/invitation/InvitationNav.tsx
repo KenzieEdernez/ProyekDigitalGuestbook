@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import HamburgerButton from "@/components/invitation/HamburgerButton";
 import MenuOverlay from "@/components/invitation/MenuOverlay";
-import { getCoupleDisplayName, type InvitationSection } from "@/lib/wedding-config";
+import type { InvitationSection } from "@/lib/wedding-config";
 
 interface InvitationNavProps {
   active: InvitationSection;
+  coupleName: string;
   onNavigate: (section: InvitationSection) => void;
   musicPlaying: boolean;
   onToggleMusic: () => void;
@@ -15,6 +16,7 @@ interface InvitationNavProps {
 
 export default function InvitationNav({
   active,
+  coupleName,
   onNavigate,
   musicPlaying,
   onToggleMusic,
@@ -28,46 +30,60 @@ export default function InvitationNav({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
+
   const handleNav = (section: InvitationSection) => {
+    setMenuOpen(false);
     onNavigate(section);
   };
 
+  const toggleMenu = () => setMenuOpen((v) => !v);
+
   return (
     <>
-      {/* Sticky header — all screen sizes */}
       <header
-        className={`sticky top-0 z-50 flex items-center justify-between border-b px-4 py-3 transition-all duration-500 lg:px-10 lg:py-4 ${
-          scrolled
-            ? "border-white/10 bg-navy/90 shadow-card backdrop-blur-xl"
+        className={`sticky top-0 flex items-center justify-between border-b px-4 py-3 transition-all duration-500 lg:px-10 lg:py-4 ${
+          menuOpen ? "z-[80]" : "z-50"
+        } ${
+          scrolled || menuOpen
+            ? "border-white/10 bg-navy/92 shadow-card backdrop-blur-xl"
             : "border-transparent bg-navy/75 backdrop-blur-md"
         }`}
       >
         <button
           onClick={() => handleNav("home")}
-          className="text-left transition-opacity hover:opacity-80"
+          className="group text-left transition-opacity hover:opacity-90"
         >
-          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-royal/80">
+          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-royal/80 transition-colors group-hover:text-royal">
             The Wedding of
           </p>
-          <p className="font-display text-base font-light text-white lg:text-lg">
-            {getCoupleDisplayName()}
+          <p className="font-display text-base font-light text-white transition-transform duration-300 group-hover:translate-x-0.5 lg:text-lg">
+            {coupleName}
           </p>
         </button>
 
         <HamburgerButton
           open={menuOpen}
-          onClick={() => setMenuOpen((v) => !v)}
+          onClick={toggleMenu}
+          elevated={menuOpen}
         />
       </header>
 
       <MenuOverlay
         open={menuOpen}
         active={active}
+        coupleName={coupleName}
         onClose={() => setMenuOpen(false)}
         onNavigate={handleNav}
       />
 
-      {/* Music toggle */}
       <button
         onClick={onToggleMusic}
         className={`fixed bottom-6 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border shadow-card transition-all duration-300 ease-out-expo hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8 ${
