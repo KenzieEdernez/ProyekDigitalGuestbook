@@ -22,7 +22,7 @@ export default function HamburgerButton({
         open
           ? "hamburger-open border-royal/60 bg-navy shadow-glow"
           : "border-white/25 bg-navy/85 hover:border-royal/45 hover:bg-navy"
-      } ${elevated ? "z-[81]" : ""} ${className}`}
+      } ${elevated ? "z-[202]" : ""} ${className}`}
     >
       <span
         className={`pointer-events-none absolute inset-0 rounded-full transition-all duration-500 ${

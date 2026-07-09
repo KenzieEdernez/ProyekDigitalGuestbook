@@ -50,7 +50,7 @@ export default function InvitationNav({
     <>
       <header
         className={`sticky top-0 flex items-center justify-between border-b px-4 py-3 transition-all duration-500 lg:px-10 lg:py-4 ${
-          menuOpen ? "z-[80]" : "z-50"
+          menuOpen ? "z-[201]" : "z-50"
         } ${
           scrolled || menuOpen
             ? "border-white/10 bg-navy/92 shadow-card backdrop-blur-xl"
@@ -73,6 +73,7 @@ export default function InvitationNav({
           open={menuOpen}
           onClick={toggleMenu}
           elevated={menuOpen}
+          className={menuOpen ? "z-[202]" : ""}
         />
       </header>
 
