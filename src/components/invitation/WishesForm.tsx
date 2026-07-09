@@ -53,17 +53,17 @@ export default function WishesForm({
   };
 
   return (
-    <div className="glass-card-light overflow-hidden p-7 lg:p-8">
+    <div className="wish-letter-form overflow-hidden rounded-2xl border border-royal/15 bg-[#fffdf8] p-7 shadow-card lg:p-8">
       <div className="mb-6 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-royal/10">
           <MessageSquare className="h-5 w-5 text-royal" />
         </div>
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-royal">
-            Wishes & Blessings
+            Your Letter
           </p>
           <p className="text-sm text-stone-500">
-            Leave a message for the happy couple
+            Write a wish for {guestName}
           </p>
         </div>
       </div>
@@ -87,7 +87,7 @@ export default function WishesForm({
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Write your wishes and blessings..."
+            placeholder="Dear William & Jessica, we wish you..."
             rows={5}
             maxLength={500}
             className="input-field resize-none"
@@ -104,7 +104,7 @@ export default function WishesForm({
           className="btn-invite-primary w-full"
         >
           <Send className="h-4 w-4" />
-          {submitting ? "Sending..." : "Send Wish"}
+          {submitting ? "Sending..." : "Send Letter"}
         </button>
       </form>
     </div>

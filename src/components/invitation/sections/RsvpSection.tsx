@@ -15,9 +15,8 @@ import {
 } from "@/components/invitation/InvitationPass";
 import Reveal from "@/components/invitation/Reveal";
 import SectionHeader from "@/components/invitation/SectionHeader";
-import WishesForm from "@/components/invitation/WishesForm";
-import WishesWall from "@/components/invitation/WishesWall";
 import type { mergeEventSettings } from "@/lib/event-config";
+import { saveRsvpSession } from "@/lib/rsvp-session";
 import type { Guest } from "@/types/guest";
 
 type EventSettings = ReturnType<typeof mergeEventSettings>;
@@ -26,6 +25,7 @@ type Step = "attendance" | "details" | "done";
 interface RsvpSectionProps {
   event: EventSettings;
   defaultName?: string | null;
+  onNavigateWishes?: () => void;
 }
 
 const FLOW_STEPS = [
@@ -35,7 +35,11 @@ const FLOW_STEPS = [
   { id: "wishes", label: "Wishes" },
 ];
 
-export default function RsvpSection({ event, defaultName }: RsvpSectionProps) {
+export default function RsvpSection({
+  event,
+  defaultName,
+  onNavigateWishes,
+}: RsvpSectionProps) {
   const [step, setStep] = useState<Step>("attendance");
   const [stepDirection, setStepDirection] = useState<"forward" | "back">(
     "forward"
@@ -50,8 +54,6 @@ export default function RsvpSection({ event, defaultName }: RsvpSectionProps) {
   const [guest, setGuest] = useState<Guest | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showWishesWall, setShowWishesWall] = useState(false);
-  const [wishesRefresh, setWishesRefresh] = useState(0);
 
   const goToStep = (next: Step, direction: "forward" | "back") => {
     setStepDirection(direction);
@@ -82,6 +84,10 @@ export default function RsvpSection({ event, defaultName }: RsvpSectionProps) {
       }
 
       setGuest(data.guest);
+      saveRsvpSession({
+        guestName: data.guest.name,
+        attendance: attending ? "attending" : "not_attending",
+      });
       goToStep("done", "forward");
     } catch {
       setError("Failed to connect to the server.");
@@ -108,7 +114,7 @@ export default function RsvpSection({ event, defaultName }: RsvpSectionProps) {
           <SectionHeader
             label="Complete"
             title="Thank You"
-            subtitle="Your confirmation has been received. Please leave a message for us."
+            subtitle="Your confirmation has been received. Scroll down to leave your wish letter."
           />
 
           {/* Step progress — all complete */}
@@ -130,8 +136,8 @@ export default function RsvpSection({ event, defaultName }: RsvpSectionProps) {
             ))}
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-10 lg:items-start">
-            <Reveal direction="left" className="animate-scale-in">
+          <div className="mx-auto max-w-lg">
+            <Reveal direction="up" className="animate-scale-in">
               {attending ? (
                 <InvitationPass guest={guest} event={event} />
               ) : (
@@ -139,17 +145,18 @@ export default function RsvpSection({ event, defaultName }: RsvpSectionProps) {
               )}
             </Reveal>
 
-            <Reveal direction="right" delay={150} className="space-y-5">
-              <WishesForm
-                guestName={guest.name}
-                attendance={attending ? "attending" : "not_attending"}
-                onSubmitted={() => setWishesRefresh((k) => k + 1)}
-              />
-              <WishesWall
-                open={showWishesWall}
-                onToggle={() => setShowWishesWall((v) => !v)}
-                refreshKey={wishesRefresh}
-              />
+            <Reveal direction="up" delay={200} className="mt-8 text-center">
+              <button
+                type="button"
+                onClick={onNavigateWishes}
+                className="btn-invite-primary w-full max-w-md"
+              >
+                Write Your Wish Letter
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <p className="mt-3 text-xs text-stone-500">
+                Your letter will appear in the guestbook for everyone to read.
+              </p>
             </Reveal>
           </div>
         </div>

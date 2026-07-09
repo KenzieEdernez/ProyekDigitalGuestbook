@@ -117,14 +117,16 @@ export type InvitationSection =
   | "event"
   | "gallery"
   | "rsvp"
-  | "gift";
+  | "gift"
+  | "wishes";
 
 export const NAV_ITEMS: { id: InvitationSection; label: string }[] = [
   { id: "home", label: "Home" },
   { id: "couple", label: "Couple" },
   { id: "event", label: "Event" },
   { id: "gallery", label: "Gallery" },
-  { id: "rsvp", label: "RSVP & Wishes" },
+  { id: "rsvp", label: "RSVP" },
+  { id: "wishes", label: "Wishes" },
   { id: "gift", label: "Gift" },
 ];
 

@@ -13,6 +13,7 @@ import EventSection from "@/components/invitation/sections/EventSection";
 import GallerySection from "@/components/invitation/sections/GallerySection";
 import RsvpSection from "@/components/invitation/sections/RsvpSection";
 import GiftSection from "@/components/invitation/sections/GiftSection";
+import WishLettersSection from "@/components/invitation/sections/WishLettersSection";
 import Reveal from "@/components/invitation/Reveal";
 import { useEventSettings } from "@/hooks/useEventSettings";
 import {
@@ -28,6 +29,7 @@ const SECTION_IDS: InvitationSection[] = [
   "gallery",
   "rsvp",
   "gift",
+  "wishes",
 ];
 
 type Phase = "cover" | "curtain" | "open";
@@ -195,9 +197,15 @@ export default function InvitationApp() {
             <WaveDivider fill="#f3efe6" />
             <GallerySection />
             <WaveDivider fill="#f8f6f2" />
-            <RsvpSection event={eventSettings} defaultName={guestName} />
+            <RsvpSection
+              event={eventSettings}
+              defaultName={guestName}
+              onNavigateWishes={() => navigateTo("wishes")}
+            />
             <WaveDivider fill="#faf7f2" />
             <GiftSection />
+            <WaveDivider fill="#f5f0ea" />
+            <WishLettersSection onNavigateRsvp={() => navigateTo("rsvp")} />
           </main>
 
           <footer className="relative overflow-hidden border-t border-royal/10 bg-white px-6 py-16 text-center lg:py-20">
