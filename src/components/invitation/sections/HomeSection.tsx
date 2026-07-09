@@ -139,7 +139,7 @@ export default function HomeSection({
         </Reveal>
 
         <Reveal direction="up" delay={650}>
-          <div className="mt-14 w-full max-w-lg">
+          <div className="mt-14 w-full max-w-2xl">
             <p className="mb-5 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/40">
               Countdown to Our Big Day
             </p>
