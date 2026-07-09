@@ -36,7 +36,7 @@ export const DEFAULT_WEDDING: WeddingSettings = {
     {
       id: "ceremony-1",
       title: "Wedding Ceremony",
-      date: "Thursday, December 12, 2025",
+      date: "Thursday, 12 December 2025",
       time: "09:00 AM",
       location: "Grand Ballroom",
       address: "Jakarta, Indonesia",

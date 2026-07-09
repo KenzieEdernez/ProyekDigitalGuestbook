@@ -1,4 +1,5 @@
 import { getPhotoBucket, getSupabaseAdmin } from "./supabase-server";
+import { formatEventTimeAt, stripTimePrefix } from "./event-time";
 import { DEFAULT_WEDDING, mergeWeddingSettings } from "./wedding-config";
 import type {
   CeremonyItem,
@@ -125,7 +126,9 @@ function sanitizeCeremonies(items: CeremonyItem[] | undefined): CeremonyItem[] {
       id: textValue(item.id) || uuidv4(),
       title: textValue(item.title),
       date: textValue(item.date),
-      time: textValue(item.time),
+      time: textValue(item.time)
+        ? formatEventTimeAt(stripTimePrefix(textValue(item.time)))
+        : "",
       location: textValue(item.location),
       address: textValue(item.address),
       mapUrl: textValue(item.mapUrl) || "https://maps.google.com",

@@ -14,6 +14,8 @@ import {
   Music,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+import CeremonyDateInput from "@/components/admin/CeremonyDateInput";
+import EventTimeInput from "@/components/admin/EventTimeInput";
 import { DEFAULT_WEDDING } from "@/lib/wedding-config";
 import type { WeddingSettings } from "@/types/wedding";
 
@@ -481,11 +483,53 @@ export default function WeddingContentSettings() {
                     </button>
                   )}
                 </div>
+                <div className="mb-3">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    Title
+                  </label>
+                  <input
+                    className="input-field"
+                    value={item.title}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        ceremonies: f.ceremonies.map((c) =>
+                          c.id === item.id
+                            ? { ...c, title: e.target.value }
+                            : c
+                        ),
+                      }))
+                    }
+                  />
+                </div>
+                <CeremonyDateInput
+                  value={item.date}
+                  onChange={(date) =>
+                    setForm((f) => ({
+                      ...f,
+                      ceremonies: f.ceremonies.map((c) =>
+                        c.id === item.id ? { ...c, date } : c
+                      ),
+                    }))
+                  }
+                  disabled={saving}
+                />
+                <EventTimeInput
+                  label="Time"
+                  className="mb-3"
+                  timeFrom={item.time}
+                  onChange={(time) =>
+                    setForm((f) => ({
+                      ...f,
+                      ceremonies: f.ceremonies.map((c) =>
+                        c.id === item.id ? { ...c, time } : c
+                      ),
+                    }))
+                  }
+                  disabled={saving}
+                />
                 {(
                   [
-                    ["title", "Title"],
-                    ["date", "Date"],
-                    ["time", "Time"],
                     ["location", "Location"],
                     ["address", "Address"],
                     ["mapUrl", "Maps URL"],

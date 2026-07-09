@@ -12,6 +12,9 @@ type EventTimeInputProps = {
   timeFrom: string;
   onChange: (timeFrom: string) => void;
   disabled?: boolean;
+  label?: string;
+  className?: string;
+  showPreview?: boolean;
 };
 
 const HOURS = Array.from({ length: 12 }, (_, index) => index + 1);
@@ -21,6 +24,9 @@ export default function EventTimeInput({
   timeFrom,
   onChange,
   disabled = false,
+  label = "Event Time *",
+  className = "md:col-span-2",
+  showPreview = true,
 }: EventTimeInputProps) {
   const parts = partsFromTimeString(timeFrom);
 
@@ -30,9 +36,9 @@ export default function EventTimeInput({
   };
 
   return (
-    <div className="md:col-span-2">
+    <div className={className}>
       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-        Event Time *
+        {label}
       </label>
       <div className="grid grid-cols-[1fr_1fr_1fr] gap-2">
         <select
@@ -71,12 +77,14 @@ export default function EventTimeInput({
           <option value="PM">PM</option>
         </select>
       </div>
-      <p className="mt-2 text-xs text-stone-400">
-        Public page will show:{" "}
-        <span className="font-semibold text-stone-600 dark:text-stone-300">
-          {timeFrom || "—"}
-        </span>
-      </p>
+      {showPreview && (
+        <p className="mt-2 text-xs text-stone-400">
+          Public page will show:{" "}
+          <span className="font-semibold text-stone-600 dark:text-stone-300">
+            {timeFrom || "—"}
+          </span>
+        </p>
+      )}
     </div>
   );
 }
