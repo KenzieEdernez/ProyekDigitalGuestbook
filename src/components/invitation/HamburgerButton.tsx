@@ -18,7 +18,7 @@ export default function HamburgerButton({
       onClick={onClick}
       aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
-      className={`hamburger-btn group relative flex h-[52px] w-[52px] items-center justify-center rounded-full transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95 ${
+      className={`hamburger-btn group relative flex h-[52px] w-[52px] items-center justify-center rounded-full active:scale-95 ${
         open ? "hamburger-open is-open" : "hamburger-closed"
       } ${elevated ? "z-[202]" : ""} ${className}`}
     >

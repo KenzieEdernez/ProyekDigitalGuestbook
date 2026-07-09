@@ -25,7 +25,15 @@ export default function InvitationNav({
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 16);
+        ticking = false;
+      });
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -48,7 +56,7 @@ export default function InvitationNav({
   return (
     <>
       <header
-        className={`invitation-header sticky top-0 px-4 py-3 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] lg:px-10 lg:py-4 ${
+        className={`invitation-header sticky top-0 px-4 py-3 lg:px-10 lg:py-4 ${
           menuOpen ? "z-[201] is-menu-open" : "z-50"
         } ${scrolled || menuOpen ? "is-scrolled" : ""}`}
       >
@@ -71,7 +79,6 @@ export default function InvitationNav({
             elevated={menuOpen}
           />
         </div>
-        <div className="invitation-header-line pointer-events-none absolute bottom-0 left-0 right-0 h-px" />
       </header>
 
       <MenuOverlay

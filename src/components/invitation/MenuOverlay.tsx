@@ -43,7 +43,6 @@ export default function MenuOverlay({
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [animKey, setAnimKey] = useState(0);
 
   useEffect(() => {
     setPortalRoot(document.body);
@@ -51,16 +50,15 @@ export default function MenuOverlay({
 
   useEffect(() => {
     if (open) {
-      setAnimKey((k) => k + 1);
       setMounted(true);
       const frame = requestAnimationFrame(() => {
-        requestAnimationFrame(() => setVisible(true));
+        setVisible(true);
       });
       return () => cancelAnimationFrame(frame);
     }
 
     setVisible(false);
-    const timer = setTimeout(() => setMounted(false), 600);
+    const timer = setTimeout(() => setMounted(false), 320);
     return () => clearTimeout(timer);
   }, [open]);
 
@@ -74,7 +72,7 @@ export default function MenuOverlay({
 
   const handleNav = (section: InvitationSection) => {
     onClose();
-    setTimeout(() => onNavigate(section), 400);
+    onNavigate(section);
   };
 
   if (!mounted || !portalRoot) return null;
@@ -124,7 +122,7 @@ export default function MenuOverlay({
           </div>
 
           <nav className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 lg:px-7">
-            <ul key={animKey} className="space-y-1">
+            <ul className="space-y-1">
               {NAV_ITEMS.map(({ id, label }, i) => {
                 const isActive = active === id;
                 const Icon = NAV_ICONS[id];
@@ -136,13 +134,13 @@ export default function MenuOverlay({
                   >
                     <button
                       onClick={() => handleNav(id)}
-                      className={`menu-nav-btn group relative flex w-full items-center gap-4 rounded-xl px-4 py-[1.125rem] text-left transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] lg:px-5 ${
+                      className={`menu-nav-btn group relative flex w-full items-center gap-4 rounded-xl px-4 py-[1.125rem] text-left transition-colors duration-200 active:scale-[0.98] lg:px-5 ${
                         isActive ? "is-active" : ""
                       }`}
                     >
                       <span className="menu-nav-glow pointer-events-none absolute inset-0 rounded-xl" />
                       <span
-                        className={`menu-nav-icon relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all duration-500 ${
+                        className={`menu-nav-icon relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
                           isActive
                             ? "border-royal/50 bg-royal/15 text-royal"
                             : "border-white/10 bg-white/[0.04] text-white/50 group-hover:border-royal/30 group-hover:text-royal/90"
@@ -152,7 +150,7 @@ export default function MenuOverlay({
                       </span>
                       <span className="relative flex-1">
                         <span
-                          className={`block font-display text-[1.05rem] font-light tracking-wide transition-colors duration-500 ${
+                          className={`block font-display text-[1.05rem] font-light tracking-wide transition-colors duration-200 ${
                             isActive ? "text-royal" : "text-white/85 group-hover:text-white"
                           }`}
                         >
@@ -160,7 +158,7 @@ export default function MenuOverlay({
                         </span>
                       </span>
                       <ArrowUpRight
-                        className={`relative h-4 w-4 shrink-0 transition-all duration-500 ${
+                        className={`relative h-4 w-4 shrink-0 transition-opacity duration-200 ${
                           isActive
                             ? "translate-x-0 translate-y-0 text-royal opacity-100"
                             : "-translate-x-1 translate-y-1 text-white/25 opacity-0 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:text-royal/70 group-hover:opacity-100"

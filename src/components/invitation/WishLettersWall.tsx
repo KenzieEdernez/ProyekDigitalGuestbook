@@ -8,10 +8,12 @@ interface WishLettersWallProps {
   refreshKey?: number;
 }
 
+const BUBBLE_SIZE = 100;
+
 type BubbleLayout = {
   left: string;
   top: string;
-  size: number;
+  enterDelay: string;
   delay: string;
   duration: string;
   floatClass: string;
@@ -37,13 +39,12 @@ function seededRandom(seed: number) {
 }
 
 function scatterBubbles(wishes: Wish[]): BubbleLayout[] {
-  const margin = 10;
+  const margin = 11;
+  const radius = (BUBBLE_SIZE / 420) * 50;
   const placed: { x: number; y: number; r: number }[] = [];
 
   return wishes.map((wish, index) => {
     const seed = hashString(wish.id);
-    const size = 76 + Math.floor(seededRandom(seed) * 44);
-    const radius = (size / 420) * 50;
 
     let x = margin;
     let y = margin;
@@ -60,7 +61,7 @@ function scatterBubbles(wishes: Wish[]): BubbleLayout[] {
         const dx = x - p.x;
         const dy = y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        return dist < radius + p.r + 1.5;
+        return dist < radius + p.r + 2;
       });
 
       if (!collides) break;
@@ -73,11 +74,11 @@ function scatterBubbles(wishes: Wish[]): BubbleLayout[] {
     return {
       left: `${x}%`,
       top: `${y}%`,
-      size,
+      enterDelay: `${(index * 0.07 + seededRandom(seed + 2) * 0.15).toFixed(2)}s`,
       delay: `${(seededRandom(seed + 5) * 2.5).toFixed(2)}s`,
-      duration: `${(4.2 + seededRandom(seed + 7) * 3.5).toFixed(2)}s`,
+      duration: `${(5 + seededRandom(seed + 7) * 3).toFixed(2)}s`,
       floatClass: `wish-bubble-float-${floatVariant}`,
-      drift: Math.floor(seededRandom(seed + 11) * 28) - 14,
+      drift: Math.floor(seededRandom(seed + 11) * 24) - 12,
     };
   });
 }
@@ -109,8 +110,8 @@ export default function WishLettersWall({ refreshKey = 0 }: WishLettersWallProps
 
   if (loading) {
     return (
-      <div className="flex h-[420px] items-center justify-center md:h-[500px]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-royal/30 border-t-royal" />
+      <div className="wish-field-loading flex h-[420px] items-center justify-center md:h-[500px]">
+        <div className="wish-loading-orb h-10 w-10 rounded-full border-2 border-royal/25 border-t-royal" />
       </div>
     );
   }
@@ -130,47 +131,59 @@ export default function WishLettersWall({ refreshKey = 0 }: WishLettersWallProps
   return (
     <>
       <div className="wish-bubble-field relative h-[420px] overflow-hidden rounded-3xl border border-royal/10 bg-gradient-to-br from-[#fffdf8] via-white/70 to-blush/50 md:h-[500px]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(197,160,89,0.12),transparent_45%),radial-gradient(circle_at_80%_85%,rgba(249,240,237,0.8),transparent_50%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(197,160,89,0.15)_1px,transparent_1px)] [background-size:24px_24px]" />
+        <div className="wish-field-glow pointer-events-none absolute inset-0" />
+        <div className="wish-field-dots pointer-events-none absolute inset-0" />
+        <div className="wish-field-sparkle wish-field-sparkle-a pointer-events-none absolute" />
+        <div className="wish-field-sparkle wish-field-sparkle-b pointer-events-none absolute" />
+        <div className="wish-field-sparkle wish-field-sparkle-c pointer-events-none absolute" />
 
         {wishes.map((wish, i) => {
           const layout = layouts[i];
           const attending = isAttending(wish.attendance);
           const ringClass = wish.attendance
             ? attending
-              ? "ring-[3px] ring-emerald-400/90"
-              : "ring-[3px] ring-red-400/90"
-            : "ring-2 ring-royal/25";
+              ? "wish-bubble-ring-attending"
+              : "wish-bubble-ring-absent"
+            : "wish-bubble-ring-neutral";
 
           return (
-            <button
+            <div
               key={wish.id}
-              type="button"
-              onClick={() => setSelected(wish)}
-              className={`wish-bubble ${layout.floatClass} group absolute flex items-center justify-center rounded-full text-center shadow-[0_8px_24px_rgba(26,35,50,0.12)] transition-transform duration-500 hover:z-30 hover:scale-110 ${ringClass}`}
+              className="wish-bubble-wrap absolute"
               style={{
                 left: layout.left,
                 top: layout.top,
-                width: layout.size,
-                height: layout.size,
-                animationDelay: layout.delay,
-                animationDuration: layout.duration,
-                ["--bubble-drift" as string]: `${layout.drift}px`,
+                ["--enter-delay" as string]: layout.enterDelay,
               }}
-              aria-label={`Open wish from ${wish.guest_name}`}
             >
-              <span className="wish-bubble-shine pointer-events-none absolute inset-1 rounded-full" />
-              <span className="relative z-10 px-2 font-display text-[11px] font-light leading-tight text-navy/90">
-                {wish.guest_name.split(" ")[0]}
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setSelected(wish)}
+                className={`wish-bubble ${layout.floatClass} ${ringClass} group relative flex items-center justify-center rounded-full text-center`}
+                style={{
+                  width: BUBBLE_SIZE,
+                  height: BUBBLE_SIZE,
+                  animationDelay: layout.delay,
+                  animationDuration: layout.duration,
+                  ["--bubble-drift" as string]: `${layout.drift}px`,
+                }}
+                aria-label={`Open wish from ${wish.guest_name}`}
+              >
+                <span className="wish-bubble-ring pointer-events-none absolute inset-0 rounded-full" />
+                <span className="wish-bubble-shine pointer-events-none absolute inset-1 rounded-full" />
+                <span className="wish-bubble-glow pointer-events-none absolute inset-0 rounded-full" />
+                <span className="wish-bubble-name relative z-10 px-2 font-display text-base font-semibold leading-tight text-navy">
+                  {wish.guest_name.split(" ")[0]}
+                </span>
+              </button>
+            </div>
           );
         })}
       </div>
 
       {selected && (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-navy-900/60 p-6 backdrop-blur-sm"
+          className="wish-modal-backdrop fixed inset-0 z-[80] flex items-center justify-center bg-navy-900/60 p-6 backdrop-blur-sm"
           onClick={() => setSelected(null)}
         >
           <div
