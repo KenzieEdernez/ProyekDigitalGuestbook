@@ -13,8 +13,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Digital Guestbook | EdernDigital",
-  description: "Attendance confirmation and digital guestbook for your event",
+  title: "Undangan Pernikahan | EdernDigital",
+  description:
+    "Undangan digital pernikahan dengan RSVP, tiket masuk barcode, dan ucapan tamu",
 };
 
 export const viewport: Viewport = {

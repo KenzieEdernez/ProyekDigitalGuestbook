@@ -112,6 +112,27 @@
     text-wrap: balance;
   }
 
+  .invitation-section {
+    scroll-margin-top: 0;
+  }
+
+  .invitation-cover {
+    animation: fadeIn 0.8s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .invitation-app {
+    scroll-behavior: smooth;
+  }
+
   /* html5-qrcode: satu preview kamera, full width */
   .scanner-viewport {
     position: relative;

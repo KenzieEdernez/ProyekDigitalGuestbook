@@ -94,6 +94,25 @@ add column if not exists time_from text;
 alter table public.guests
 add column if not exists email text;
 
+create table if not exists public.wishes (
+  id text primary key,
+  guest_name text not null,
+  message text not null,
+  attendance text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_wishes_created on public.wishes(created_at desc);
+
+alter table public.wishes enable row level security;
+
+create policy "Service role manages wishes"
+on public.wishes
+for all
+to service_role
+using (true)
+with check (true);
+
 alter table public.guests enable row level security;
 alter table public.event_settings enable row level security;
 alter table public.envelope_counters enable row level security;
