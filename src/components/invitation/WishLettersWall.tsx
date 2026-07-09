@@ -76,9 +76,9 @@ function scatterBubbles(wishes: Wish[]): BubbleLayout[] {
       top: `${y}%`,
       enterDelay: `${(index * 0.07 + seededRandom(seed + 2) * 0.15).toFixed(2)}s`,
       delay: `${(seededRandom(seed + 5) * 2.5).toFixed(2)}s`,
-      duration: `${(5 + seededRandom(seed + 7) * 3).toFixed(2)}s`,
+      duration: `${(4 + seededRandom(seed + 7) * 2.5).toFixed(2)}s`,
       floatClass: `wish-bubble-float-${floatVariant}`,
-      drift: Math.floor(seededRandom(seed + 11) * 24) - 12,
+      drift: Math.floor(seededRandom(seed + 11) * 40) - 20,
     };
   });
 }
@@ -149,23 +149,22 @@ export default function WishLettersWall({ refreshKey = 0 }: WishLettersWallProps
           return (
             <div
               key={wish.id}
-              className="wish-bubble-wrap absolute"
+              className={`wish-bubble-wrap ${layout.floatClass}`}
               style={{
                 left: layout.left,
                 top: layout.top,
                 ["--enter-delay" as string]: layout.enterDelay,
+                ["--float-duration" as string]: layout.duration,
+                ["--bubble-drift" as string]: `${layout.drift}px`,
               }}
             >
               <button
                 type="button"
                 onClick={() => setSelected(wish)}
-                className={`wish-bubble ${layout.floatClass} ${ringClass} group relative flex items-center justify-center rounded-full text-center`}
+                className={`wish-bubble ${ringClass} group relative flex items-center justify-center rounded-full text-center`}
                 style={{
                   width: BUBBLE_SIZE,
                   height: BUBBLE_SIZE,
-                  animationDelay: layout.delay,
-                  animationDuration: layout.duration,
-                  ["--bubble-drift" as string]: `${layout.drift}px`,
                 }}
                 aria-label={`Open wish from ${wish.guest_name}`}
               >

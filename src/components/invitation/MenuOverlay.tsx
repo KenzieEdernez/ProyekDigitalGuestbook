@@ -43,6 +43,7 @@ export default function MenuOverlay({
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [animKey, setAnimKey] = useState(0);
 
   useEffect(() => {
     setPortalRoot(document.body);
@@ -50,15 +51,16 @@ export default function MenuOverlay({
 
   useEffect(() => {
     if (open) {
+      setAnimKey((k) => k + 1);
       setMounted(true);
       const frame = requestAnimationFrame(() => {
-        setVisible(true);
+        requestAnimationFrame(() => setVisible(true));
       });
       return () => cancelAnimationFrame(frame);
     }
 
     setVisible(false);
-    const timer = setTimeout(() => setMounted(false), 320);
+    const timer = setTimeout(() => setMounted(false), 480);
     return () => clearTimeout(timer);
   }, [open]);
 
@@ -122,7 +124,7 @@ export default function MenuOverlay({
           </div>
 
           <nav className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 lg:px-7">
-            <ul className="space-y-1">
+            <ul key={animKey} className="space-y-1">
               {NAV_ITEMS.map(({ id, label }, i) => {
                 const isActive = active === id;
                 const Icon = NAV_ICONS[id];

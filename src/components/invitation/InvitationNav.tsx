@@ -58,7 +58,7 @@ export default function InvitationNav({
       <header
         className={`invitation-header sticky top-0 px-4 py-3 lg:px-10 lg:py-4 ${
           menuOpen ? "z-[201] is-menu-open" : "z-50"
-        } ${scrolled || menuOpen ? "is-scrolled" : ""}`}
+        } is-dark ${scrolled ? "is-scrolled" : ""}`}
       >
         <div className="invitation-header-inner relative flex items-center justify-between">
           <button

@@ -387,28 +387,40 @@
 
   /* ── Invitation header ── */
   .invitation-header {
-    background: transparent;
+    background: linear-gradient(
+      180deg,
+      rgba(12, 18, 30, 0.98) 0%,
+      rgba(14, 20, 34, 0.94) 100%
+    );
+    border-bottom: 1px solid rgba(197, 160, 89, 0.14);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .invitation-header.is-scrolled {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
   }
 
   .invitation-header-inner {
     border-radius: 9999px;
     padding: 0.625rem 1rem 0.625rem 1.25rem;
-    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     transition:
-      background-color 0.28s ease,
-      border-color 0.28s ease,
-      box-shadow 0.28s ease;
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
   }
 
-  .invitation-header.is-scrolled .invitation-header-inner,
-  .invitation-header.is-menu-open .invitation-header-inner {
-    background: rgba(18, 26, 40, 0.9);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16);
+  .invitation-header.is-scrolled .invitation-header-inner {
+    background: rgba(18, 26, 40, 0.92);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   }
 
   .invitation-header.is-menu-open .invitation-header-inner {
-    border-color: rgba(197, 160, 89, 0.22);
+    background: rgba(22, 30, 46, 0.95);
+    border-color: rgba(197, 160, 89, 0.35);
+    box-shadow: 0 4px 20px rgba(197, 160, 89, 0.12);
   }
 
   /* ── Hamburger button ── */
@@ -526,8 +538,8 @@
     opacity: 0;
     visibility: hidden;
     transition:
-      opacity 0.28s ease,
-      visibility 0.28s;
+      opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0.38s;
   }
 
   .menu-overlay.is-visible {
@@ -543,9 +555,10 @@
   }
 
   .menu-backdrop {
-    background: rgba(8, 12, 20, 0.62);
+    background: rgba(6, 10, 18, 0.72);
     opacity: 0;
-    transition: opacity 0.28s ease;
+    backdrop-filter: blur(3px);
+    transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .menu-overlay.is-visible .menu-backdrop {
@@ -559,33 +572,51 @@
   .menu-panel {
     background: linear-gradient(
       165deg,
-      rgba(20, 28, 44, 0.98) 0%,
-      rgba(14, 20, 34, 1) 42%,
+      rgba(20, 28, 44, 0.99) 0%,
+      rgba(12, 18, 30, 1) 45%,
       rgba(18, 26, 42, 0.99) 100%
     );
-    box-shadow: -20px 0 48px rgba(0, 0, 0, 0.35);
+    box-shadow: -24px 0 56px rgba(0, 0, 0, 0.42);
     transform: translateX(100%);
-    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.85;
+    transition:
+      transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.38s ease;
     will-change: transform;
   }
 
   .menu-panel.is-visible {
     transform: translateX(0);
+    opacity: 1;
   }
 
   .menu-panel.is-hiding {
     transform: translateX(100%);
-    transition-duration: 0.28s;
+    opacity: 0.7;
+    transition-duration: 0.4s;
   }
 
   .menu-panel-shimmer {
     background: linear-gradient(
       180deg,
       transparent 0%,
-      rgba(197, 160, 89, 0.45) 50%,
+      rgba(197, 160, 89, 0.35) 45%,
+      rgba(197, 160, 89, 0.7) 50%,
+      rgba(197, 160, 89, 0.35) 55%,
       transparent 100%
     );
-    opacity: 0.5;
+    opacity: 0.55;
+    animation: menuEdgeGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes menuEdgeGlow {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 0.75;
+    }
   }
 
   .menu-panel-texture {
@@ -614,10 +645,30 @@
   .menu-orb {
     background: radial-gradient(
       circle,
-      rgba(197, 160, 89, 0.1) 0%,
+      rgba(197, 160, 89, 0.12) 0%,
       transparent 70%
     );
     filter: blur(20px);
+  }
+
+  .menu-orb-a {
+    animation: menuOrbDrift 9s ease-in-out infinite;
+  }
+
+  .menu-orb-b {
+    animation: menuOrbDrift 11s ease-in-out 1.5s infinite reverse;
+  }
+
+  @keyframes menuOrbDrift {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.6;
+    }
+    50% {
+      transform: translateY(-10px);
+      opacity: 1;
+    }
   }
 
   .menu-header-ornament {
@@ -633,22 +684,41 @@
   .menu-block-footer,
   .menu-nav-item {
     opacity: 0;
-    transition: opacity 0.22s ease;
   }
 
   .menu-overlay.is-visible .menu-block-header {
-    opacity: 1;
-    transition-delay: 0.08s;
+    animation: menuHeaderReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
   }
 
   .menu-overlay.is-visible .menu-nav-item {
-    opacity: 1;
-    transition-delay: calc(var(--item-index, 0) * 0.03s + 0.12s);
+    animation: menuItemReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--item-index, 0) * 0.055s + 0.2s);
   }
 
   .menu-overlay.is-visible .menu-block-footer {
-    opacity: 1;
-    transition-delay: 0.2s;
+    animation: menuHeaderReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+  }
+
+  @keyframes menuHeaderReveal {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes menuItemReveal {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
   .menu-nav-btn {
@@ -834,23 +904,74 @@
   }
 
   .wish-bubble-wrap {
+    position: absolute;
     transform: translate(-50%, -50%);
-    animation: wishBubbleWrapEnter 0.85s cubic-bezier(0.34, 1.45, 0.64, 1) both;
-    animation-delay: var(--enter-delay, 0s);
+    animation:
+      wishBubbleWrapEnter 0.9s cubic-bezier(0.34, 1.3, 0.64, 1) both,
+      wishBubbleWrapFloat0 var(--float-duration, 6s) ease-in-out infinite;
+    animation-delay: var(--enter-delay, 0s), calc(var(--enter-delay, 0s) + 0.9s);
+  }
+
+  .wish-bubble-wrap:has(.wish-bubble:hover) {
+    animation-play-state: paused, paused;
+  }
+
+  .wish-bubble-wrap.wish-bubble-float-0 {
+    animation-name: wishBubbleWrapEnter, wishBubbleWrapFloat0;
+  }
+
+  .wish-bubble-wrap.wish-bubble-float-1 {
+    animation-name: wishBubbleWrapEnter, wishBubbleWrapFloat1;
+  }
+
+  .wish-bubble-wrap.wish-bubble-float-2 {
+    animation-name: wishBubbleWrapEnter, wishBubbleWrapFloat2;
   }
 
   @keyframes wishBubbleWrapEnter {
     0% {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(0) rotate(-12deg);
-    }
-    55% {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1.1) rotate(3deg);
+      transform: translate(-50%, -50%) scale(0.4);
     }
     100% {
       opacity: 1;
-      transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  @keyframes wishBubbleWrapFloat0 {
+    0%,
+    100% {
+      transform: translate(-50%, -50%) translate(0, 0);
+    }
+    33% {
+      transform: translate(-50%, -50%) translate(calc(var(--bubble-drift, 10px) * 0.7), -14px);
+    }
+    66% {
+      transform: translate(-50%, -50%) translate(calc(var(--bubble-drift, 10px) * -0.5), -22px);
+    }
+  }
+
+  @keyframes wishBubbleWrapFloat1 {
+    0%,
+    100% {
+      transform: translate(-50%, -50%) translate(0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate(-50%, -50%) translate(var(--bubble-drift, 10px), -18px) rotate(2deg);
+    }
+  }
+
+  @keyframes wishBubbleWrapFloat2 {
+    0%,
+    100% {
+      transform: translate(-50%, -50%) translate(0, 0);
+    }
+    25% {
+      transform: translate(-50%, -50%) translate(calc(var(--bubble-drift, 10px) * -0.6), -10px);
+    }
+    75% {
+      transform: translate(-50%, -50%) translate(calc(var(--bubble-drift, 10px) * 0.8), -24px);
     }
   }
 
@@ -865,8 +986,6 @@
       0 10px 28px rgba(26, 35, 50, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(8px);
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
     transition:
       box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
       transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -874,8 +993,7 @@
 
   .wish-bubble:hover {
     z-index: 30;
-    animation-play-state: paused;
-    transform: scale(1.12);
+    transform: scale(1.1);
     box-shadow:
       0 16px 40px rgba(197, 160, 89, 0.22),
       0 8px 24px rgba(26, 35, 50, 0.12),
@@ -971,60 +1089,6 @@
   .wish-bubble:hover .wish-bubble-name {
     color: #1a2332;
     transform: scale(1.05);
-  }
-
-  .wish-bubble-float-0 {
-    animation-name: wishBubbleDrift0;
-  }
-
-  .wish-bubble-float-1 {
-    animation-name: wishBubbleDrift1;
-  }
-
-  .wish-bubble-float-2 {
-    animation-name: wishBubbleDrift2;
-  }
-
-  @keyframes wishBubbleDrift0 {
-    0%,
-    100% {
-      transform: translate(0, 0) rotate(0deg);
-    }
-    25% {
-      transform: translate(calc(var(--bubble-drift, 8px) * 0.6), -10px) rotate(1deg);
-    }
-    50% {
-      transform: translate(var(--bubble-drift, 8px), -16px) rotate(0deg);
-    }
-    75% {
-      transform: translate(calc(var(--bubble-drift, 8px) * -0.4), -8px) rotate(-1deg);
-    }
-  }
-
-  @keyframes wishBubbleDrift1 {
-    0%,
-    100% {
-      transform: translate(0, 0) scale(1);
-    }
-    33% {
-      transform: translate(calc(var(--bubble-drift, 8px) * -0.7), -12px) scale(1.02);
-    }
-    66% {
-      transform: translate(calc(var(--bubble-drift, 8px) * 0.5), -20px) scale(0.98);
-    }
-  }
-
-  @keyframes wishBubbleDrift2 {
-    0%,
-    100% {
-      transform: translate(0, 0) rotate(0deg);
-    }
-    40% {
-      transform: translate(calc(var(--bubble-drift, 8px) * 0.8), -14px) rotate(2deg);
-    }
-    80% {
-      transform: translate(calc(var(--bubble-drift, 8px) * -0.5), -6px) rotate(-1.5deg);
-    }
   }
 
   .wish-modal-backdrop {
