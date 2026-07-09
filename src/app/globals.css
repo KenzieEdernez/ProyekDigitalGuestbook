@@ -387,100 +387,129 @@
     animation: float 7s ease-in-out 2s infinite;
   }
 
-  /* ── Mobile menu overlay ── */
+  /* ── Menu overlay ── */
   .menu-overlay {
     pointer-events: none;
+    opacity: 0;
     visibility: hidden;
   }
 
-  .menu-overlay-open {
+  .menu-overlay.is-visible {
     pointer-events: auto;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .menu-overlay.is-hiding {
+    pointer-events: none;
+    opacity: 0;
     visibility: visible;
   }
 
   .menu-backdrop {
+    background: rgba(12, 18, 28, 0.62);
     opacity: 0;
-    background: rgba(15, 20, 30, 0.55);
     backdrop-filter: blur(0px);
     transition:
-      opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-      backdrop-filter 0.5s ease;
+      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      backdrop-filter 0.55s ease;
   }
 
-  .menu-overlay-open .menu-backdrop {
+  .menu-overlay.is-visible .menu-backdrop {
     opacity: 1;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+  }
+
+  .menu-overlay.is-hiding .menu-backdrop {
+    opacity: 0;
+    backdrop-filter: blur(0px);
   }
 
   .menu-panel {
     background: linear-gradient(
-      165deg,
-      rgba(26, 35, 50, 0.98) 0%,
-      rgba(20, 28, 42, 0.99) 55%,
-      rgba(26, 35, 50, 0.97) 100%
+      168deg,
+      rgba(24, 32, 48, 0.99) 0%,
+      rgba(18, 26, 40, 1) 50%,
+      rgba(22, 30, 46, 0.99) 100%
     );
-    box-shadow: -24px 0 60px rgba(0, 0, 0, 0.35);
-    transform: translateX(105%);
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -28px 0 80px rgba(0, 0, 0, 0.45);
+    transform: translateX(100%) scale(0.98);
+    opacity: 0.6;
+    transition:
+      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.45s ease;
+  }
+
+  .menu-panel.is-visible {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+
+  .menu-panel.is-hiding {
+    transform: translateX(100%) scale(0.98);
+    opacity: 0.4;
+    transition-duration: 0.45s;
   }
 
   .menu-panel-glow {
     background: radial-gradient(
-      ellipse at 20% 0%,
-      rgba(197, 160, 89, 0.12) 0%,
-      transparent 55%
+      ellipse at 15% 0%,
+      rgba(197, 160, 89, 0.18) 0%,
+      transparent 60%
     );
   }
 
-  .menu-panel-open {
-    transform: translateX(0);
+  .menu-orb-a {
+    animation: menuOrbFloat 8s ease-in-out infinite;
   }
 
-  .menu-overlay-closed .menu-panel {
-    transform: translateX(105%);
-    transition-duration: 0.45s;
+  .menu-orb-b {
+    animation: menuOrbFloat 10s ease-in-out 1s infinite reverse;
   }
 
-  .menu-header-reveal,
-  .menu-footer-reveal {
-    opacity: 0;
-    transform: translateY(8px);
-    transition:
-      opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  @keyframes menuOrbFloat {
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-12px) scale(1.05);
+    }
   }
 
-  .menu-overlay-open .menu-header-reveal {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 0.15s;
+  .menu-overlay.is-visible .menu-block-header {
+    animation: menuFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
   }
 
-  .menu-overlay-open .menu-footer-reveal {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 0.45s;
+  .menu-overlay.is-visible .menu-nav-item {
+    animation: menuNavSlideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--item-index, 0) * 0.07s + 0.22s);
   }
 
-  .menu-nav-item {
-    opacity: 0;
-    transform: translateX(32px);
-    transition:
-      opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-    transition-delay: calc(var(--item-index, 0) * 70ms + 180ms);
+  .menu-overlay.is-visible .menu-block-footer {
+    animation: menuFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
   }
 
-  .menu-overlay-open .menu-nav-item {
-    opacity: 1;
-    transform: translateX(0);
+  @keyframes menuFadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  .menu-overlay-closed .menu-nav-item {
-    opacity: 0;
-    transform: translateX(20px);
-    transition-delay: 0ms;
-    transition-duration: 0.2s;
+  @keyframes menuNavSlideIn {
+    from {
+      opacity: 0;
+      transform: translateX(36px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
   .menu-nav-btn::before {
@@ -488,17 +517,33 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(
-      90deg,
+      105deg,
       transparent 0%,
-      rgba(197, 160, 89, 0.06) 50%,
-      transparent 100%
+      rgba(197, 160, 89, 0.1) 45%,
+      transparent 90%
     );
-    transform: translateX(-100%);
-    transition: transform 0.6s ease;
+    transform: translateX(-120%);
+    transition: transform 0.7s ease;
   }
 
   .menu-nav-btn:hover::before {
-    transform: translateX(100%);
+    transform: translateX(120%);
+  }
+
+  .hamburger-ring {
+    border: 1px solid rgba(197, 160, 89, 0.45);
+    box-shadow: 0 0 20px rgba(197, 160, 89, 0.25);
+    animation: hamburgerPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes hamburgerPulse {
+    0%,
+    100% {
+      box-shadow: 0 0 12px rgba(197, 160, 89, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 24px rgba(197, 160, 89, 0.45);
+    }
   }
 
   .hamburger-btn {
@@ -507,32 +552,36 @@
 
   /* Love story carousel */
   .love-story-slide-right {
-    animation: loveSlideRight 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: loveSlideRight 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .love-story-slide-left {
-    animation: loveSlideLeft 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: loveSlideLeft 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   @keyframes loveSlideRight {
     from {
       opacity: 0;
-      transform: translateX(28px) scale(0.98);
+      transform: translateX(40px) scale(0.96);
+      filter: blur(4px);
     }
     to {
       opacity: 1;
       transform: translateX(0) scale(1);
+      filter: blur(0);
     }
   }
 
   @keyframes loveSlideLeft {
     from {
       opacity: 0;
-      transform: translateX(-28px) scale(0.98);
+      transform: translateX(-40px) scale(0.96);
+      filter: blur(4px);
     }
     to {
       opacity: 1;
       transform: translateX(0) scale(1);
+      filter: blur(0);
     }
   }
 
