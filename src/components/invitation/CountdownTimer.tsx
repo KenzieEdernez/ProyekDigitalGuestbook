@@ -42,7 +42,7 @@ export default function CountdownTimer({ target, settingsReady = true }: Countdo
   if (!target || !timeLeft) {
     return (
       <p className="text-center text-sm text-white/50">
-        Set the event date and time in Admin → Event Settings, then save.
+        Set the wedding date and time in Admin → Wedding Invitation Content → Wedding Events.
       </p>
     );
   }

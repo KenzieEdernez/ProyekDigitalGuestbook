@@ -18,12 +18,14 @@ import SectionHeader from "@/components/invitation/SectionHeader";
 import type { mergeEventSettings } from "@/lib/event-config";
 import { saveRsvpSession } from "@/lib/rsvp-session";
 import type { Guest } from "@/types/guest";
+import type { WeddingSettings } from "@/types/wedding";
 
 type EventSettings = ReturnType<typeof mergeEventSettings>;
 type Step = "attendance" | "details" | "done";
 
 interface RsvpSectionProps {
   event: EventSettings;
+  wedding: WeddingSettings;
   defaultName?: string | null;
   onNavigateWishes?: () => void;
 }
@@ -37,6 +39,7 @@ const FLOW_STEPS = [
 
 export default function RsvpSection({
   event,
+  wedding,
   defaultName,
   onNavigateWishes,
 }: RsvpSectionProps) {
@@ -139,7 +142,7 @@ export default function RsvpSection({
           <div className="mx-auto max-w-lg">
             <Reveal direction="up" className="animate-scale-in">
               {attending ? (
-                <InvitationPass guest={guest} event={event} />
+                <InvitationPass guest={guest} wedding={wedding} />
               ) : (
                 <DeclinedInvitation name={guest.name} />
               )}

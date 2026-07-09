@@ -12,10 +12,31 @@ import {
   Ticket,
 } from "lucide-react";
 import LinearBarcode from "@/components/invitation/LinearBarcode";
-import { formatRegNumber, mergeEventSettings } from "@/lib/event-config";
+import { formatRegNumber } from "@/lib/event-config";
+import { getPrimaryCeremony } from "@/lib/ceremony-event";
+import { getCoupleDisplayName } from "@/lib/wedding-config";
 import type { Guest } from "@/types/guest";
+import type { WeddingSettings } from "@/types/wedding";
 
-type ResolvedEvent = ReturnType<typeof mergeEventSettings>;
+type PassDetails = {
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  address: string;
+};
+
+function getPassDetails(wedding: WeddingSettings): PassDetails {
+  const ceremony = getPrimaryCeremony(wedding);
+
+  return {
+    title: ceremony?.title || getCoupleDisplayName(wedding),
+    date: ceremony?.date || "",
+    time: ceremony?.time || "",
+    location: ceremony?.location || "",
+    address: ceremony?.address || "",
+  };
+}
 
 function sanitizeFilename(value: string) {
   return value
@@ -37,12 +58,12 @@ function loadImage(src: string) {
 async function createPassImageBlob({
   qrElement,
   guest,
-  event,
+  details,
   invitationBarcode,
 }: {
   qrElement: HTMLElement | null;
   guest: Guest;
-  event: ResolvedEvent;
+  details: PassDetails;
   invitationBarcode: string;
 }) {
   const svg = qrElement?.querySelector("svg");
@@ -76,11 +97,11 @@ async function createPassImageBlob({
 
   ctx.fillStyle = "#1a2332";
   ctx.font = "700 36px Georgia";
-  ctx.fillText(event.name, 450, 195);
+  ctx.fillText(details.title, 450, 195);
 
   ctx.fillStyle = "#78716c";
   ctx.font = "22px Arial";
-  ctx.fillText(event.dateDisplay, 450, 235);
+  ctx.fillText(details.date, 450, 235);
 
   ctx.fillStyle = "#ffffff";
   ctx.roundRect(250, 270, 400, 400, 20);
@@ -117,12 +138,13 @@ async function createPassImageBlob({
 
 interface InvitationPassProps {
   guest: Guest;
-  event: ResolvedEvent;
+  wedding: WeddingSettings;
 }
 
-export function InvitationPass({ guest, event }: InvitationPassProps) {
+export function InvitationPass({ guest, wedding }: InvitationPassProps) {
   const qrRef = useRef<HTMLDivElement>(null);
   const invitationBarcode = guest.invitation_barcode;
+  const details = getPassDetails(wedding);
 
   if (!invitationBarcode) return null;
 
@@ -133,7 +155,7 @@ export function InvitationPass({ guest, event }: InvitationPassProps) {
     createPassImageBlob({
       qrElement: qrRef.current,
       guest,
-      event,
+      details,
       invitationBarcode,
     });
 
@@ -160,7 +182,7 @@ export function InvitationPass({ guest, event }: InvitationPassProps) {
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
-          title: `Wedding Ticket - ${event.name}`,
+          title: `Wedding Ticket - ${details.title}`,
           text: `Entry ticket for ${guest.name}`,
           files: [file],
         });
@@ -240,16 +262,17 @@ export function InvitationPass({ guest, event }: InvitationPassProps) {
         <div className="mt-6 space-y-3 rounded-xl border border-stone-100 bg-stone-50 p-5 text-sm text-stone-600">
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 shrink-0 text-royal" />
-            <span>{event.dateDisplay}</span>
+            <span>{details.date}</span>
           </div>
           <div className="flex items-center gap-3">
             <Clock className="h-4 w-4 shrink-0 text-royal" />
-            <span>{event.time}</span>
+            <span>{details.time}</span>
           </div>
           <div className="flex items-center gap-3">
             <MapPin className="h-4 w-4 shrink-0 text-royal" />
             <span>
-              {event.location}, {event.address}
+              {details.location}
+              {details.address ? `, ${details.address}` : ""}
             </span>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { Calendar, Heart } from "lucide-react";
 import CountdownTimer from "@/components/invitation/CountdownTimer";
 import Reveal from "@/components/invitation/Reveal";
 import { addToCalendar } from "@/lib/calendar-event";
+import { resolveCeremonyEventDetails } from "@/lib/ceremony-event";
 import { parseEventDateTime } from "@/lib/event-datetime";
 import { getCoupleDisplayName } from "@/lib/wedding-config";
 import type { WeddingSettings } from "@/types/wedding";
@@ -16,51 +17,20 @@ interface HomeSectionProps {
   event: EventSettings;
   wedding: WeddingSettings;
   guestName: string | null;
-  settingsReady: boolean;
-  settingsAvailable: boolean;
-}
-
-function resolveAdminEventDetails(
-  event: EventSettings,
-  wedding: WeddingSettings
-) {
-  if (!event.date || !event.timeFrom) return null;
-
-  const coupleName = getCoupleDisplayName(wedding);
-
-  return {
-    date: event.date,
-    time: event.timeFrom,
-    location: [event.location, event.address].filter(Boolean).join(", "),
-    title: `${coupleName} Wedding`,
-    description: event.name || "Wedding celebration",
-    dateLabel: event.dateDisplay || event.date,
-  };
+  weddingReady: boolean;
 }
 
 export default function HomeSection({
   event,
   wedding,
   guestName,
-  settingsReady,
-  settingsAvailable,
+  weddingReady,
 }: HomeSectionProps) {
   const [scrollY, setScrollY] = useState(0);
   const eventDetails = useMemo(() => {
-    if (!settingsReady || !settingsAvailable) return null;
-    return resolveAdminEventDetails(event, wedding);
-  }, [
-    settingsReady,
-    settingsAvailable,
-    event.date,
-    event.dateDisplay,
-    event.timeFrom,
-    event.location,
-    event.address,
-    event.name,
-    wedding.groom.name,
-    wedding.bride.name,
-  ]);
+    if (!weddingReady) return null;
+    return resolveCeremonyEventDetails(wedding);
+  }, [weddingReady, wedding.ceremonies]);
   const countdownTarget = useMemo(
     () =>
       eventDetails
@@ -147,7 +117,7 @@ export default function HomeSection({
             )}
             <CountdownTimer
               target={countdownTarget}
-              settingsReady={settingsReady}
+              settingsReady={weddingReady}
             />
           </div>
         </Reveal>

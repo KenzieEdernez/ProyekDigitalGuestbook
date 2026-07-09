@@ -18,6 +18,7 @@ import Reveal from "@/components/invitation/Reveal";
 import { useEventSettings } from "@/hooks/useEventSettings";
 import { useWeddingSettings } from "@/hooks/useWeddingSettings";
 import { getCoupleDisplayName, parseGuestName, type InvitationSection } from "@/lib/wedding-config";
+import { getPrimaryCeremony } from "@/lib/ceremony-event";
 
 const SECTION_IDS: InvitationSection[] = [
   "home",
@@ -141,6 +142,8 @@ export default function InvitationApp() {
     }
   }, [musicAvailable]);
 
+  const primaryCeremony = getPrimaryCeremony(wedding);
+
   if (!eventSettings.settingsReady || !weddingReady) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-champagne px-6">
@@ -150,27 +153,6 @@ export default function InvitationApp() {
             EdernDigital
           </p>
           <p className="mt-3 text-sm text-stone-500">Loading invitation...</p>
-        </div>
-      </main>
-    );
-  }
-
-  if (!eventSettings.settingsAvailable) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-champagne px-6">
-        <div className="max-w-md text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-royal">
-            EdernDigital
-          </p>
-          <h1 className="mt-3 font-display text-2xl text-navy">
-            Event settings are not available
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-stone-500">
-            Please configure event settings from the admin page first.
-          </p>
-          <Link href="/admin" className="btn-invite-primary mt-6 inline-flex">
-            Open Admin
-          </Link>
         </div>
       </main>
     );
@@ -190,7 +172,7 @@ export default function InvitationApp() {
         <InvitationCover
           guestName={guestName}
           heroImage={eventSettings.heroImage}
-          weddingDate={eventSettings.dateDisplay}
+          weddingDate={primaryCeremony?.date ?? ""}
           coupleName={getCoupleDisplayName(wedding)}
           onOpen={handleOpen}
         />
@@ -225,8 +207,7 @@ export default function InvitationApp() {
               event={eventSettings}
               wedding={wedding}
               guestName={guestName}
-              settingsReady={eventSettings.settingsReady}
-              settingsAvailable={eventSettings.settingsAvailable}
+              weddingReady={weddingReady}
             />
 
             <WaveDivider fill="#f9f0ed" />
@@ -238,6 +219,7 @@ export default function InvitationApp() {
             <WaveDivider fill="#f8f6f2" />
             <RsvpSection
               event={eventSettings}
+              wedding={wedding}
               defaultName={guestName}
               onNavigateWishes={() => navigateTo("wishes")}
             />

@@ -77,13 +77,14 @@ function resolveTimeFields(input: Partial<EventSettings> & Record<string, unknow
   return { timeFrom, time };
 }
 
-function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown>): EventSettings {
+function buildSettings(input: Partial<EventSettings> & Record<string, unknown>): EventSettings {
   const date = toDateInputValue(textValue(input.date));
   const { timeFrom, time } = resolveTimeFields(input);
-  const settings = {
+
+  return {
     name: textValue(input.name),
     date,
-    dateDisplay: formatDateDisplay(date),
+    dateDisplay: formatDateDisplay(date) || textValue(input.dateDisplay),
     timeFrom,
     time,
     location: textValue(input.location),
@@ -99,22 +100,16 @@ function sanitizeSettings(input: Partial<EventSettings> & Record<string, unknown
     ),
     heroImage: textValue(input.heroImage ?? input.hero_image),
   };
+}
 
-  const requiredFields = [
-    settings.name,
-    settings.date,
-    settings.timeFrom,
-    settings.location,
-    settings.address,
-    settings.dressLadies,
-    settings.dressGentlemen,
-  ];
+function mapRowToInput(data: Record<string, unknown>): Partial<EventSettings> {
+  return buildSettings(data);
+}
 
-  if (requiredFields.some((value) => !value)) {
-    throw new Error("Event settings are incomplete.");
+function validatePresentationSettings(settings: EventSettings) {
+  if (!settings.dressLadies || !settings.dressGentlemen) {
+    throw new Error("Dress code for Ladies and Gentlemen is required.");
   }
-
-  return settings;
 }
 
 export async function getEventSettings(): Promise<EventSettings | null> {
@@ -128,7 +123,7 @@ export async function getEventSettings(): Promise<EventSettings | null> {
 
     if (error) throw error;
     if (!data) return null;
-    return sanitizeSettings(data as Partial<EventSettings> & Record<string, unknown>);
+    return buildSettings(data as Partial<EventSettings> & Record<string, unknown>);
   } catch {
     return null;
   }
@@ -137,9 +132,22 @@ export async function getEventSettings(): Promise<EventSettings | null> {
 export async function saveEventSettings(
   input: Partial<EventSettings>
 ): Promise<EventSettings> {
-  const settings = sanitizeSettings(input);
-  const heroImage = await saveHeroImage(settings.heroImage);
   const supabase = getSupabaseAdmin();
+  const { data: existing } = await supabase
+    .from("event_settings")
+    .select("*")
+    .eq("id", "default")
+    .maybeSingle();
+
+  const merged = {
+    ...(existing
+      ? mapRowToInput(existing as Record<string, unknown>)
+      : {}),
+    ...input,
+  };
+  const settings = buildSettings(merged);
+  validatePresentationSettings(settings);
+  const heroImage = await saveHeroImage(settings.heroImage);
   const { error } = await supabase.from("event_settings").upsert({
     id: "default",
     name: settings.name,

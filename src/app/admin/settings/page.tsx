@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ImageIcon, Save } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
 import WeddingContentSettings from "@/components/admin/WeddingContentSettings";
-import EventTimeInput from "@/components/admin/EventTimeInput";
-import { formatEventTimeAt } from "@/lib/event-time";
 import type { EventSettings } from "@/types/event";
 
 const EMPTY_EVENT_SETTINGS: EventSettings = {
@@ -76,45 +74,6 @@ function readLandscapeImage(file: File) {
   });
 }
 
-const fields: Array<{
-  key: keyof EventSettings;
-  label: string;
-  placeholder: string;
-  type?: string;
-}> = [
-  {
-    key: "name",
-    label: "Event Name",
-    placeholder: "Example: Engagement Dinner",
-  },
-  {
-    key: "date",
-    label: "Date",
-    placeholder: "Select event date",
-    type: "date",
-  },
-  {
-    key: "location",
-    label: "Location",
-    placeholder: "Example: The Imperial Grand Hall",
-  },
-  {
-    key: "address",
-    label: "Address",
-    placeholder: "Example: 450 Prestige Blvd, Jakarta",
-  },
-  {
-    key: "dressLadies",
-    label: "Ladies",
-    placeholder: "Example: Evening dress in neutral tones",
-  },
-  {
-    key: "dressGentlemen",
-    label: "Gentlemen",
-    placeholder: "Example: Formal suit in dark tones",
-  },
-];
-
 export default function EventSettingsPage() {
   const [form, setForm] = useState<EventSettings>(EMPTY_EVENT_SETTINGS);
   const [loading, setLoading] = useState(true);
@@ -159,7 +118,7 @@ export default function EventSettingsPage() {
       }
 
       setForm(data.settings);
-      setMessage("Event settings saved successfully.");
+      setMessage("Page settings saved successfully.");
     } catch {
       setError("Failed to connect to the server.");
     } finally {
@@ -192,8 +151,8 @@ export default function EventSettingsPage() {
 
   return (
     <AdminShell
-      title="Event Settings"
-      subtitle="Manage event details and all wedding invitation content"
+      title="Wedding Settings"
+      subtitle="Manage the hero image, dress code, and wedding invitation content"
     >
       <form onSubmit={handleSubmit} className="card-premium mb-8 max-w-3xl p-6">
         {message && (
@@ -209,7 +168,7 @@ export default function EventSettingsPage() {
 
         {loading ? (
           <div className="rounded-lg bg-parchment px-4 py-5 text-sm text-stone-500 dark:bg-navy-700 dark:text-stone-300">
-            Loading event settings...
+            Loading settings...
           </div>
         ) : (
           <div className="space-y-6">
@@ -246,41 +205,40 @@ export default function EventSettingsPage() {
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
-              {fields.map((field) => (
-                <div
-                  key={field.key}
-                  className={field.key === "address" ? "md:col-span-2" : undefined}
-                >
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                    {field.label}
-                  </label>
-                  <input
-                    type={field.type ?? "text"}
-                    value={form[field.key]}
-                    onChange={(e) =>
-                      setForm((current) => ({
-                        ...current,
-                        [field.key]: e.target.value,
-                      }))
-                    }
-                    placeholder={field.placeholder}
-                    disabled={saving}
-                    className="input-field"
-                  />
-                </div>
-              ))}
-
-              <EventTimeInput
-                timeFrom={form.timeFrom}
-                disabled={saving}
-                onChange={(timeFrom) =>
-                  setForm((current) => ({
-                    ...current,
-                    timeFrom,
-                    time: formatEventTimeAt(timeFrom),
-                  }))
-                }
-              />
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Ladies
+                </label>
+                <input
+                  value={form.dressLadies}
+                  onChange={(e) =>
+                    setForm((current) => ({
+                      ...current,
+                      dressLadies: e.target.value,
+                    }))
+                  }
+                  placeholder="Example: Evening dress in neutral tones"
+                  disabled={saving}
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Gentlemen
+                </label>
+                <input
+                  value={form.dressGentlemen}
+                  onChange={(e) =>
+                    setForm((current) => ({
+                      ...current,
+                      dressGentlemen: e.target.value,
+                    }))
+                  }
+                  placeholder="Example: Formal suit in dark tones"
+                  disabled={saving}
+                  className="input-field"
+                />
+              </div>
             </div>
           </div>
         )}
