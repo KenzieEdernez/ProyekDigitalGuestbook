@@ -25,7 +25,8 @@ export default function InvitationNav({
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -44,37 +45,33 @@ export default function InvitationNav({
     onNavigate(section);
   };
 
-  const toggleMenu = () => setMenuOpen((v) => !v);
-
   return (
     <>
       <header
-        className={`sticky top-0 flex items-center justify-between border-b px-4 py-3 transition-all duration-500 lg:px-10 lg:py-4 ${
-          menuOpen ? "z-[201]" : "z-50"
-        } ${
-          scrolled || menuOpen
-            ? "border-white/10 bg-navy/92 shadow-card backdrop-blur-xl"
-            : "border-transparent bg-navy/75 backdrop-blur-md"
-        }`}
+        className={`invitation-header sticky top-0 px-4 py-3 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] lg:px-10 lg:py-4 ${
+          menuOpen ? "z-[201] is-menu-open" : "z-50"
+        } ${scrolled || menuOpen ? "is-scrolled" : ""}`}
       >
-        <button
-          onClick={() => handleNav("home")}
-          className="group text-left transition-opacity hover:opacity-90"
-        >
-          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-royal/80 transition-colors group-hover:text-royal">
-            The Wedding of
-          </p>
-          <p className="font-display text-base font-light text-white transition-transform duration-300 group-hover:translate-x-0.5 lg:text-lg">
-            {coupleName}
-          </p>
-        </button>
+        <div className="invitation-header-inner relative flex items-center justify-between">
+          <button
+            onClick={() => handleNav("home")}
+            className="group min-w-0 text-left"
+          >
+            <p className="text-[9px] font-bold uppercase tracking-[0.38em] text-royal/75 transition-all duration-500 group-hover:tracking-[0.42em] group-hover:text-royal">
+              The Wedding of
+            </p>
+            <p className="truncate font-display text-base font-light text-white transition-all duration-500 group-hover:text-royal/90 lg:text-lg">
+              {coupleName}
+            </p>
+          </button>
 
-        <HamburgerButton
-          open={menuOpen}
-          onClick={toggleMenu}
-          elevated={menuOpen}
-          className={menuOpen ? "z-[202]" : ""}
-        />
+          <HamburgerButton
+            open={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+            elevated={menuOpen}
+          />
+        </div>
+        <div className="invitation-header-line pointer-events-none absolute bottom-0 left-0 right-0 h-px" />
       </header>
 
       <MenuOverlay
@@ -87,7 +84,7 @@ export default function InvitationNav({
 
       <button
         onClick={onToggleMusic}
-        className={`fixed bottom-6 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border shadow-card transition-all duration-300 ease-out-expo hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8 ${
+        className={`fixed bottom-6 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border shadow-card transition-all duration-500 ease-out-expo hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8 ${
           musicPlaying
             ? "border-royal/40 bg-royal/10"
             : "border-stone-200 bg-white hover:border-royal/30"

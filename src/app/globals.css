@@ -385,11 +385,233 @@
     animation: float 7s ease-in-out 2s infinite;
   }
 
+  /* ── Invitation header ── */
+  .invitation-header {
+    background: transparent;
+  }
+
+  .invitation-header.is-scrolled .invitation-header-inner {
+    background: rgba(18, 26, 40, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    border-radius: 9999px;
+    padding: 0.625rem 1rem 0.625rem 1.25rem;
+  }
+
+  .invitation-header.is-menu-open .invitation-header-inner {
+    background: rgba(18, 26, 40, 0.88);
+    border: 1px solid rgba(197, 160, 89, 0.2);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+    border-radius: 9999px;
+    padding: 0.625rem 1rem 0.625rem 1.25rem;
+  }
+
+  .invitation-header-inner {
+    transition:
+      background 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      border 0.7s ease,
+      box-shadow 0.7s ease,
+      backdrop-filter 0.7s ease,
+      border-radius 0.7s ease,
+      padding 0.7s ease;
+  }
+
+  .invitation-header-line {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(197, 160, 89, 0.15) 20%,
+      rgba(197, 160, 89, 0.45) 50%,
+      rgba(197, 160, 89, 0.15) 80%,
+      transparent 100%
+    );
+    opacity: 0;
+    transform: scaleX(0.4);
+    transition:
+      opacity 0.7s ease,
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .invitation-header.is-scrolled .invitation-header-line,
+  .invitation-header.is-menu-open .invitation-header-line {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  /* ── Hamburger button ── */
+  .hamburger-btn {
+    will-change: transform;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .hamburger-btn:hover {
+    background: rgba(197, 160, 89, 0.08);
+    border-color: rgba(197, 160, 89, 0.35);
+    box-shadow: 0 0 28px rgba(197, 160, 89, 0.18);
+  }
+
+  .hamburger-btn.is-open {
+    background: rgba(197, 160, 89, 0.12);
+    border-color: rgba(197, 160, 89, 0.5);
+    box-shadow: 0 0 32px rgba(197, 160, 89, 0.28);
+  }
+
+  .hamburger-aura {
+    background: radial-gradient(
+      circle at center,
+      rgba(197, 160, 89, 0.22) 0%,
+      transparent 70%
+    );
+    opacity: 0;
+    transform: scale(0.8);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .hamburger-btn:hover .hamburger-aura,
+  .hamburger-btn.is-open .hamburger-aura {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+
+  .hamburger-ring {
+    border: 1px solid rgba(197, 160, 89, 0.35);
+    opacity: 0.7;
+    transition:
+      border-color 0.5s ease,
+      opacity 0.5s ease,
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .hamburger-btn:hover .hamburger-ring {
+    border-color: rgba(197, 160, 89, 0.65);
+    opacity: 1;
+  }
+
+  .hamburger-btn.is-open .hamburger-ring {
+    border-color: rgba(197, 160, 89, 0.75);
+    transform: rotate(90deg);
+    opacity: 1;
+  }
+
+  .hamburger-ring-outer {
+    border: 1px solid rgba(197, 160, 89, 0.12);
+    opacity: 0;
+    transform: scale(0.92);
+    transition:
+      opacity 0.6s ease,
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .hamburger-btn:hover .hamburger-ring-outer,
+  .hamburger-btn.is-open .hamburger-ring-outer {
+    opacity: 1;
+    transform: scale(1);
+    animation: hamburgerOuterPulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes hamburgerOuterPulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.15);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(197, 160, 89, 0);
+    }
+  }
+
+  .hamburger-line {
+    width: 100%;
+    transform-origin: center;
+    transition:
+      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.4s ease,
+      background-color 0.4s ease;
+  }
+
+  .hamburger-line-top {
+    width: 100%;
+  }
+
+  .hamburger-line-mid {
+    width: 72%;
+  }
+
+  .hamburger-line-bot {
+    width: 88%;
+  }
+
+  .hamburger-btn:hover .hamburger-line {
+    background-color: rgba(197, 160, 89, 0.95);
+  }
+
+  .hamburger-btn:hover .hamburger-line-mid {
+    width: 100%;
+  }
+
+  .hamburger-closed .hamburger-line-top,
+  .hamburger-closed .hamburger-line-bot {
+    animation: hamburgerBreathe 3.2s ease-in-out infinite;
+  }
+
+  .hamburger-closed .hamburger-line-mid {
+    animation: hamburgerBreatheMid 3.2s ease-in-out 0.4s infinite;
+  }
+
+  @keyframes hamburgerBreathe {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-1px);
+    }
+  }
+
+  @keyframes hamburgerBreatheMid {
+    0%,
+    100% {
+      transform: translateX(0);
+      opacity: 0.85;
+    }
+    50% {
+      transform: translateX(-2px);
+      opacity: 1;
+    }
+  }
+
+  .hamburger-btn.is-open .hamburger-line {
+    width: 100%;
+    background-color: #fff;
+    animation: none;
+  }
+
+  .hamburger-btn.is-open .hamburger-line-top {
+    transform: translateY(8px) rotate(45deg);
+  }
+
+  .hamburger-btn.is-open .hamburger-line-mid {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+
+  .hamburger-btn.is-open .hamburger-line-bot {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+
   /* ── Menu overlay ── */
   .menu-overlay {
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
+    transition:
+      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0.55s;
   }
 
   .menu-overlay.is-visible {
@@ -405,17 +627,17 @@
   }
 
   .menu-backdrop {
-    background: rgba(12, 18, 28, 0.62);
+    background: rgba(8, 12, 20, 0.55);
     opacity: 0;
     backdrop-filter: blur(0px);
     transition:
-      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-      backdrop-filter 0.55s ease;
+      opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+      backdrop-filter 0.6s ease;
   }
 
   .menu-overlay.is-visible .menu-backdrop {
     opacity: 1;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px) saturate(1.1);
   }
 
   .menu-overlay.is-hiding .menu-backdrop {
@@ -425,36 +647,88 @@
 
   .menu-panel {
     background: linear-gradient(
-      168deg,
-      rgba(24, 32, 48, 0.99) 0%,
-      rgba(18, 26, 40, 1) 50%,
-      rgba(22, 30, 46, 0.99) 100%
+      165deg,
+      rgba(20, 28, 44, 0.98) 0%,
+      rgba(14, 20, 34, 1) 42%,
+      rgba(18, 26, 42, 0.99) 100%
     );
-    box-shadow: -28px 0 80px rgba(0, 0, 0, 0.45);
-    transform: translateX(100%) scale(0.98);
-    opacity: 0.6;
+    box-shadow:
+      -32px 0 90px rgba(0, 0, 0, 0.5),
+      inset 1px 0 0 rgba(197, 160, 89, 0.08);
+    clip-path: inset(0 0 0 100% round 0);
+    opacity: 0;
     transition:
-      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.45s ease;
+      clip-path 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.5s ease;
   }
 
   .menu-panel.is-visible {
-    transform: translateX(0) scale(1);
+    clip-path: inset(0 0 0 0 round 0);
     opacity: 1;
   }
 
   .menu-panel.is-hiding {
-    transform: translateX(100%) scale(0.98);
-    opacity: 0.4;
-    transition-duration: 0.45s;
+    clip-path: inset(0 0 0 100% round 0);
+    opacity: 0.5;
+    transition-duration: 0.5s;
+  }
+
+  .menu-panel-shimmer {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(197, 160, 89, 0.55) 35%,
+      rgba(197, 160, 89, 0.85) 50%,
+      rgba(197, 160, 89, 0.55) 65%,
+      transparent 100%
+    );
+    background-size: 100% 200%;
+    animation: menuEdgeShimmer 3.5s ease-in-out infinite;
+    opacity: 0.7;
+  }
+
+  @keyframes menuEdgeShimmer {
+    0%,
+    100% {
+      background-position: 0% 0%;
+      opacity: 0.45;
+    }
+    50% {
+      background-position: 0% 100%;
+      opacity: 0.9;
+    }
+  }
+
+  .menu-panel-texture {
+    background-image: radial-gradient(
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+    opacity: 0.35;
   }
 
   .menu-panel-glow {
+    background:
+      radial-gradient(
+        ellipse at 12% 8%,
+        rgba(197, 160, 89, 0.2) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse at 88% 92%,
+        rgba(197, 160, 89, 0.08) 0%,
+        transparent 45%
+      );
+  }
+
+  .menu-orb {
     background: radial-gradient(
-      ellipse at 15% 0%,
-      rgba(197, 160, 89, 0.18) 0%,
-      transparent 60%
+      circle,
+      rgba(197, 160, 89, 0.12) 0%,
+      transparent 70%
     );
+    filter: blur(24px);
   }
 
   .menu-orb-a {
@@ -471,87 +745,125 @@
       transform: translateY(0) scale(1);
     }
     50% {
-      transform: translateY(-12px) scale(1.05);
+      transform: translateY(-14px) scale(1.06);
     }
   }
 
+  .menu-header-ornament {
+    background: linear-gradient(
+      90deg,
+      rgba(197, 160, 89, 0.7) 0%,
+      rgba(197, 160, 89, 0.15) 70%,
+      transparent 100%
+    );
+  }
+
+  .menu-block-header,
+  .menu-block-footer,
+  .menu-nav-item {
+    opacity: 0;
+  }
+
   .menu-overlay.is-visible .menu-block-header {
-    animation: menuFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+    opacity: 1;
+    animation: menuFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
   }
 
   .menu-overlay.is-visible .menu-nav-item {
     opacity: 1;
-    animation: menuNavSlideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: calc(var(--item-index, 0) * 0.07s + 0.22s);
+    animation: menuNavReveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--item-index, 0) * 0.075s + 0.28s);
   }
 
-  .menu-overlay.is-visible .menu-block-header,
   .menu-overlay.is-visible .menu-block-footer {
     opacity: 1;
-  }
-
-  .menu-overlay.is-visible .menu-block-footer {
-    animation: menuFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+    animation: menuFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.62s both;
   }
 
   @keyframes menuFadeUp {
     from {
       opacity: 0;
-      transform: translateY(14px);
+      transform: translateY(18px);
+      filter: blur(4px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
+      filter: blur(0);
     }
   }
 
-  @keyframes menuNavSlideIn {
+  @keyframes menuNavReveal {
     from {
       opacity: 0;
-      transform: translateX(36px);
+      transform: translateX(42px);
+      filter: blur(3px);
     }
     to {
       opacity: 1;
       transform: translateX(0);
+      filter: blur(0);
     }
+  }
+
+  .menu-nav-btn {
+    border: 1px solid transparent;
   }
 
   .menu-nav-btn::before {
     content: "";
     position: absolute;
     inset: 0;
+    border-radius: inherit;
     background: linear-gradient(
       105deg,
       transparent 0%,
-      rgba(197, 160, 89, 0.1) 45%,
-      transparent 90%
+      rgba(197, 160, 89, 0.12) 42%,
+      transparent 88%
     );
-    transform: translateX(-120%);
-    transition: transform 0.7s ease;
+    transform: translateX(-130%);
+    transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
   }
 
   .menu-nav-btn:hover::before {
-    transform: translateX(120%);
+    transform: translateX(130%);
   }
 
-  .hamburger-ring {
-    border: 1px solid rgba(197, 160, 89, 0.45);
-    box-shadow: 0 0 20px rgba(197, 160, 89, 0.25);
-    animation: hamburgerPulse 2s ease-in-out infinite;
+  .menu-nav-glow {
+    opacity: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(197, 160, 89, 0.14) 0%,
+      rgba(197, 160, 89, 0.04) 40%,
+      transparent 100%
+    );
+    transition: opacity 0.5s ease;
   }
 
-  @keyframes hamburgerPulse {
+  .menu-nav-btn:hover .menu-nav-glow,
+  .menu-nav-btn.is-active .menu-nav-glow {
+    opacity: 1;
+  }
+
+  .menu-nav-btn.is-active {
+    border-color: rgba(197, 160, 89, 0.18);
+    background: rgba(197, 160, 89, 0.06);
+    box-shadow: inset 3px 0 0 rgba(197, 160, 89, 0.75);
+  }
+
+  .menu-footer-card {
+    animation: menuFooterGlow 4s ease-in-out infinite;
+  }
+
+  @keyframes menuFooterGlow {
     0%,
     100% {
-      box-shadow: 0 0 12px rgba(197, 160, 89, 0.2);
+      box-shadow: 0 0 0 rgba(197, 160, 89, 0);
     }
     50% {
-      box-shadow: 0 0 24px rgba(197, 160, 89, 0.45);
+      box-shadow: 0 0 24px rgba(197, 160, 89, 0.08);
     }
-  }
-
-  .hamburger-btn {
-    will-change: transform;
   }
 
   /* Love story carousel */

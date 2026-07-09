@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
-  ArrowRight,
+  ArrowUpRight,
   Calendar,
   ClipboardCheck,
   Gift,
@@ -11,7 +11,6 @@ import {
   Home,
   ImageIcon,
   Mail,
-  Sparkles,
   X,
 } from "lucide-react";
 import { NAV_ITEMS, type InvitationSection } from "@/lib/wedding-config";
@@ -61,7 +60,7 @@ export default function MenuOverlay({
     }
 
     setVisible(false);
-    const timer = setTimeout(() => setMounted(false), 520);
+    const timer = setTimeout(() => setMounted(false), 600);
     return () => clearTimeout(timer);
   }, [open]);
 
@@ -75,7 +74,7 @@ export default function MenuOverlay({
 
   const handleNav = (section: InvitationSection) => {
     onClose();
-    setTimeout(() => onNavigate(section), 360);
+    setTimeout(() => onNavigate(section), 400);
   };
 
   if (!mounted || !portalRoot) return null;
@@ -91,39 +90,41 @@ export default function MenuOverlay({
       <div className="menu-backdrop absolute inset-0" onClick={onClose} />
 
       <aside
-        className={`menu-panel absolute right-0 top-0 flex h-[100dvh] w-[min(92vw,400px)] flex-col lg:w-[440px] ${visible ? "is-visible" : "is-hiding"}`}
+        className={`menu-panel absolute right-0 top-0 flex h-[100dvh] w-[min(90vw,420px)] flex-col lg:w-[460px] ${visible ? "is-visible" : "is-hiding"}`}
       >
-        <div className="menu-panel-edge pointer-events-none absolute bottom-0 left-0 top-0 w-[2px] bg-gradient-to-b from-transparent via-royal/70 to-transparent" />
+        <div className="menu-panel-shimmer pointer-events-none absolute bottom-0 left-0 top-0 w-px" />
+        <div className="menu-panel-texture pointer-events-none absolute inset-0" />
         <div className="menu-panel-glow pointer-events-none absolute inset-0" />
-        <div className="menu-orb menu-orb-a pointer-events-none absolute -left-16 top-1/4 h-44 w-44 rounded-full bg-royal/15 blur-3xl" />
-        <div className="menu-orb menu-orb-b pointer-events-none absolute -right-8 bottom-1/3 h-36 w-36 rounded-full bg-blush/25 blur-3xl" />
+        <div className="menu-orb menu-orb-a pointer-events-none absolute -left-20 top-[18%] h-48 w-48 rounded-full" />
+        <div className="menu-orb menu-orb-b pointer-events-none absolute -right-10 bottom-[22%] h-40 w-40 rounded-full" />
 
         <div className="menu-panel-content relative z-10 flex h-full min-h-0 flex-col">
-          <div className="menu-block menu-block-header flex shrink-0 items-center justify-between border-b border-white/10 px-6 py-5 lg:px-8 lg:py-6">
-            <div>
-              <div className="mb-2 flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5 animate-pulse-soft text-royal" />
-                <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-royal">
-                  Menu
+          <div className="menu-block menu-block-header shrink-0 px-7 pb-6 pt-8 lg:px-9 lg:pt-10">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-[0.45em] text-royal/90">
+                  Wedding Invitation
                 </p>
+                <h2 className="mt-3 font-display text-2xl font-light leading-tight text-white lg:text-[1.75rem]">
+                  {coupleName}
+                </h2>
+                <div className="menu-header-ornament mt-4 h-px w-full max-w-[180px]" />
               </div>
-              <p className="font-display text-xl font-light text-white lg:text-2xl">
-                {coupleName}
-              </p>
+              <button
+                onClick={onClose}
+                aria-label="Close menu"
+                className="menu-close-btn group flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/5 transition-all duration-500 hover:border-royal/50 hover:bg-royal/10 active:scale-90"
+              >
+                <X className="h-[18px] w-[18px] text-white/55 transition-all duration-500 group-hover:rotate-90 group-hover:text-royal" />
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="menu-close-btn group flex items-center gap-2.5 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 transition-all duration-300 hover:border-royal/50 hover:bg-royal/10 active:scale-95"
-            >
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 transition-colors group-hover:text-royal">
-                Close
-              </span>
-              <X className="h-4 w-4 text-white/60 transition-all duration-300 group-hover:rotate-90 group-hover:text-royal" />
-            </button>
+            <p className="mt-5 text-[11px] leading-relaxed text-white/40">
+              Select a section to explore our celebration
+            </p>
           </div>
 
-          <nav className="min-h-0 flex-1 overflow-y-auto px-4 py-6 lg:px-6 lg:py-8">
-            <ul key={animKey} className="space-y-2.5">
+          <nav className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 lg:px-7">
+            <ul key={animKey} className="space-y-1">
               {NAV_ITEMS.map(({ id, label }, i) => {
                 const isActive = active === id;
                 const Icon = NAV_ICONS[id];
@@ -135,29 +136,34 @@ export default function MenuOverlay({
                   >
                     <button
                       onClick={() => handleNav(id)}
-                      className={`menu-nav-btn group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border px-4 py-4 text-left transition-all duration-300 active:scale-[0.98] lg:px-5 lg:py-4 ${
-                        isActive
-                          ? "border-royal/35 bg-royal/15 text-royal shadow-[inset_4px_0_0_0_rgba(197,160,89,1)]"
-                          : "border-transparent text-white/85 hover:border-white/10 hover:bg-white/8 hover:text-white"
+                      className={`menu-nav-btn group relative flex w-full items-center gap-4 rounded-xl px-4 py-[1.125rem] text-left transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] lg:px-5 ${
+                        isActive ? "is-active" : ""
                       }`}
                     >
+                      <span className="menu-nav-glow pointer-events-none absolute inset-0 rounded-xl" />
                       <span
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 ${
+                        className={`menu-nav-icon relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all duration-500 ${
                           isActive
-                            ? "border-royal/50 bg-royal/20 text-royal shadow-glow"
-                            : "border-white/15 bg-white/8 text-white/75 group-hover:border-royal/35 group-hover:text-royal"
+                            ? "border-royal/50 bg-royal/15 text-royal"
+                            : "border-white/10 bg-white/[0.04] text-white/50 group-hover:border-royal/30 group-hover:text-royal/90"
                         }`}
                       >
-                        <Icon className="h-[18px] w-[18px]" />
+                        <Icon className="h-[17px] w-[17px]" />
                       </span>
-                      <span className="flex-1 font-display text-base font-light tracking-wide">
-                        {label}
+                      <span className="relative flex-1">
+                        <span
+                          className={`block font-display text-[1.05rem] font-light tracking-wide transition-colors duration-500 ${
+                            isActive ? "text-royal" : "text-white/85 group-hover:text-white"
+                          }`}
+                        >
+                          {label}
+                        </span>
                       </span>
-                      <ArrowRight
-                        className={`h-4 w-4 shrink-0 transition-all duration-300 ${
+                      <ArrowUpRight
+                        className={`relative h-4 w-4 shrink-0 transition-all duration-500 ${
                           isActive
-                            ? "translate-x-0 text-royal opacity-100"
-                            : "-translate-x-1 text-white/35 opacity-80 group-hover:translate-x-0 group-hover:text-royal group-hover:opacity-100"
+                            ? "translate-x-0 translate-y-0 text-royal opacity-100"
+                            : "-translate-x-1 translate-y-1 text-white/25 opacity-0 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:text-royal/70 group-hover:opacity-100"
                         }`}
                       />
                     </button>
@@ -167,10 +173,14 @@ export default function MenuOverlay({
             </ul>
           </nav>
 
-          <div className="menu-block menu-block-footer shrink-0 border-t border-white/10 px-6 py-6">
-            <div className="text-center">
-              <div className="mx-auto mb-3 h-px w-24 bg-gradient-to-r from-transparent via-royal/60 to-transparent" />
-              <p className="text-[9px] uppercase tracking-[0.35em] text-white/45">
+          <div className="menu-block menu-block-footer shrink-0 px-7 py-8 lg:px-9">
+            <div className="menu-footer-card rounded-2xl border border-white/[0.06] bg-white/[0.03] px-5 py-4 text-center backdrop-blur-sm">
+              <div className="mx-auto mb-3 flex items-center justify-center gap-3">
+                <span className="h-px w-10 bg-gradient-to-r from-transparent to-royal/50" />
+                <Heart className="h-3 w-3 fill-royal/30 text-royal/60" />
+                <span className="h-px w-10 bg-gradient-to-l from-transparent to-royal/50" />
+              </div>
+              <p className="text-[9px] uppercase tracking-[0.4em] text-white/35">
                 With love &amp; gratitude
               </p>
             </div>
