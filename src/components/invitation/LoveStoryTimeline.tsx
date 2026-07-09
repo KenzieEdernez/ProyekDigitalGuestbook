@@ -13,10 +13,10 @@ export default function LoveStoryTimeline() {
       <Reveal direction="blur" duration={900}>
         <div className="mb-14 text-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-royal">
-            Perjalanan Kami
+            Our Journey
           </p>
           <h3 className="mt-4 font-display text-4xl font-light text-navy md:text-5xl">
-            Kisah Cinta Kami
+            Our Love Story
           </h3>
           <div className="ornament-line mx-auto mt-6 max-w-xs" />
         </div>
@@ -122,7 +122,7 @@ export default function LoveStoryTimeline() {
           ))}
         </div>
         <p className="mt-2 text-center text-[9px] uppercase tracking-[0.3em] text-stone-400">
-          Geser untuk melihat
+          Swipe to explore
         </p>
       </div>
     </div>

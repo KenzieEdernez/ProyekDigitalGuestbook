@@ -40,10 +40,10 @@ export default function HomeSection({
       <div className="absolute inset-0 bg-gradient-to-b from-navy-900/75 via-navy-900/35 to-champagne" />
       <div className="absolute inset-0 bg-radial-gold opacity-60" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-4xl flex-col items-center justify-center px-6 py-28 text-center">
+      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 py-28 text-center lg:max-w-6xl lg:px-10 lg:py-32">
         <Reveal direction="blur" duration={900}>
           <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-royal-200">
-            Undangan Pernikahan
+            Wedding Invitation
           </p>
         </Reveal>
 
@@ -64,7 +64,7 @@ export default function HomeSection({
         {guestName && (
           <Reveal direction="up" delay={400}>
             <p className="text-sm font-light text-white/70">
-              Untuk{" "}
+              For{" "}
               <span className="font-display text-xl text-white">
                 {guestName}
               </span>
@@ -86,7 +86,7 @@ export default function HomeSection({
         <Reveal direction="up" delay={650}>
           <div className="mt-14 w-full max-w-lg">
             <p className="mb-5 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/40">
-              Menuju Hari Bahagia
+              Countdown to Our Big Day
             </p>
             <CountdownTimer targetDate={event.date} />
           </div>
@@ -97,7 +97,7 @@ export default function HomeSection({
             onClick={onNavigateRsvp}
             className="btn-invite-primary mt-12 px-12"
           >
-            Konfirmasi Kehadiran
+            Confirm Attendance
           </button>
         </Reveal>
       </div>

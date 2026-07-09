@@ -3,8 +3,8 @@ export const WEDDING = {
     name: "William",
     fullName: "William Alexander",
     nickname: "Will",
-    father: "Bapak Robert Anderson",
-    mother: "Ibu Sarah Anderson",
+    father: "Mr. Robert Anderson",
+    mother: "Mrs. Sarah Anderson",
     photo:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80&auto=format&fit=crop&crop=face",
     instagram: "@william.a",
@@ -13,54 +13,54 @@ export const WEDDING = {
     name: "Jessica",
     fullName: "Jessica Marie",
     nickname: "Jess",
-    father: "Bapak David Thompson",
-    mother: "Ibu Emily Thompson",
+    father: "Mr. David Thompson",
+    mother: "Mrs. Emily Thompson",
     photo:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80&auto=format&fit=crop&crop=face",
     instagram: "@jessica.m",
   },
   quote:
-    "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu merasa tenteram kepadanya.",
+    "And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquility with them.",
   quoteSource: "QS. Ar-Rum: 21",
   loveStory: [
     {
       year: "2019",
-      title: "Pertemuan Pertama",
-      text: "Kami bertemu di sebuah acara kampus. Sebuah percakapan singkat berubah menjadi malam yang tak terlupakan.",
+      title: "First Meeting",
+      text: "We met at a campus event. A brief conversation turned into an unforgettable evening.",
     },
     {
       year: "2021",
-      title: "Menjalin Komitmen",
-      text: "Setelah melewati jarak dan waktu, kami memutuskan untuk melangkah bersama menuju masa depan.",
+      title: "Building Commitment",
+      text: "Through distance and time, we chose to walk together toward the future.",
     },
     {
       year: "2024",
-      title: "Lamaran",
-      text: "Di bawah langit senja Paris, William melamar Jessica — dan jawabannya adalah ya.",
+      title: "The Proposal",
+      text: "Beneath the Paris sunset, William proposed to Jessica — and she said yes.",
     },
     {
       year: "2025",
-      title: "Hari Bahagia",
-      text: "Kini kami mengundang Anda untuk menjadi bagian dari hari yang paling istimewa dalam hidup kami.",
+      title: "Our Big Day",
+      text: "Now we invite you to be part of the most special day of our lives.",
     },
   ],
   ceremonies: [
     {
       id: "akad",
-      title: "Akad Nikah",
-      date: "Kamis, 12 Desember 2025",
-      time: "09.00 WIB",
-      location: "Masjid Al-Ikhlas",
-      address: "Jl. Merdeka No. 45, Jakarta Selatan",
+      title: "Holy Matrimony",
+      date: "Thursday, December 12, 2025",
+      time: "09:00 AM",
+      location: "Al-Ikhlas Mosque",
+      address: "45 Merdeka Street, South Jakarta",
       mapUrl: "https://maps.google.com",
     },
     {
       id: "resepsi",
-      title: "Resepsi Pernikahan",
-      date: "Kamis, 12 Desember 2025",
-      time: "11.00 – 14.00 WIB",
-      location: "Grand Ballroom Hotel Mulia",
-      address: "Jl. Asia Afrika Senayan, Jakarta Pusat",
+      title: "Wedding Reception",
+      date: "Thursday, December 12, 2025",
+      time: "11:00 AM – 02:00 PM",
+      location: "Grand Ballroom, Hotel Mulia",
+      address: "Asia Afrika Senayan, Central Jakarta",
       mapUrl: "https://maps.google.com",
     },
   ],
@@ -104,9 +104,9 @@ export const WEDDING = {
   ],
   giftAddress: {
     name: "William & Jessica",
-    address: "Apartemen Senayan Residence, Unit 12B",
-    city: "Jakarta Selatan, 12190",
-    phone: "0812-3456-7890",
+    address: "Senayan Residence Apartment, Unit 12B",
+    city: "South Jakarta, 12190",
+    phone: "+62 812-3456-7890",
   },
   musicUrl: "/music/wedding.mp3",
 } as const;
@@ -117,17 +117,15 @@ export type InvitationSection =
   | "event"
   | "gallery"
   | "rsvp"
-  | "gift"
-  | "wishes";
+  | "gift";
 
 export const NAV_ITEMS: { id: InvitationSection; label: string }[] = [
-  { id: "home", label: "Beranda" },
-  { id: "couple", label: "Mempelai" },
-  { id: "event", label: "Acara" },
-  { id: "gallery", label: "Galeri" },
-  { id: "rsvp", label: "RSVP" },
-  { id: "gift", label: "Hadiah" },
-  { id: "wishes", label: "Ucapan" },
+  { id: "home", label: "Home" },
+  { id: "couple", label: "Couple" },
+  { id: "event", label: "Event" },
+  { id: "gallery", label: "Gallery" },
+  { id: "rsvp", label: "RSVP & Wishes" },
+  { id: "gift", label: "Gift" },
 ];
 
 export function getCoupleDisplayName() {

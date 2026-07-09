@@ -15,6 +15,8 @@ import {
 } from "@/components/invitation/InvitationPass";
 import Reveal from "@/components/invitation/Reveal";
 import SectionHeader from "@/components/invitation/SectionHeader";
+import WishesForm from "@/components/invitation/WishesForm";
+import WishesWall from "@/components/invitation/WishesWall";
 import type { mergeEventSettings } from "@/lib/event-config";
 import type { Guest } from "@/types/guest";
 
@@ -25,6 +27,13 @@ interface RsvpSectionProps {
   event: EventSettings;
   defaultName?: string | null;
 }
+
+const FLOW_STEPS = [
+  { id: "attendance", label: "Attendance" },
+  { id: "details", label: "Your Details" },
+  { id: "ticket", label: "Ticket" },
+  { id: "wishes", label: "Wishes" },
+];
 
 export default function RsvpSection({ event, defaultName }: RsvpSectionProps) {
   const [step, setStep] = useState<Step>("attendance");
@@ -41,6 +50,8 @@ export default function RsvpSection({ event, defaultName }: RsvpSectionProps) {
   const [guest, setGuest] = useState<Guest | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showWishesWall, setShowWishesWall] = useState(false);
+  const [wishesRefresh, setWishesRefresh] = useState(0);
 
   const goToStep = (next: Step, direction: "forward" | "back") => {
     setStepDirection(direction);
@@ -66,280 +77,376 @@ export default function RsvpSection({ event, defaultName }: RsvpSectionProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Konfirmasi gagal.");
+        setError(data.error || "Confirmation failed.");
         return;
       }
 
       setGuest(data.guest);
       goToStep("done", "forward");
     } catch {
-      setError("Gagal terhubung ke server.");
+      setError("Failed to connect to the server.");
     } finally {
       setLoading(false);
     }
   };
 
+  const currentFlowIndex =
+    step === "attendance" ? 0 : step === "details" ? 1 : 2;
+
+  const stepAnimClass =
+    stepDirection === "forward" ? "rsvp-step-enter" : "rsvp-step-back";
+
+  /* ── Done: ticket + wishes ── */
   if (step === "done" && guest) {
     return (
-      <section id="rsvp" className="invitation-section bg-cream px-6 py-28">
-        <div className="mx-auto max-w-2xl animate-scale-in">
-          {attending ? (
-            <InvitationPass guest={guest} event={event} />
-          ) : (
-            <DeclinedInvitation name={guest.name} />
-          )}
+      <section
+        id="rsvp"
+        className="invitation-section relative overflow-hidden bg-cream px-6 py-20 lg:py-28"
+      >
+        <div className="absolute inset-0 bg-radial-gold opacity-30" />
+        <div className="relative mx-auto max-w-6xl">
+          <SectionHeader
+            label="Complete"
+            title="Thank You"
+            subtitle="Your confirmation has been received. Please leave a message for us."
+          />
+
+          {/* Step progress — all complete */}
+          <div className="mb-12 flex items-center justify-center gap-2 lg:gap-4">
+            {FLOW_STEPS.map((s, i) => (
+              <div key={s.id} className="flex items-center gap-2">
+                <div className="flex flex-col items-center">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-white lg:h-10 lg:w-10">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <span className="mt-1.5 hidden text-[9px] font-semibold uppercase tracking-wide text-navy sm:block">
+                    {s.label}
+                  </span>
+                </div>
+                {i < FLOW_STEPS.length - 1 && (
+                  <div className="mb-4 h-px w-6 bg-navy lg:w-12" />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-10 lg:items-start">
+            <Reveal direction="left" className="animate-scale-in">
+              {attending ? (
+                <InvitationPass guest={guest} event={event} />
+              ) : (
+                <DeclinedInvitation name={guest.name} />
+              )}
+            </Reveal>
+
+            <Reveal direction="right" delay={150} className="space-y-5">
+              <WishesForm
+                guestName={guest.name}
+                attendance={attending ? "attending" : "not_attending"}
+                onSubmitted={() => setWishesRefresh((k) => k + 1)}
+              />
+              <WishesWall
+                open={showWishesWall}
+                onToggle={() => setShowWishesWall((v) => !v)}
+                refreshKey={wishesRefresh}
+              />
+            </Reveal>
+          </div>
         </div>
       </section>
     );
   }
 
-  const steps = [
-    { id: "attendance", label: "Kehadiran" },
-    { id: "details", label: "Data Diri" },
-  ];
-
-  const currentStepIndex = step === "attendance" ? 0 : 1;
-  const stepAnimClass =
-    stepDirection === "forward" ? "rsvp-step-enter" : "rsvp-step-back";
-
+  /* ── RSVP wizard ── */
   return (
     <section
       id="rsvp"
-      className="invitation-section relative overflow-hidden bg-cream px-6 py-28"
+      className="invitation-section relative overflow-hidden bg-cream px-6 py-20 lg:py-28"
     >
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-[0.05]"
+        className="absolute inset-0 bg-cover bg-center opacity-[0.04]"
         style={{ backgroundImage: `url('${event.heroImage}')` }}
       />
-      <div className="absolute inset-0 bg-radial-gold opacity-40" />
+      <div className="absolute inset-0 bg-radial-gold opacity-30" />
 
-      <div className="relative mx-auto max-w-xl">
-        <SectionHeader
-          label="RSVP"
-          title="Konfirmasi Kehadiran"
-          subtitle="Mohon konfirmasi kehadiran Anda agar kami dapat mempersiapkan acara dengan baik."
-        />
+      <div className="relative mx-auto max-w-6xl">
+        <div className="lg:grid lg:grid-cols-5 lg:gap-14 lg:items-start">
+          {/* Desktop sidebar */}
+          <div className="mb-10 lg:col-span-2 lg:mb-0 lg:sticky lg:top-28">
+            <SectionHeader
+              label="RSVP"
+              title="Confirm Attendance"
+              subtitle="Please confirm your attendance so we can prepare the event accordingly."
+              align="left"
+            />
 
-        {/* Animated step indicator */}
-        <Reveal direction="up" delay={100}>
-          <div className="mb-10 flex items-center justify-center">
-            {steps.map((s, i) => (
-              <div key={s.id} className="flex items-center">
-                <div className="flex flex-col items-center">
+            <div className="mt-8 hidden space-y-4 lg:block">
+              {FLOW_STEPS.slice(0, 3).map((s, i) => (
+                <div
+                  key={s.id}
+                  className={`flex items-center gap-4 rounded-xl border px-5 py-4 transition-all duration-500 ${
+                    i <= currentFlowIndex
+                      ? "border-royal/25 bg-white/80 shadow-soft"
+                      : "border-stone-100 bg-white/40 opacity-50"
+                  }`}
+                >
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold transition-all duration-500 ease-out-expo ${
-                      i <= currentStepIndex
-                        ? "bg-navy text-white shadow-card"
-                        : "bg-stone-100 text-stone-400"
-                    } ${i === currentStepIndex ? "scale-110 ring-4 ring-royal/20" : ""}`}
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                      i < currentFlowIndex
+                        ? "bg-navy text-white"
+                        : i === currentFlowIndex
+                          ? "bg-royal text-white ring-4 ring-royal/20"
+                          : "bg-stone-100 text-stone-400"
+                    }`}
                   >
-                    {i < currentStepIndex ? (
+                    {i < currentFlowIndex ? (
                       <Check className="h-4 w-4" />
                     ) : (
                       i + 1
                     )}
                   </div>
-                  <span
-                    className={`mt-2 text-[10px] font-semibold uppercase tracking-wide transition-colors duration-300 ${
-                      i <= currentStepIndex ? "text-navy" : "text-stone-400"
-                    }`}
-                  >
-                    {s.label}
-                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-navy">{s.label}</p>
+                    <p className="text-xs text-stone-400">
+                      {i === 0 && "Choose attending or not"}
+                      {i === 1 && "Fill in your contact details"}
+                      {i === 2 && "Get your ticket & send wishes"}
+                    </p>
+                  </div>
                 </div>
-                {i < steps.length - 1 && (
-                  <div className="relative mx-4 mb-5 h-0.5 w-16 overflow-hidden rounded-full bg-stone-200">
-                    <div
-                      className="absolute inset-y-0 left-0 bg-navy transition-all duration-700 ease-out-expo"
-                      style={{
-                        width: i < currentStepIndex ? "100%" : "0%",
-                      }}
-                    />
+              ))}
+            </div>
+          </div>
+
+          {/* Form area */}
+          <div className="lg:col-span-3">
+            {/* Mobile step indicator */}
+            <Reveal direction="up" delay={100}>
+              <div className="mb-8 flex items-center justify-center lg:hidden">
+                {[
+                  { id: "attendance", label: "Attendance" },
+                  { id: "details", label: "Your Details" },
+                ].map((s, i) => (
+                  <div key={s.id} className="flex items-center">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold transition-all duration-500 ${
+                          i <= currentFlowIndex
+                            ? "bg-navy text-white shadow-card"
+                            : "bg-stone-100 text-stone-400"
+                        } ${i === currentFlowIndex ? "scale-110 ring-4 ring-royal/20" : ""}`}
+                      >
+                        {i < currentFlowIndex ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          i + 1
+                        )}
+                      </div>
+                      <span
+                        className={`mt-2 text-[10px] font-semibold uppercase tracking-wide ${
+                          i <= currentFlowIndex ? "text-navy" : "text-stone-400"
+                        }`}
+                      >
+                        {s.label}
+                      </span>
+                    </div>
+                    {i < 1 && (
+                      <div className="relative mx-4 mb-5 h-0.5 w-16 overflow-hidden rounded-full bg-stone-200">
+                        <div
+                          className="absolute inset-y-0 left-0 bg-navy transition-all duration-700"
+                          style={{
+                            width: i < currentFlowIndex ? "100%" : "0%",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+
+            <Reveal direction="up" delay={200}>
+              <div className="glass-card-light overflow-hidden">
+                {error && (
+                  <div className="mx-7 mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+
+                {step === "attendance" && (
+                  <div key="attendance" className={`p-7 lg:p-9 ${stepAnimClass}`}>
+                    <p className="mb-7 text-center text-sm text-stone-500 lg:text-left">
+                      Will you be attending our wedding?
+                    </p>
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      {[
+                        {
+                          value: true,
+                          icon: <Heart className="h-5 w-5" />,
+                          title: "Yes, I'll Attend",
+                          desc: "Join us & receive a digital entry ticket",
+                        },
+                        {
+                          value: false,
+                          icon: <span className="text-lg">🙏</span>,
+                          title: "Sorry, Can't Attend",
+                          desc: "Unable to attend, but sending blessings",
+                        },
+                      ].map((opt) => (
+                        <button
+                          key={String(opt.value)}
+                          onClick={() => setAttending(opt.value)}
+                          className={`group flex flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all duration-400 ease-out-expo active:scale-[0.98] lg:p-8 ${
+                            attending === opt.value
+                              ? "border-navy bg-navy/[0.03] shadow-soft"
+                              : "border-stone-100 hover:border-royal/30"
+                          }`}
+                        >
+                          <div
+                            className={`flex h-14 w-14 items-center justify-center rounded-full transition-all duration-400 ${
+                              attending === opt.value
+                                ? "bg-navy text-white scale-105"
+                                : "bg-parchment text-stone-400 group-hover:bg-royal/10 group-hover:text-royal"
+                            }`}
+                          >
+                            {opt.icon}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-navy">
+                              {opt.title}
+                            </p>
+                            <p className="mt-1 text-xs text-stone-500">
+                              {opt.desc}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      disabled={attending === null}
+                      onClick={() => goToStep("details", "forward")}
+                      className="btn-invite-primary mt-8 w-full disabled:opacity-40"
+                    >
+                      Continue
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+
+                {step === "details" && (
+                  <div key="details" className={`p-7 lg:p-9 ${stepAnimClass}`}>
+                    <div className="grid gap-5 lg:grid-cols-2">
+                      <div className="lg:col-span-2">
+                        <label className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                          <User className="h-3.5 w-3.5" />
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          value={form.name}
+                          onChange={(e) =>
+                            setForm((f) => ({ ...f, name: e.target.value }))
+                          }
+                          placeholder="Enter your full name"
+                          className="input-field"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                          WhatsApp
+                        </label>
+                        <input
+                          type="tel"
+                          value={form.phone}
+                          onChange={(e) =>
+                            setForm((f) => ({ ...f, phone: e.target.value }))
+                          }
+                          placeholder="08xxxxxxxxxx"
+                          className="input-field"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          value={form.email}
+                          onChange={(e) =>
+                            setForm((f) => ({ ...f, email: e.target.value }))
+                          }
+                          placeholder="email@contoh.com"
+                          className="input-field"
+                        />
+                      </div>
+
+                      {attending && (
+                        <div>
+                          <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                            Number of Guests (max. 4)
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={4}
+                            value={form.pax}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              if (!raw) {
+                                setForm((f) => ({ ...f, pax: "" }));
+                                return;
+                              }
+                              const next = Math.min(
+                                4,
+                                Math.max(1, parseInt(raw) || 0)
+                              );
+                              setForm((f) => ({ ...f, pax: String(next) }));
+                            }}
+                            className="input-field"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {attending && (
+                      <div className="mt-5 flex gap-3 rounded-xl border border-royal/15 bg-royal/5 p-4">
+                        <QrCode className="mt-0.5 h-5 w-5 shrink-0 text-royal" />
+                        <p className="text-xs leading-relaxed text-stone-600">
+                          You will receive a digital ticket (QR + barcode),
+                          then you can leave a wish right away.
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-8 flex gap-3">
+                      <button
+                        onClick={() => goToStep("attendance", "back")}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border-2 border-stone-200 px-4 py-3.5 text-xs font-bold uppercase tracking-wide text-stone-600 transition-all hover:bg-stone-50 active:scale-95"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                      </button>
+                      <button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className="btn-invite-primary flex-[2]"
+                      >
+                        {loading
+                          ? "Processing..."
+                          : attending
+                            ? "Get Entry Ticket"
+                            : "Submit Confirmation"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
-            ))}
+            </Reveal>
           </div>
-        </Reveal>
-
-        <Reveal direction="up" delay={200}>
-          <div className="glass-card-light overflow-hidden">
-            {error && (
-              <div className="mx-7 mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-                {error}
-              </div>
-            )}
-
-            {step === "attendance" && (
-              <div key="attendance" className={`p-8 ${stepAnimClass}`}>
-                <p className="mb-7 text-center text-sm text-stone-500">
-                  Apakah Anda akan hadir di acara pernikahan kami?
-                </p>
-                <div className="grid gap-4">
-                  {[
-                    {
-                      value: true,
-                      icon: <Heart className="h-5 w-5" />,
-                      title: "Ya, Saya Hadir",
-                      desc: "Saya akan datang dan mendapatkan tiket masuk digital",
-                    },
-                    {
-                      value: false,
-                      icon: <span className="text-lg">🙏</span>,
-                      title: "Maaf, Tidak Hadir",
-                      desc: "Saya tidak dapat hadir, namun tetap memberikan doa",
-                    },
-                  ].map((opt) => (
-                    <button
-                      key={String(opt.value)}
-                      onClick={() => setAttending(opt.value)}
-                      className={`group flex items-center gap-4 rounded-2xl border-2 p-5 text-left transition-all duration-400 ease-out-expo active:scale-[0.98] ${
-                        attending === opt.value
-                          ? "border-navy bg-navy/[0.03] shadow-soft"
-                          : "border-stone-100 hover:border-royal/30 hover:bg-royal/[0.02]"
-                      }`}
-                    >
-                      <div
-                        className={`flex h-14 w-14 items-center justify-center rounded-full transition-all duration-400 ${
-                          attending === opt.value
-                            ? "bg-navy text-white scale-105"
-                            : "bg-parchment text-stone-400 group-hover:bg-royal/10 group-hover:text-royal"
-                        }`}
-                      >
-                        {opt.icon}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-navy">{opt.title}</p>
-                        <p className="mt-0.5 text-xs text-stone-500">
-                          {opt.desc}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                <button
-                  disabled={attending === null}
-                  onClick={() => goToStep("details", "forward")}
-                  className="btn-invite-primary mt-8 w-full disabled:opacity-40"
-                >
-                  Lanjutkan
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-
-            {step === "details" && (
-              <div key="details" className={`p-8 ${stepAnimClass}`}>
-                <div className="space-y-5">
-                  <div>
-                    <label className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                      <User className="h-3.5 w-3.5" />
-                      Nama Lengkap
-                    </label>
-                    <input
-                      type="text"
-                      value={form.name}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, name: e.target.value }))
-                      }
-                      placeholder="Masukkan nama lengkap"
-                      className="input-field"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                      Nomor WhatsApp
-                    </label>
-                    <input
-                      type="tel"
-                      value={form.phone}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, phone: e.target.value }))
-                      }
-                      placeholder="08xxxxxxxxxx"
-                      className="input-field"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, email: e.target.value }))
-                      }
-                      placeholder="email@contoh.com"
-                      className="input-field"
-                    />
-                  </div>
-
-                  {attending && (
-                    <div>
-                      <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                        Jumlah Tamu (maks. 4)
-                      </label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={4}
-                        value={form.pax}
-                        onChange={(e) => {
-                          const raw = e.target.value;
-                          if (!raw) {
-                            setForm((f) => ({ ...f, pax: "" }));
-                            return;
-                          }
-                          const next = Math.min(
-                            4,
-                            Math.max(1, parseInt(raw) || 0)
-                          );
-                          setForm((f) => ({ ...f, pax: String(next) }));
-                        }}
-                        className="input-field"
-                      />
-                    </div>
-                  )}
-
-                  {attending && (
-                    <div className="flex gap-3 rounded-xl border border-royal/15 bg-royal/5 p-4">
-                      <QrCode className="mt-0.5 h-5 w-5 shrink-0 text-royal" />
-                      <p className="text-xs leading-relaxed text-stone-600">
-                        Setelah konfirmasi, Anda akan menerima tiket digital
-                        berisi QR code dan barcode untuk masuk ke acara.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-8 flex gap-3">
-                  <button
-                    onClick={() => goToStep("attendance", "back")}
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border-2 border-stone-200 px-4 py-3.5 text-xs font-bold uppercase tracking-wide text-stone-600 transition-all duration-300 hover:bg-stone-50 active:scale-95"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Kembali
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="btn-invite-primary flex-[2]"
-                  >
-                    {loading
-                      ? "Memproses..."
-                      : attending
-                        ? "Dapatkan Tiket Masuk"
-                        : "Kirim Konfirmasi"}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </Reveal>
+        </div>
       </div>
     </section>
   );

@@ -116,7 +116,7 @@ export default function InvitationCover({
             }}
           >
             <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-white/40">
-              Kepada Yth.
+              Dear
             </p>
             <p className="mt-3 font-display text-2xl font-light text-white md:text-3xl">
               {guestName}
@@ -132,8 +132,8 @@ export default function InvitationCover({
             transition: "opacity 1s ease",
           }}
         >
-          Dengan penuh sukacita, kami mengundang Anda untuk hadir dan memberikan
-          doa restu di hari bahagia kami.
+          With great joy, we invite you to attend and share your blessings on our
+          special day.
         </p>
 
         <button
@@ -143,7 +143,7 @@ export default function InvitationCover({
             btnPressed ? "scale-95 opacity-70" : ""
           }`}
         >
-          <span className="relative z-10">Buka Undangan</span>
+          <span className="relative z-10">Open Invitation</span>
           <ChevronDown className="relative z-10 h-4 w-4 transition-transform duration-500 group-hover:translate-y-1.5" />
         </button>
       </div>
@@ -155,7 +155,7 @@ export default function InvitationCover({
       >
         <div className="flex flex-col items-center gap-3">
           <span className="text-[8px] uppercase tracking-[0.4em] text-white/30">
-            Tap untuk membuka
+            Tap to open
           </span>
           <div className="relative h-10 w-5 rounded-full border border-white/20">
             <div className="absolute left-1/2 top-2 h-2 w-0.5 -translate-x-1/2 animate-pulse rounded-full bg-royal/60" />

@@ -172,6 +172,12 @@
     }
   }
 
+  @media (min-width: 1024px) {
+    .invitation-section {
+      scroll-margin-top: 4.5rem;
+    }
+  }
+
   .invitation-cover {
     animation: fadeIn 1s ease-out;
   }

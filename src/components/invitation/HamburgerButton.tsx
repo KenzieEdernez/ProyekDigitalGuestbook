@@ -14,7 +14,7 @@ export default function HamburgerButton({
   return (
     <button
       onClick={onClick}
-      aria-label={open ? "Tutup menu" : "Buka menu"}
+      aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
       className={`hamburger-btn group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-navy/80 shadow-card backdrop-blur-md transition-all duration-400 ease-out-expo hover:border-royal/40 active:scale-95 ${className}`}
     >

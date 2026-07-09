@@ -4,19 +4,19 @@ import { useEffect } from "react";
 import { ArrowRight, X } from "lucide-react";
 import { NAV_ITEMS, getCoupleDisplayName, type InvitationSection } from "@/lib/wedding-config";
 
-interface MobileMenuOverlayProps {
+interface MenuOverlayProps {
   open: boolean;
   active: InvitationSection;
   onClose: () => void;
   onNavigate: (section: InvitationSection) => void;
 }
 
-export default function MobileMenuOverlay({
+export default function MenuOverlay({
   open,
   active,
   onClose,
   onNavigate,
-}: MobileMenuOverlayProps) {
+}: MenuOverlayProps) {
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -39,39 +39,35 @@ export default function MobileMenuOverlay({
 
   return (
     <div
-      className={`menu-overlay fixed inset-0 z-[70] lg:hidden ${
+      className={`menu-overlay fixed inset-0 z-[70] ${
         open ? "menu-overlay-open" : "menu-overlay-closed"
       }`}
       aria-hidden={!open}
     >
-      {/* Backdrop */}
       <div
-        className="menu-backdrop absolute inset-0 bg-navy-900/60 backdrop-blur-[2px]"
+        className="menu-backdrop absolute inset-0 bg-navy-900/50 backdrop-blur-[2px] lg:bg-navy-900/40"
         onClick={onClose}
       />
 
-      {/* Side panel */}
       <aside
-        className={`menu-panel absolute right-0 top-0 flex h-full w-[min(88vw,360px)] flex-col bg-navy/95 shadow-card-lg backdrop-blur-2xl ${
+        className={`menu-panel absolute right-0 top-0 flex h-full w-[min(90vw,380px)] flex-col bg-navy/96 shadow-card-lg backdrop-blur-2xl lg:w-[420px] ${
           open ? "menu-panel-open" : "menu-panel-closed"
         }`}
       >
-        {/* Gold accent line */}
         <div className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-royal/40 to-transparent" />
 
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-5 lg:px-8 lg:py-6">
           <div>
             <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-royal/80">
-              Undangan
+              Invitation Menu
             </p>
-            <p className="mt-1 font-display text-lg font-light text-white">
+            <p className="mt-1 font-display text-xl font-light text-white lg:text-2xl">
               {getCoupleDisplayName()}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="menu-close-btn group flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 transition-all duration-300 hover:border-royal/40 hover:bg-white/5 active:scale-95"
+            className="menu-close-btn group flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 transition-all duration-300 hover:border-royal/40 hover:bg-white/5 active:scale-95"
           >
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 transition-colors group-hover:text-royal">
               Close
@@ -80,9 +76,8 @@ export default function MobileMenuOverlay({
           </button>
         </div>
 
-        {/* Nav items */}
-        <nav className="flex-1 overflow-y-auto px-4 py-6">
-          <ul className="space-y-1">
+        <nav className="flex-1 overflow-y-auto px-4 py-6 lg:px-6 lg:py-8">
+          <ul className="space-y-1.5">
             {NAV_ITEMS.map(({ id, label }, i) => {
               const isActive = active === id;
               const stepNum = String(i + 1).padStart(2, "0");
@@ -94,7 +89,7 @@ export default function MobileMenuOverlay({
                 >
                   <button
                     onClick={() => handleNav(id)}
-                    className={`group flex w-full items-center justify-between rounded-xl px-4 py-4 text-left transition-all duration-300 active:scale-[0.98] ${
+                    className={`group flex w-full items-center justify-between rounded-xl px-4 py-4 text-left transition-all duration-300 active:scale-[0.98] lg:px-5 lg:py-4 ${
                       isActive
                         ? "bg-royal/15 text-royal"
                         : "text-white/60 hover:bg-white/5 hover:text-white"
@@ -102,15 +97,15 @@ export default function MobileMenuOverlay({
                   >
                     <div className="flex items-center gap-4">
                       <span
-                        className={`flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-bold transition-all duration-300 ${
+                        className={`flex h-9 w-9 items-center justify-center rounded-full border text-[10px] font-bold transition-all duration-300 ${
                           isActive
                             ? "border-royal/40 bg-royal/10 text-royal"
                             : "border-white/10 text-white/30 group-hover:border-royal/20 group-hover:text-royal/60"
                         }`}
                       >
-                        <span className="text-[10px] font-bold">{stepNum}</span>
+                        {stepNum}
                       </span>
-                      <span className="text-sm font-medium tracking-wide">
+                      <span className="text-sm font-medium tracking-wide lg:text-base">
                         {label}
                       </span>
                     </div>
@@ -124,7 +119,6 @@ export default function MobileMenuOverlay({
           </ul>
         </nav>
 
-        {/* Footer */}
         <div className="border-t border-white/10 px-6 py-5">
           <p className="text-center text-[9px] uppercase tracking-[0.3em] text-white/25">
             EdernDigital

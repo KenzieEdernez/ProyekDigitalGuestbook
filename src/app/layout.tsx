@@ -19,9 +19,9 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Undangan Pernikahan | EdernDigital",
+  title: "Wedding Invitation | EdernDigital",
   description:
-    "Undangan digital pernikahan dengan RSVP, tiket masuk barcode, dan ucapan tamu",
+    "Digital wedding invitation with RSVP, entry barcode ticket, and guest wishes",
 };
 
 export const viewport: Viewport = {
@@ -37,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id">
+    <html lang="en">
       <body
         className={`${inter.variable} ${playfair.variable} ${cormorant.variable} min-h-screen`}
       >

@@ -74,7 +74,7 @@ export default function CameraCapture({
         setCameraReady(true);
       }
     } catch {
-      setError("Tidak dapat mengakses kamera.");
+      setError("Unable to access camera.");
     }
   }, []);
 
@@ -102,7 +102,7 @@ export default function CameraCapture({
       )}
 
       {autoCaptureOnce && cameraReady && !error && (
-        <p className="mb-2 text-center text-sm text-stone-500">Mengambil foto...</p>
+        <p className="mb-2 text-center text-sm text-stone-500">Taking photo...</p>
       )}
 
       {!preview ? (
@@ -146,7 +146,7 @@ export default function CameraCapture({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-lg bg-white py-2.5 text-sm font-semibold text-navy shadow-md transition hover:bg-stone-50 ${compact ? "" : "touch-target"}`}
               >
                 <Camera className="h-4 w-4" />
-                Ambil Foto
+                Take Photo
               </button>
             </div>
           )}
@@ -166,14 +166,14 @@ export default function CameraCapture({
               }}
               className="flex-1 rounded-lg border border-stone-200 py-2.5 text-sm font-medium"
             >
-              Foto Ulang
+              Retake
             </button>
             <button
               onClick={() => onCapture(preview)}
               className="btn-navy flex-1 py-2.5 text-xs"
             >
               <CheckCircle2 className="h-4 w-4" />
-              Gunakan
+              Use Photo
             </button>
           </div>
         </>

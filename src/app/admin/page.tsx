@@ -208,12 +208,12 @@ export default function AdminDashboard() {
                     </p>
                     <p className="text-xs text-stone-400">
                       {g.status === "souvenir_claimed"
-                        ? "Souvenir diambil"
+                        ? "Souvenir collected"
                         : "Check-in"}{" "}
                       ·{" "}
                       {new Date(
                         g.souvenir_claimed_at || g.checked_in_at!
-                      ).toLocaleTimeString("id-ID", {
+                      ).toLocaleTimeString("en-US", {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
             </p>
           </div>
           <Link href="/admin/guests" className="text-xs font-semibold text-royal hover:underline">
-            Lihat Semua →
+            View All →
           </Link>
         </div>
         <div className="overflow-x-auto">
@@ -254,7 +254,7 @@ export default function AdminDashboard() {
                   Pax
                 </th>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-stone-400">
-                  Daftar
+                  Registered
                 </th>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-stone-400">
                   Action
@@ -272,7 +272,7 @@ export default function AdminDashboard() {
                   </td>
                   <td className="px-6 py-4 text-stone-700 dark:text-stone-200">{g.pax}</td>
                   <td className="px-6 py-4 text-stone-500 dark:text-stone-400">
-                    {new Date(g.created_at).toLocaleString("id-ID", {
+                    {new Date(g.created_at).toLocaleString("en-US", {
                       day: "numeric",
                       month: "short",
                       hour: "2-digit",

@@ -17,7 +17,7 @@ export default function ScanInput({
   value,
   onChange,
   onScan,
-  placeholder = "Scan QR code di sini...",
+  placeholder = "Scan QR code here...",
   autoFocus = true,
   disabled = false,
   variant = "default",

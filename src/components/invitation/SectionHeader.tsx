@@ -17,17 +17,20 @@ export default function SectionHeader({
   light = false,
   align = "center",
 }: SectionHeaderProps) {
-  const alignClass = align === "center" ? "text-center mx-auto" : "text-left";
+  const alignClass = align === "center" ? "text-center mx-auto" : "text-left mx-0";
+  const ornamentAlign = align === "center" ? "justify-center" : "justify-start";
 
   return (
     <header className={`mb-16 max-w-2xl ${alignClass}`}>
       <Reveal direction="blur" duration={700}>
-        <div className="flex items-center justify-center gap-4">
-          <span
-            className={`h-px w-12 bg-gradient-to-r from-transparent ${
-              light ? "to-royal/60" : "to-royal"
-            }`}
-          />
+        <div className={`flex items-center gap-4 ${ornamentAlign}`}>
+          {align === "center" && (
+            <span
+              className={`h-px w-12 bg-gradient-to-r from-transparent ${
+                light ? "to-royal/60" : "to-royal"
+              }`}
+            />
+          )}
           <p
             className={`text-[10px] font-bold uppercase tracking-[0.4em] ${
               light ? "text-royal-200" : "text-royal"
@@ -38,7 +41,7 @@ export default function SectionHeader({
           <span
             className={`h-px w-12 bg-gradient-to-l from-transparent ${
               light ? "to-royal/60" : "to-royal"
-            }`}
+            } ${align === "left" ? "hidden" : ""}`}
           />
         </div>
       </Reveal>

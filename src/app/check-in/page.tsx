@@ -110,7 +110,7 @@ export default function CheckInPage() {
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error || "Check-in gagal.");
+          setError(data.error || "Check-in failed.");
           setShowCamera(true);
           return;
         }
@@ -445,7 +445,7 @@ export default function CheckInPage() {
                     <p className="text-xs text-white/60">Guest Information</p>
                     <p className="mt-1 font-serif text-xl font-bold">{guest.name}</p>
                     <p className="mt-1 text-sm text-white/70">
-                      {guest.phone} · {guest.pax} orang
+                      {guest.phone} · {guest.pax} guest{guest.pax > 1 ? "s" : ""}
                     </p>
                   </div>
                 </>

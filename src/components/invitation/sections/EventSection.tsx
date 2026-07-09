@@ -21,9 +21,9 @@ export default function EventSection({ event }: EventSectionProps) {
       <div className="absolute inset-0 bg-radial-gold opacity-30" />
       <div className="grain-overlay absolute inset-0" />
 
-      <div className="relative mx-auto max-w-4xl">
+      <div className="relative mx-auto max-w-5xl lg:max-w-6xl">
         <SectionHeader
-          label="Rangkaian Acara"
+          label="Wedding Events"
           title="Wedding Event"
           light
         />
@@ -47,7 +47,7 @@ export default function EventSection({ event }: EventSectionProps) {
                     </div>
                     <div>
                       <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">
-                        Tanggal
+                        Date
                       </p>
                       <p className="mt-1 text-sm">{ceremony.date}</p>
                     </div>
@@ -58,7 +58,7 @@ export default function EventSection({ event }: EventSectionProps) {
                     </div>
                     <div>
                       <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">
-                        Waktu
+                        Time
                       </p>
                       <p className="mt-1 text-sm">{ceremony.time}</p>
                     </div>
@@ -71,7 +71,7 @@ export default function EventSection({ event }: EventSectionProps) {
                   </div>
                   <div>
                     <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">
-                      Lokasi
+                      Location
                     </p>
                     <p className="mt-1 font-medium">{ceremony.location}</p>
                     <p className="mt-0.5 text-sm text-white/50">
@@ -87,7 +87,7 @@ export default function EventSection({ event }: EventSectionProps) {
                   className="mt-7 inline-flex items-center gap-2 rounded-full border border-royal/30 px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-royal transition-all duration-300 hover:bg-royal/15 active:scale-95"
                 >
                   <ExternalLink className="h-3 w-3" />
-                  Buka di Maps
+                  Open in Maps
                 </a>
               </div>
             </Reveal>
@@ -102,13 +102,13 @@ export default function EventSection({ event }: EventSectionProps) {
             <div className="mt-6 grid gap-6 sm:grid-cols-2">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-white/40">
-                  Wanita
+                  Ladies
                 </p>
                 <p className="mt-2 font-display text-xl">{event.dressLadies}</p>
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-white/40">
-                  Pria
+                  Gentlemen
                 </p>
                 <p className="mt-2 font-display text-xl">
                   {event.dressGentlemen}

@@ -23,13 +23,13 @@ export async function createWish(input: CreateWishInput): Promise<Wish> {
   const message = input.message?.trim();
 
   if (!guestName || guestName.length < 2) {
-    throw new Error("Nama tamu wajib diisi.");
+    throw new Error("Guest name is required.");
   }
   if (!message || message.length < 3) {
-    throw new Error("Ucapan wajib diisi.");
+    throw new Error("Message is required.");
   }
   if (message.length > 500) {
-    throw new Error("Ucapan maksimal 500 karakter.");
+    throw new Error("Message must be 500 characters or fewer.");
   }
 
   const supabase = getSupabaseAdmin();

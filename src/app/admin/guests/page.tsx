@@ -45,7 +45,7 @@ function escapeHtml(value: unknown) {
 
 function formatDateTime(value?: string | null) {
   if (!value) return "-";
-  return new Date(value).toLocaleString("id-ID", {
+  return new Date(value).toLocaleString("en-US", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -98,7 +98,7 @@ export default function GuestListPage() {
   });
 
   const exportPrintableReport = () => {
-    const reportDate = new Date().toLocaleString("id-ID", {
+    const reportDate = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -424,7 +424,7 @@ export default function GuestListPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
           <input
             type="text"
-            placeholder="Cari nama, HP, atau angpao ID..."
+            placeholder="Search name, phone, or angpao ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input-field pl-10"
@@ -435,7 +435,7 @@ export default function GuestListPage() {
           onChange={(e) => setFilter(e.target.value)}
           className="input-field w-auto min-w-[160px]"
         >
-          <option value="all">Semua Status</option>
+          <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="checked_in">Checked-in</option>
           <option value="souvenir_claimed">Souvenir OK</option>
@@ -536,7 +536,7 @@ export default function GuestListPage() {
                           onClick={() => handleDelete(guest.id)}
                           className="text-xs text-red-400 hover:text-red-600"
                         >
-                          Hapus
+                          Delete
                         </button>
                       </div>
                     </td>
@@ -569,7 +569,7 @@ export default function GuestListPage() {
             {
               label: "Souvenirs Given",
               value: `${stats.souvenir_claimed} / ${stats.checked_in + stats.souvenir_claimed || 0}`,
-              sub: "Distribusi",
+              sub: "Distributed",
             },
           ].map((s) => (
             <div key={s.label} className="card-premium p-5">
@@ -731,14 +731,14 @@ export default function GuestListPage() {
                   disabled={saving}
                   className="rounded-lg border border-stone-200 px-4 py-2.5 text-sm font-semibold text-stone-600 transition hover:bg-stone-50 disabled:opacity-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-navy-700"
                 >
-                  Batal
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
                   className="btn-navy px-5 py-2.5 text-sm disabled:opacity-50"
                 >
-                  {saving ? "Menyimpan..." : "Simpan"}
+                  {saving ? "Saving..." : "Save"}
                 </button>
               </div>
             </form>

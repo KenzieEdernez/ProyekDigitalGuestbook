@@ -75,7 +75,7 @@ export default function SouvenirPage() {
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error || "Barcode tidak ditemukan.");
+          setError(data.error || "Barcode not found.");
           setScanValue("");
           lastBarcodeRef.current = null;
           restartScanner();
@@ -125,7 +125,7 @@ export default function SouvenirPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Penukaran gagal.");
+        setError(data.error || "Redemption failed.");
         restartScanner();
         return;
       }
@@ -280,7 +280,7 @@ export default function SouvenirPage() {
                   {transactions.map((g) => (
                     <tr key={g.id} className="border-t border-stone-50 dark:border-stone-800">
                       <td className="px-6 py-3 text-stone-500 dark:text-stone-400">
-                        {new Date(g.souvenir_claimed_at!).toLocaleTimeString("id-ID", {
+                        {new Date(g.souvenir_claimed_at!).toLocaleTimeString("en-US", {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}

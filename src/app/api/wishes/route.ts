@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   if (!rateLimit.allowed) {
     return NextResponse.json(
       {
-        error: `Terlalu banyak percobaan. Coba lagi dalam ${rateLimit.retryAfter} detik.`,
+        error: `Too many attempts. Please try again in ${rateLimit.retryAfter} seconds.`,
       },
       {
         status: 429,
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error ? error.message : "Gagal mengirim ucapan.",
+          error instanceof Error ? error.message : "Failed to send wish.",
       },
       { status: 400 }
     );

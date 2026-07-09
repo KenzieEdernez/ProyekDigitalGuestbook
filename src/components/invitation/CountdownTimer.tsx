@@ -37,16 +37,16 @@ export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
   }, [targetDate]);
 
   const units = [
-    { label: "Hari", value: timeLeft.days },
-    { label: "Jam", value: timeLeft.hours },
-    { label: "Menit", value: timeLeft.minutes },
-    { label: "Detik", value: timeLeft.seconds },
+    { label: "Days", value: timeLeft.days },
+    { label: "Hours", value: timeLeft.hours },
+    { label: "Minutes", value: timeLeft.minutes },
+    { label: "Seconds", value: timeLeft.seconds },
   ];
 
   if (timeLeft.ended) {
     return (
       <p className="text-center font-display text-2xl text-royal animate-pulse-soft">
-        Hari bahagia telah tiba!
+        Our big day has arrived!
       </p>
     );
   }

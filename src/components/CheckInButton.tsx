@@ -31,8 +31,8 @@ export default function CheckInButton() {
         <div style={modalOverlayStyle} role="dialog" aria-modal="true">
           <div style={modalContentStyle}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3>Scan Barcode untuk Check-in</h3>
-              <button onClick={() => setOpen(false)}>Tutup</button>
+              <h3>Scan Barcode for Check-in</h3>
+              <button onClick={() => setOpen(false)}>Close</button>
             </div>
 
             <BarcodeScanner

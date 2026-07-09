@@ -13,7 +13,6 @@ import EventSection from "@/components/invitation/sections/EventSection";
 import GallerySection from "@/components/invitation/sections/GallerySection";
 import RsvpSection from "@/components/invitation/sections/RsvpSection";
 import GiftSection from "@/components/invitation/sections/GiftSection";
-import WishesSection from "@/components/invitation/sections/WishesSection";
 import Reveal from "@/components/invitation/Reveal";
 import { useEventSettings } from "@/hooks/useEventSettings";
 import {
@@ -29,7 +28,6 @@ const SECTION_IDS: InvitationSection[] = [
   "gallery",
   "rsvp",
   "gift",
-  "wishes",
 ];
 
 type Phase = "cover" | "curtain" | "open";
@@ -125,7 +123,7 @@ export default function InvitationApp() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-royal">
             EdernDigital
           </p>
-          <p className="mt-3 text-sm text-stone-500">Memuat undangan...</p>
+          <p className="mt-3 text-sm text-stone-500">Loading invitation...</p>
         </div>
       </main>
     );
@@ -139,13 +137,13 @@ export default function InvitationApp() {
             EdernDigital
           </p>
           <h1 className="mt-3 font-display text-2xl text-navy">
-            Pengaturan acara belum tersedia
+            Event settings are not available
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-stone-500">
-            Silakan isi pengaturan acara dari halaman admin terlebih dahulu.
+            Please configure event settings from the admin page first.
           </p>
           <Link href="/admin" className="btn-invite-primary mt-6 inline-flex">
-            Buka Admin
+            Open Admin
           </Link>
         </div>
       </main>
@@ -172,7 +170,7 @@ export default function InvitationApp() {
       )}
 
       {phase === "open" && (
-        <div className="invitation-app invitation-app-enter bg-champagne pb-24 lg:pb-0">
+        <div className="invitation-app invitation-app-enter bg-champagne">
           <ScrollProgress />
           <audio ref={audioRef} loop preload="none" />
 
@@ -183,26 +181,26 @@ export default function InvitationApp() {
             onToggleMusic={toggleMusic}
           />
 
-          <HomeSection
-            event={eventSettings}
-            guestName={guestName}
-            onNavigateRsvp={() => navigateTo("rsvp")}
-          />
+          <main>
+            <HomeSection
+              event={eventSettings}
+              guestName={guestName}
+              onNavigateRsvp={() => navigateTo("rsvp")}
+            />
 
-          <WaveDivider fill="#f9f0ed" />
-          <CoupleSection />
-          <WaveDivider fill="#1a2332" flip />
-          <EventSection event={eventSettings} />
-          <WaveDivider fill="#f3efe6" />
-          <GallerySection />
-          <WaveDivider fill="#f8f6f2" />
-          <RsvpSection event={eventSettings} defaultName={guestName} />
-          <WaveDivider fill="#faf7f2" />
-          <GiftSection />
-          <WaveDivider fill="#f3efe6" />
-          <WishesSection defaultName={guestName} />
+            <WaveDivider fill="#f9f0ed" />
+            <CoupleSection />
+            <WaveDivider fill="#1a2332" flip />
+            <EventSection event={eventSettings} />
+            <WaveDivider fill="#f3efe6" />
+            <GallerySection />
+            <WaveDivider fill="#f8f6f2" />
+            <RsvpSection event={eventSettings} defaultName={guestName} />
+            <WaveDivider fill="#faf7f2" />
+            <GiftSection />
+          </main>
 
-          <footer className="relative overflow-hidden border-t border-royal/10 bg-white px-6 py-16 text-center">
+          <footer className="relative overflow-hidden border-t border-royal/10 bg-white px-6 py-16 text-center lg:py-20">
             <div className="absolute inset-0 bg-radial-gold opacity-50" />
             <Reveal direction="scale" className="relative">
               <p className="font-display text-3xl font-light text-navy">
@@ -210,7 +208,7 @@ export default function InvitationApp() {
               </p>
               <div className="ornament-line mx-auto my-5 max-w-xs" />
               <p className="text-sm text-stone-500">
-                Terima kasih atas doa dan kehadiran Anda
+                Thank you for your blessings and presence
               </p>
               <p className="mt-8 text-[10px] uppercase tracking-[0.3em] text-stone-300">
                 {eventSettings.organizer}

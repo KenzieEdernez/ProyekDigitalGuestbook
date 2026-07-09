@@ -14,7 +14,7 @@ export async function GET() {
 export async function PUT(request: Request) {
   if (!(await isAdminLoggedIn())) {
     return NextResponse.json(
-      { error: "Anda harus login sebagai panitia." },
+      { error: "You must be logged in as staff." },
       { status: 401 }
     );
   }

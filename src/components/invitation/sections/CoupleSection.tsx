@@ -11,11 +11,11 @@ export default function CoupleSection() {
     <section id="couple" className="invitation-section relative bg-blush px-6 py-28">
       <div className="absolute inset-0 bg-radial-gold opacity-40" />
 
-      <div className="relative mx-auto max-w-5xl">
+      <div className="relative mx-auto max-w-6xl lg:max-w-7xl">
         <SectionHeader
-          label="Mempelai"
+          label="The Couple"
           title="Bride & Groom"
-          subtitle="Dua hati yang dipersatukan dalam cinta dan kasih sayang, siap melangkah menuju jenjang baru bersama."
+          subtitle="Two hearts united in love, ready to begin a new chapter together."
         />
 
         <div className="relative grid gap-8 md:grid-cols-2 md:gap-12">
@@ -53,7 +53,7 @@ export default function CoupleSection() {
                 <div className="space-y-4 p-6">
                   <p className="text-sm leading-relaxed text-stone-500">
                     <span className="font-semibold text-navy">
-                      {i === 0 ? "Putra" : "Putri"} dari
+                      {i === 0 ? "Son of" : "Daughter of"}
                     </span>
                     <br />
                     {person.father}

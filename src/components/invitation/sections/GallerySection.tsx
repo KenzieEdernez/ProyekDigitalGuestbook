@@ -30,11 +30,11 @@ export default function GallerySection() {
 
   return (
     <section id="gallery" className="invitation-section bg-parchment px-6 py-28">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-6xl lg:max-w-7xl">
         <SectionHeader
-          label="Galeri"
-          title="Foto Prewedding"
-          subtitle="Momen indah perjalanan cinta kami yang ingin kami bagikan dengan Anda."
+          label="Gallery"
+          title="Prewedding Photos"
+          subtitle="Beautiful moments from our journey together that we'd love to share with you."
         />
 
         <div className="columns-2 gap-4 md:columns-3">

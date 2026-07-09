@@ -6,7 +6,7 @@ import InvitationApp from "@/components/invitation/InvitationApp";
 function InvitationLoading() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-cream">
-      <p className="text-sm text-stone-500">Memuat undangan...</p>
+      <p className="text-sm text-stone-500">Loading invitation...</p>
     </main>
   );
 }

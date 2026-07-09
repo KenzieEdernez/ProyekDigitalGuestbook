@@ -23,11 +23,11 @@ export default function GiftSection() {
     <section id="gift" className="invitation-section relative bg-champagne px-6 py-28">
       <div className="absolute inset-0 bg-radial-gold opacity-30" />
 
-      <div className="relative mx-auto max-w-3xl">
+      <div className="relative mx-auto max-w-3xl lg:max-w-5xl">
         <SectionHeader
-          label="Tanda Kasih"
+          label="Gift"
           title="Wedding Gift"
-          subtitle="Kehadiran dan doa restu Anda adalah hadiah terindah. Namun jika ingin memberikan tanda kasih, berikut informasinya."
+          subtitle="Your presence and blessings are the greatest gift. If you wish to give more, details are below."
         />
 
         <Reveal direction="scale" delay={100}>
@@ -76,7 +76,7 @@ export default function GiftSection() {
         <Reveal direction="up" delay={250}>
           <div className="mt-8 overflow-hidden rounded-2xl border border-royal/15 bg-white/60 p-7 backdrop-blur-sm">
             <p className="text-[10px] font-bold uppercase tracking-widest text-royal">
-              Kirim Kado Fisik
+              Send Physical Gift
             </p>
             <div className="mt-5 space-y-4 text-sm text-stone-600">
               <p className="font-display text-xl text-navy">

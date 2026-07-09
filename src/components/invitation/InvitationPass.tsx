@@ -64,7 +64,7 @@ async function createPassImageBlob({
   ctx.fillStyle = "#c5a059";
   ctx.font = "700 20px Arial";
   ctx.textAlign = "center";
-  ctx.fillText("E-TICKET UNDANGAN", 450, 60);
+  ctx.fillText("WEDDING E-TICKET", 450, 60);
 
   ctx.fillStyle = "#ffffff";
   ctx.roundRect(50, 90, 800, 1100, 28);
@@ -72,7 +72,7 @@ async function createPassImageBlob({
 
   ctx.fillStyle = "#c5a059";
   ctx.font = "700 18px Arial";
-  ctx.fillText("KONFIRMASI KEHADIRAN", 450, 145);
+  ctx.fillText("ATTENDANCE CONFIRMED", 450, 145);
 
   ctx.fillStyle = "#1a2332";
   ctx.font = "700 36px Georgia";
@@ -93,7 +93,7 @@ async function createPassImageBlob({
 
   ctx.fillStyle = "#78716c";
   ctx.font = "22px Arial";
-  ctx.fillText(`${guest.pax} Tamu`, 450, 760);
+  ctx.fillText(`${guest.pax} Guest${guest.pax > 1 ? "s" : ""}`, 450, 760);
 
   ctx.fillStyle = "#1a2332";
   ctx.font = "700 24px Courier New";
@@ -105,7 +105,7 @@ async function createPassImageBlob({
 
   ctx.fillStyle = "#78716c";
   ctx.font = "18px Arial";
-  ctx.fillText("Tunjukkan QR atau barcode ini di pintu masuk", 450, 920);
+  ctx.fillText("Show this QR or barcode at the entrance", 450, 920);
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -127,7 +127,7 @@ export function InvitationPass({ guest, event }: InvitationPassProps) {
   if (!invitationBarcode) return null;
 
   const getFileName = () =>
-    `tiket-${sanitizeFilename(guest.name) || "tamu"}-${invitationBarcode}.png`;
+    `ticket-${sanitizeFilename(guest.name) || "guest"}-${invitationBarcode}.png`;
 
   const createImage = () =>
     createPassImageBlob({
@@ -149,7 +149,7 @@ export function InvitationPass({ guest, event }: InvitationPassProps) {
       anchor.remove();
       URL.revokeObjectURL(url);
     } catch {
-      alert("Gagal menyimpan tiket.");
+      alert("Failed to save ticket.");
     }
   };
 
@@ -160,15 +160,15 @@ export function InvitationPass({ guest, event }: InvitationPassProps) {
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
-          title: `Tiket Undangan - ${event.name}`,
-          text: `Tiket masuk untuk ${guest.name}`,
+          title: `Wedding Ticket - ${event.name}`,
+          text: `Entry ticket for ${guest.name}`,
           files: [file],
         });
         return;
       }
 
       await downloadPass();
-      alert("Browser tidak mendukung berbagi. Tiket telah diunduh.");
+      alert("Sharing is not supported. The ticket has been downloaded.");
     } catch {
       // user cancelled
     }
@@ -182,13 +182,13 @@ export function InvitationPass({ guest, event }: InvitationPassProps) {
         </div>
         <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-royal">
           <Ticket className="h-3.5 w-3.5" />
-          E-Ticket Undangan
+          Wedding E-Ticket
         </div>
         <h2 className="font-serif text-2xl font-bold text-white">
-          Kehadiran Dikonfirmasi
+          Attendance Confirmed
         </h2>
         <p className="mt-2 text-sm text-white/60">
-          Simpan tiket digital ini untuk masuk ke acara
+          Save this digital ticket for event entry
         </p>
       </div>
 
@@ -201,22 +201,22 @@ export function InvitationPass({ guest, event }: InvitationPassProps) {
 
         <div className="mt-6">
           <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-widest text-stone-400">
-            Barcode Masuk
+            Entry Barcode
           </p>
           <LinearBarcode value={invitationBarcode} />
         </div>
 
         <div className="mt-8 grid grid-cols-3 gap-3">
           {[
-            { label: "Nama", value: guest.name },
+            { label: "Name", value: guest.name },
             {
-              label: "No. Tiket",
+              label: "Ticket No.",
               value: formatRegNumber(invitationBarcode),
               small: true,
             },
             {
-              label: "Jumlah Tamu",
-              value: `${guest.pax} orang`,
+              label: "Party Size",
+              value: `${guest.pax} guest${guest.pax > 1 ? "s" : ""}`,
             },
           ].map(({ label, value, small }) => (
             <div
@@ -257,14 +257,14 @@ export function InvitationPass({ guest, event }: InvitationPassProps) {
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button onClick={downloadPass} className="btn-navy py-3 text-xs">
             <Download className="h-4 w-4" />
-            Simpan Tiket
+            Save Ticket
           </button>
           <button
             onClick={sharePass}
             className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-navy px-4 py-3 text-xs font-semibold uppercase tracking-wide text-navy transition hover:bg-navy/5"
           >
             <Share2 className="h-4 w-4" />
-            Bagikan
+            Share
           </button>
         </div>
       </div>
@@ -278,13 +278,13 @@ export function DeclinedInvitation({ name }: { name: string }) {
       <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-parchment">
         <span className="text-3xl">🙏</span>
       </div>
-      <h2 className="font-serif text-3xl font-bold text-navy">Terima Kasih</h2>
+      <h2 className="font-serif text-3xl font-bold text-navy">Thank You</h2>
       <p className="mt-4 leading-relaxed text-stone-600">
-        Terima kasih atas konfirmasinya, <strong>{name}</strong>. Doa dan
-        dukungan Anda sangat berarti bagi kami.
+        Thank you for your confirmation, <strong>{name}</strong>. Your
+        blessings and support mean the world to us.
       </p>
       <p className="mt-4 text-sm text-stone-400">
-        Semoga kita dapat bertemu di kesempatan lain.
+        We hope to see you on another occasion.
       </p>
     </div>
   );
