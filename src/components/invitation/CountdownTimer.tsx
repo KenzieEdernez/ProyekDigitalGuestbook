@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 interface CountdownTimerProps {
-  targetDate: string;
+  target: Date | null;
 }
 
 function getTimeLeft(target: Date) {
@@ -20,28 +20,36 @@ function getTimeLeft(target: Date) {
   };
 }
 
-export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
+export default function CountdownTimer({ target }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState(() =>
-    getTimeLeft(new Date(targetDate))
+    target ? getTimeLeft(target) : null
   );
   const [tick, setTick] = useState(false);
 
   useEffect(() => {
-    const target = new Date(targetDate);
+    if (!target) {
+      setTimeLeft(null);
+      return;
+    }
+
+    setTimeLeft(getTimeLeft(target));
+
     const timer = setInterval(() => {
       setTimeLeft(getTimeLeft(target));
       setTick(true);
       setTimeout(() => setTick(false), 300);
     }, 1000);
-    return () => clearInterval(timer);
-  }, [targetDate]);
 
-  const units = [
-    { label: "Days", value: timeLeft.days },
-    { label: "Hours", value: timeLeft.hours },
-    { label: "Minutes", value: timeLeft.minutes },
-    { label: "Seconds", value: timeLeft.seconds },
-  ];
+    return () => clearInterval(timer);
+  }, [target?.getTime()]);
+
+  if (!target || !timeLeft) {
+    return (
+      <p className="text-center text-sm text-white/50">
+        Set the event date in admin settings to start the countdown.
+      </p>
+    );
+  }
 
   if (timeLeft.ended) {
     return (
@@ -51,13 +59,20 @@ export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
     );
   }
 
+  const units = [
+    { label: "Days", value: timeLeft.days },
+    { label: "Hours", value: timeLeft.hours },
+    { label: "Minutes", value: timeLeft.minutes },
+    { label: "Seconds", value: timeLeft.seconds },
+  ];
+
   return (
     <div className="grid grid-cols-4 gap-3">
       {units.map(({ label, value }) => (
         <div
           key={label}
           className={`countdown-unit rounded-2xl border border-white/10 bg-white/10 px-2 py-5 text-center backdrop-blur-md ${
-            tick && label === "Detik" ? "scale-105" : ""
+            tick && label === "Seconds" ? "scale-105" : ""
           }`}
         >
           <p className="font-display text-3xl font-light text-white md:text-4xl">

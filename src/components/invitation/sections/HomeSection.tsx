@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Heart } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Calendar, Heart } from "lucide-react";
 import CountdownTimer from "@/components/invitation/CountdownTimer";
 import Reveal from "@/components/invitation/Reveal";
+import { addToCalendar } from "@/lib/calendar-event";
+import { parseEventDateTime } from "@/lib/event-datetime";
 import { getCoupleDisplayName } from "@/lib/wedding-config";
 import type { WeddingSettings } from "@/types/wedding";
 import type { mergeEventSettings } from "@/lib/event-config";
@@ -14,22 +16,72 @@ interface HomeSectionProps {
   event: EventSettings;
   wedding: WeddingSettings;
   guestName: string | null;
-  onNavigateRsvp: () => void;
+}
+
+function resolveEventDetails(event: EventSettings, wedding: WeddingSettings) {
+  const ceremony = wedding.ceremonies[0];
+  const coupleName = getCoupleDisplayName(wedding);
+
+  if (event.date) {
+    return {
+      date: event.date,
+      time: event.timeFrom || ceremony?.time || "9:00 AM",
+      location:
+        [event.location, event.address].filter(Boolean).join(", ") ||
+        [ceremony?.location, ceremony?.address].filter(Boolean).join(", "),
+      title: `${coupleName} Wedding`,
+      description: event.name || ceremony?.title || "Wedding celebration",
+    };
+  }
+
+  if (ceremony?.date) {
+    return {
+      date: ceremony.date,
+      time: ceremony.time || "9:00 AM",
+      location: [ceremony.location, ceremony.address].filter(Boolean).join(", "),
+      title: ceremony.title || `${coupleName} Wedding`,
+      description: ceremony.title || "Wedding celebration",
+    };
+  }
+
+  return null;
 }
 
 export default function HomeSection({
   event,
   wedding,
   guestName,
-  onNavigateRsvp,
 }: HomeSectionProps) {
   const [scrollY, setScrollY] = useState(0);
+  const eventDetails = useMemo(
+    () => resolveEventDetails(event, wedding),
+    [
+      event.date,
+      event.timeFrom,
+      event.location,
+      event.address,
+      event.name,
+      wedding.ceremonies,
+    ]
+  );
+  const countdownTarget = useMemo(
+    () =>
+      eventDetails
+        ? parseEventDateTime(eventDetails.date, eventDetails.time)
+        : null,
+    [eventDetails]
+  );
 
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const handleAddToCalendar = () => {
+    if (!eventDetails) return;
+    addToCalendar(eventDetails);
+  };
 
   return (
     <section id="home" className="invitation-section relative min-h-screen overflow-hidden">
@@ -91,16 +143,19 @@ export default function HomeSection({
             <p className="mb-5 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/40">
               Countdown to Our Big Day
             </p>
-            <CountdownTimer targetDate={event.date} />
+            <CountdownTimer target={countdownTarget} />
           </div>
         </Reveal>
 
         <Reveal direction="up" delay={800}>
           <button
-            onClick={onNavigateRsvp}
-            className="btn-invite-primary mt-12 px-12"
+            type="button"
+            onClick={handleAddToCalendar}
+            disabled={!eventDetails}
+            className="btn-invite-primary mt-12 inline-flex items-center gap-2 px-12 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Confirm Attendance
+            <Calendar className="h-4 w-4" />
+            Add to Calendar
           </button>
         </Reveal>
       </div>

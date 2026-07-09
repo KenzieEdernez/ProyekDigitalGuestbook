@@ -225,7 +225,6 @@ export default function InvitationApp() {
               event={eventSettings}
               wedding={wedding}
               guestName={guestName}
-              onNavigateRsvp={() => navigateTo("rsvp")}
             />
 
             <WaveDivider fill="#f9f0ed" />
