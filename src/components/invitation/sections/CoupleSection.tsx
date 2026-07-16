@@ -12,7 +12,7 @@ interface CoupleSectionProps {
 
 export default function CoupleSection({ wedding }: CoupleSectionProps) {
   return (
-    <section id="couple" className="invitation-section relative bg-blush px-6 py-28">
+    <section id="couple" className="invitation-section invitation-section-pad relative bg-blush">
       <div className="absolute inset-0 bg-radial-gold opacity-40" />
 
       <div className="relative mx-auto max-w-6xl lg:max-w-7xl">
@@ -22,9 +22,9 @@ export default function CoupleSection({ wedding }: CoupleSectionProps) {
           subtitle="Two hearts united in love, ready to begin a new chapter together."
         />
 
-        <div className="relative grid gap-8 md:grid-cols-2 md:gap-12">
-          <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 md:block">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-royal/30 bg-white/90 font-display text-3xl text-royal shadow-glow backdrop-blur-sm float-slow">
+        <div className="relative grid gap-6 sm:gap-8 md:grid-cols-2 md:gap-12">
+          <div className="pointer-events-none absolute left-1/2 top-[calc(50%-2rem)] z-10 flex -translate-x-1/2 -translate-y-1/2 md:top-1/2">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-royal/30 bg-white/90 font-display text-2xl text-royal shadow-glow backdrop-blur-sm float-slow sm:h-16 sm:w-16 sm:text-3xl">
               &
             </div>
           </div>
@@ -37,24 +37,24 @@ export default function CoupleSection({ wedding }: CoupleSectionProps) {
               duration={900}
               className={i === 1 ? "md:mt-20" : ""}
             >
-              <div className="group overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-royal/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-card-lg">
-                <div className="relative aspect-[3/4] overflow-hidden">
+              <div className="group overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-royal/10 transition-all duration-500 md:hover:-translate-y-2 md:hover:shadow-card-lg">
+                <div className="relative aspect-[3/4] overflow-hidden sm:aspect-[4/5]">
                   <img
                     src={person.photo}
                     alt={person.fullName}
-                    className="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105"
+                    className="invitation-portrait-photo h-full w-full transition-transform duration-700 ease-out-expo md:group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/10 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-7">
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
                     <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-royal-200">
                       {i === 0 ? "The Groom" : "The Bride"}
                     </p>
-                    <h3 className="mt-2 font-display text-3xl font-light text-white">
+                    <h3 className="mt-2 font-display text-2xl font-light text-white sm:text-3xl">
                       {person.fullName}
                     </h3>
                   </div>
                 </div>
-                <div className="space-y-4 p-6">
+                <div className="space-y-4 p-5 sm:p-6">
                   <p className="text-sm leading-relaxed text-stone-500">
                     <span className="font-semibold text-navy">
                       {i === 0 ? "Son of" : "Daughter of"}

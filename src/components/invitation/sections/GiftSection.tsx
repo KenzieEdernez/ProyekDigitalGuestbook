@@ -25,7 +25,7 @@ export default function GiftSection({ gifts, giftAddress }: GiftSectionProps) {
   };
 
   return (
-    <section id="gift" className="invitation-section relative bg-champagne px-6 py-28">
+    <section id="gift" className="invitation-section invitation-section-pad relative bg-champagne">
       <div className="absolute inset-0 bg-radial-gold opacity-30" />
 
       <div className="relative mx-auto max-w-3xl lg:max-w-5xl">

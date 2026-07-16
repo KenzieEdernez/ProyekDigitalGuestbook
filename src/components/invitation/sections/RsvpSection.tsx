@@ -110,7 +110,7 @@ export default function RsvpSection({
     return (
       <section
         id="rsvp"
-        className="invitation-section relative overflow-hidden bg-cream px-6 py-20 lg:py-28"
+        className="invitation-section invitation-section-pad relative overflow-hidden bg-cream"
       >
         <div className="absolute inset-0 bg-radial-gold opacity-30" />
         <div className="relative mx-auto max-w-6xl">
@@ -171,7 +171,7 @@ export default function RsvpSection({
   return (
     <section
       id="rsvp"
-      className="invitation-section relative overflow-hidden bg-cream px-6 py-20 lg:py-28"
+      className="invitation-section invitation-section-pad relative overflow-hidden bg-cream"
     >
       <div
         className="absolute inset-0 bg-cover bg-center opacity-[0.04]"

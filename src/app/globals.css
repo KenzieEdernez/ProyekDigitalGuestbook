@@ -178,6 +178,51 @@
     }
   }
 
+  .invitation-hero-bg {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center 30%;
+  }
+
+  @media (min-width: 768px) {
+    .invitation-hero-bg {
+      background-position: center center;
+    }
+  }
+
+  .invitation-photo {
+    object-fit: cover;
+    object-position: center 25%;
+  }
+
+  @media (min-width: 768px) {
+    .invitation-photo {
+      object-position: center center;
+    }
+  }
+
+  .invitation-portrait-photo {
+    object-fit: cover;
+    object-position: center 15%;
+  }
+
+  @media (min-width: 768px) {
+    .invitation-portrait-photo {
+      object-position: center 20%;
+    }
+  }
+
+  .invitation-section-pad {
+    @apply px-5 py-16 sm:px-6 sm:py-24 lg:py-28;
+  }
+
+  @media (max-width: 767px) {
+    .gallery-item:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
   .invitation-cover {
     animation: fadeIn 1s ease-out;
   }

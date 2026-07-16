@@ -17,7 +17,7 @@ export default function EventSection({ event, ceremonies }: EventSectionProps) {
   return (
     <section
       id="event"
-      className="invitation-section relative overflow-hidden bg-navy px-6 py-28 text-white"
+      className="invitation-section invitation-section-pad relative overflow-hidden bg-navy text-white"
     >
       <div className="absolute inset-0 bg-radial-gold opacity-30" />
       <div className="grain-overlay absolute inset-0" />
@@ -32,8 +32,8 @@ export default function EventSection({ event, ceremonies }: EventSectionProps) {
         <div className="space-y-6">
           {ceremonies.map((ceremony, i) => (
             <Reveal key={ceremony.id} direction="up" delay={i * 120}>
-              <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-all duration-500 hover:border-royal/30 hover:bg-white/8">
-                <h3 className="font-display text-3xl font-light text-royal">
+              <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md transition-all duration-500 hover:border-royal/30 hover:bg-white/8 sm:p-8">
+                <h3 className="font-display text-2xl font-light text-royal sm:text-3xl">
                   {ceremony.title}
                 </h3>
 

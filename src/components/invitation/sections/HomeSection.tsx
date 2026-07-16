@@ -51,9 +51,9 @@ export default function HomeSection({
   };
 
   return (
-    <section id="home" className="invitation-section relative min-h-screen overflow-hidden">
+    <section id="home" className="invitation-section relative min-h-[100dvh] overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center will-change-transform"
+        className="invitation-hero-bg absolute inset-0 will-change-transform"
         style={{
           backgroundImage: `url('${event.heroImage}')`,
           transform: `scale(1.05) translateY(${scrollY * 0.25}px)`,
@@ -62,7 +62,7 @@ export default function HomeSection({
       <div className="absolute inset-0 bg-gradient-to-b from-navy-900/75 via-navy-900/35 to-champagne" />
       <div className="absolute inset-0 bg-radial-gold opacity-60" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 py-28 text-center lg:max-w-6xl lg:px-10 lg:py-32">
+      <div className="relative mx-auto flex min-h-[100dvh] max-w-5xl flex-col items-center justify-center px-5 py-20 text-center sm:px-6 sm:py-28 lg:max-w-6xl lg:px-10 lg:py-32">
         <Reveal direction="blur" duration={900}>
           <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-royal-200">
             Wedding Invitation
@@ -70,7 +70,7 @@ export default function HomeSection({
         </Reveal>
 
         <Reveal direction="up" delay={150} duration={1000}>
-          <h2 className="mt-5 font-display text-5xl font-light leading-[1.1] text-white md:text-7xl">
+          <h2 className="mt-5 font-display text-4xl font-light leading-[1.1] text-white sm:text-5xl md:text-7xl">
             {getCoupleDisplayName(wedding)}
           </h2>
         </Reveal>
@@ -127,7 +127,7 @@ export default function HomeSection({
             type="button"
             onClick={handleAddToCalendar}
             disabled={!eventDetails}
-            className="btn-invite-primary mt-12 inline-flex items-center gap-2 px-12 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-invite-primary mt-10 inline-flex w-full max-w-xs items-center justify-center gap-2 px-8 sm:mt-12 sm:w-auto sm:max-w-none sm:px-12 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Calendar className="h-4 w-4" />
             Add to Calendar

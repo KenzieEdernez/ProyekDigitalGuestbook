@@ -41,13 +41,13 @@ export default function InvitationCover({
 
   return (
     <div
-      className={`invitation-cover grain-overlay relative flex min-h-screen flex-col items-center justify-center overflow-hidden transition-opacity duration-700 ${
+      className={`invitation-cover grain-overlay relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden transition-opacity duration-700 ${
         isExiting ? "opacity-0" : "opacity-100"
       }`}
     >
       {/* Ken Burns background */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-[3s] ease-out-expo"
+        className="invitation-hero-bg absolute inset-0 transition-transform duration-[3s] ease-out-expo"
         style={{
           backgroundImage: `url('${heroImage}')`,
           transform: visible && !isExiting ? "scale(1)" : "scale(1.12)",
@@ -65,7 +65,7 @@ export default function InvitationCover({
       </div>
 
       <div
-        className={`relative z-10 flex w-full max-w-xl flex-col items-center px-8 text-center transition-all duration-[1.2s] ease-out-expo ${
+        className={`relative z-10 flex w-full max-w-xl flex-col items-center px-5 py-10 text-center transition-all duration-[1.2s] ease-out-expo sm:px-8 ${
           visible && !isExiting
             ? "translate-y-0 opacity-100"
             : "translate-y-12 opacity-0"
@@ -92,7 +92,7 @@ export default function InvitationCover({
         </p>
 
         <h1
-          className="mt-5 font-display text-5xl font-light leading-[1.1] text-white md:text-7xl"
+          className="mt-5 font-display text-4xl font-light leading-[1.1] text-white sm:text-5xl md:text-7xl"
           style={{
             transitionDelay: visible ? "650ms" : "0ms",
             opacity: visible ? 1 : 0,
@@ -121,7 +121,7 @@ export default function InvitationCover({
             <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-white/40">
               Dear
             </p>
-            <p className="mt-3 font-display text-2xl font-light text-white md:text-3xl">
+            <p className="mt-3 font-display text-xl font-light text-white sm:text-2xl md:text-3xl">
               {guestName}
             </p>
           </div>
@@ -143,7 +143,7 @@ export default function InvitationCover({
           onPointerDown={onPrimeMusic}
           onClick={handleOpen}
           disabled={btnPressed}
-          className={`btn-invite-ghost group mt-12 px-12 ${
+          className={`btn-invite-ghost group mt-10 w-full max-w-xs px-8 sm:mt-12 sm:w-auto sm:max-w-none sm:px-12 ${
             btnPressed ? "scale-95 opacity-70" : ""
           }`}
         >

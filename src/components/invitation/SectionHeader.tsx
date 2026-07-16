@@ -21,7 +21,7 @@ export default function SectionHeader({
   const ornamentAlign = align === "center" ? "justify-center" : "justify-start";
 
   return (
-    <header className={`mb-16 max-w-2xl ${alignClass}`}>
+    <header className={`mb-10 max-w-2xl sm:mb-14 lg:mb-16 ${alignClass}`}>
       <Reveal direction="blur" duration={700}>
         <div className={`flex items-center gap-4 ${ornamentAlign}`}>
           {align === "center" && (
@@ -48,7 +48,7 @@ export default function SectionHeader({
 
       <Reveal direction="up" delay={120} duration={900}>
         <h2
-          className={`mt-5 font-display text-4xl font-light leading-tight md:text-5xl ${
+          className={`mt-5 font-display text-3xl font-light leading-tight sm:text-4xl md:text-5xl ${
             light ? "text-white" : "text-navy"
           }`}
         >

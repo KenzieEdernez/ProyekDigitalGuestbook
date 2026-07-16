@@ -128,6 +128,25 @@ export default function InvitationApp() {
       });
   }, [musicAvailable]);
 
+  const handleMusicEnded = useCallback(() => {
+    if (userPausedMusicRef.current) {
+      setMusicPlaying(false);
+      return;
+    }
+
+    const audio = audioRef.current;
+    if (!audio || !musicAvailable) {
+      setMusicPlaying(false);
+      return;
+    }
+
+    audio.currentTime = 0;
+    void audio
+      .play()
+      .then(() => setMusicPlaying(true))
+      .catch(() => setMusicPlaying(false));
+  }, [musicAvailable]);
+
   const handleOpen = () => {
     userPausedMusicRef.current = false;
     autoplayAttemptedRef.current = true;
@@ -213,7 +232,7 @@ export default function InvitationApp() {
               setMusicPlaying(false);
             }
           }}
-          onEnded={() => setMusicPlaying(false)}
+          onEnded={handleMusicEnded}
         />
       )}
 

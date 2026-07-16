@@ -34,7 +34,7 @@ export default function WishLettersSection({
   return (
     <section
       id="wishes"
-      className="invitation-section relative overflow-hidden bg-[#f5f0ea] px-6 py-20 lg:py-28"
+      className="invitation-section invitation-section-pad relative overflow-hidden bg-[#f5f0ea]"
     >
       <div className="absolute inset-0 bg-radial-gold opacity-25" />
       <div
