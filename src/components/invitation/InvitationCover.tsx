@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ChevronDown, Sparkles } from "lucide-react";
+import InvitationHeroBackground from "@/components/invitation/InvitationHeroBackground";
 
 interface InvitationCoverProps {
   guestName: string | null;
@@ -45,15 +46,13 @@ export default function InvitationCover({
         isExiting ? "opacity-0" : "opacity-100"
       }`}
     >
-      {/* Ken Burns background */}
-      <div
-        className="invitation-hero-bg absolute inset-0 transition-transform duration-[3s] ease-out-expo"
-        style={{
-          backgroundImage: `url('${heroImage}')`,
-          transform: visible && !isExiting ? "scale(1)" : "scale(1.12)",
-        }}
+      <InvitationHeroBackground
+        src={heroImage}
+        animateIn={visible}
+        isExiting={isExiting}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/85 via-navy-900/40 to-navy-900/95" />
+      <div className="invitation-hero-overlay-mobile absolute inset-0 md:bg-gradient-to-b md:from-navy-900/85 md:via-navy-900/40 md:to-navy-900/95" />
+      <div className="absolute inset-0 hidden bg-gradient-to-b from-navy-900/85 via-navy-900/40 to-navy-900/95 md:block" />
       <div className="absolute inset-0 bg-radial-gold" />
 
       {/* Floating ornaments */}
@@ -65,12 +64,13 @@ export default function InvitationCover({
       </div>
 
       <div
-        className={`relative z-10 flex w-full max-w-xl flex-col items-center px-5 py-10 text-center transition-all duration-[1.2s] ease-out-expo sm:px-8 ${
+        className={`invitation-hero-content relative z-10 flex w-full max-w-xl flex-col items-center px-5 py-10 text-center transition-all duration-[1.2s] ease-out-expo sm:px-8 ${
           visible && !isExiting
             ? "translate-y-0 opacity-100"
             : "translate-y-12 opacity-0"
         }`}
       >
+        <div className="invitation-hero-content-panel w-full">
         <div
           className="mb-10 flex w-full items-center justify-between text-xs font-light tracking-[0.35em] text-white/70 transition-all duration-1000 delay-300"
           style={{ transitionDelay: visible ? "400ms" : "0ms" }}
@@ -150,6 +150,7 @@ export default function InvitationCover({
           <span className="relative z-10">Open Invitation</span>
           <ChevronDown className="relative z-10 h-4 w-4 transition-transform duration-500 group-hover:translate-y-1.5" />
         </button>
+        </div>
       </div>
 
       {/* Scroll hint */}

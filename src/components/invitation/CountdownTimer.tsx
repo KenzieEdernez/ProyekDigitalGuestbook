@@ -64,18 +64,18 @@ export default function CountdownTimer({ target, settingsReady = true }: Countdo
   ];
 
   return (
-    <div className="grid grid-cols-5 gap-2 sm:gap-3">
+    <div className="grid grid-cols-5 gap-1.5 sm:gap-3">
       {units.map(({ label, value }) => (
         <div
           key={label}
-          className={`countdown-unit rounded-2xl border border-white/10 bg-white/10 px-1.5 py-4 text-center backdrop-blur-md sm:px-2 sm:py-5 ${
+          className={`countdown-unit rounded-xl border border-white/10 bg-white/10 px-1 py-3 text-center backdrop-blur-md sm:rounded-2xl sm:px-2 sm:py-5 ${
             tick && label === "Seconds" ? "scale-105" : ""
           }`}
         >
-          <p className="font-display text-2xl font-light text-white sm:text-3xl md:text-4xl">
+          <p className="font-display text-xl font-light text-white sm:text-3xl md:text-4xl">
             {String(value).padStart(2, "0")}
           </p>
-          <p className="mt-2 text-[7px] font-bold uppercase tracking-[0.2em] text-white/40 sm:text-[8px] sm:tracking-[0.25em]">
+          <p className="mt-1.5 text-[6px] font-bold uppercase tracking-[0.15em] text-white/40 sm:mt-2 sm:text-[8px] sm:tracking-[0.25em]">
             {label}
           </p>
         </div>

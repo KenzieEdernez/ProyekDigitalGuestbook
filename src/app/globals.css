@@ -178,6 +178,93 @@
     }
   }
 
+  .invitation-hero-frame {
+    background-color: #0f1520;
+  }
+
+  .invitation-hero-image {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    max-width: none;
+    transform: translateX(-50%);
+    object-fit: cover;
+    object-position: center center;
+    transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+
+  @media (max-width: 767px) {
+    .invitation-hero-image {
+      top: 0;
+      width: 100%;
+      height: auto;
+      max-height: 52vh;
+      object-fit: contain;
+      object-position: center top;
+      transform: translateX(-50%);
+    }
+
+    .invitation-hero-fill {
+      background: linear-gradient(
+        180deg,
+        rgba(15, 21, 32, 0) 0%,
+        rgba(15, 21, 32, 0.35) 28%,
+        rgba(15, 21, 32, 0.88) 52%,
+        #0f1520 100%
+      );
+    }
+  }
+
+  @media (min-width: 768px) {
+    .invitation-hero-image {
+      object-position: center center;
+    }
+  }
+
+  .invitation-hero-overlay-mobile {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 21, 32, 0.55) 0%,
+      rgba(15, 21, 32, 0.35) 45%,
+      rgba(15, 21, 32, 0.75) 100%
+    );
+  }
+
+  @media (min-width: 768px) {
+    .invitation-hero-overlay-mobile {
+      background: transparent;
+    }
+  }
+
+  .invitation-hero-content {
+    @apply relative z-10 w-full max-w-5xl px-5 text-center sm:px-6 lg:max-w-6xl lg:px-10;
+  }
+
+  @media (max-width: 767px) {
+    .invitation-hero-content-panel {
+      margin-inline: auto;
+      width: 100%;
+      max-width: 24rem;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 21, 32, 0.42);
+      padding: 1.5rem 1.25rem;
+      backdrop-filter: blur(10px);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .invitation-hero-content-panel {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      backdrop-filter: none;
+    }
+  }
+
   .invitation-hero-bg {
     background-size: cover;
     background-repeat: no-repeat;
