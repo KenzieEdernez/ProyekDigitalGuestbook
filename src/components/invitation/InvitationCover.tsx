@@ -34,7 +34,7 @@ export default function InvitationCover({
 
   const handleOpen = () => {
     setBtnPressed(true);
-    setTimeout(onOpen, 200);
+    onOpen();
   };
 
   return (
