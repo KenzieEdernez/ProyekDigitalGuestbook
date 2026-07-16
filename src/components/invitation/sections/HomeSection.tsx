@@ -8,6 +8,7 @@ import Reveal from "@/components/invitation/Reveal";
 import { addToCalendar } from "@/lib/calendar-event";
 import { resolveCeremonyEventDetails } from "@/lib/ceremony-event";
 import { parseEventDateTime } from "@/lib/event-datetime";
+import { resolveHeroImages } from "@/lib/hero-images";
 import { getCoupleDisplayName } from "@/lib/wedding-config";
 import type { WeddingSettings } from "@/types/wedding";
 import type { mergeEventSettings } from "@/lib/event-config";
@@ -28,6 +29,7 @@ export default function HomeSection({
   weddingReady,
 }: HomeSectionProps) {
   const [scrollY, setScrollY] = useState(0);
+  const heroImages = resolveHeroImages(event);
   const eventDetails = useMemo(() => {
     if (!weddingReady) return null;
     return resolveCeremonyEventDetails(wedding);
@@ -53,86 +55,85 @@ export default function HomeSection({
 
   return (
     <section id="home" className="invitation-section relative min-h-[100dvh] overflow-hidden">
-      <InvitationHeroBackground src={event.heroImage} scrollY={scrollY} />
-      <div className="invitation-hero-overlay-mobile absolute inset-0 md:bg-gradient-to-b md:from-navy-900/75 md:via-navy-900/35 md:to-champagne" />
-      <div className="absolute inset-0 hidden bg-gradient-to-b from-navy-900/75 via-navy-900/35 to-champagne md:block" />
-      <div className="absolute inset-0 bg-radial-gold opacity-50 md:opacity-60" />
+      <InvitationHeroBackground
+        landscapeSrc={heroImages.landscape}
+        portraitSrc={heroImages.portrait}
+        scrollY={scrollY}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/75 via-navy-900/35 to-champagne" />
+      <div className="absolute inset-0 bg-radial-gold opacity-60" />
 
-      <div className="relative mx-auto flex min-h-[100dvh] flex-col items-center justify-center py-16 sm:py-24 lg:py-32">
-        <div className="invitation-hero-content">
-          <div className="invitation-hero-content-panel">
-            <Reveal direction="blur" duration={900}>
-              <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-royal-200">
-                Wedding Invitation
-              </p>
-            </Reveal>
+      <div className="relative mx-auto flex min-h-[100dvh] max-w-5xl flex-col items-center justify-center px-5 py-20 text-center sm:px-6 sm:py-28 lg:max-w-6xl lg:px-10 lg:py-32">
+        <Reveal direction="blur" duration={900}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-royal-200">
+            Wedding Invitation
+          </p>
+        </Reveal>
 
-            <Reveal direction="up" delay={150} duration={1000}>
-              <h2 className="mt-5 font-display text-4xl font-light leading-[1.1] text-white sm:text-5xl md:text-7xl">
-                {getCoupleDisplayName(wedding)}
-              </h2>
-            </Reveal>
+        <Reveal direction="up" delay={150} duration={1000}>
+          <h2 className="mt-5 font-display text-4xl font-light leading-[1.1] text-white sm:text-5xl md:text-7xl">
+            {getCoupleDisplayName(wedding)}
+          </h2>
+        </Reveal>
 
-            <Reveal direction="scale" delay={300}>
-              <div className="my-6 flex items-center justify-center gap-4 sm:my-8 sm:gap-5">
-                <span className="h-px w-12 bg-gradient-to-r from-transparent to-royal/60 sm:w-20" />
-                <Heart className="h-4 w-4 fill-royal/80 text-royal animate-pulse-soft" />
-                <span className="h-px w-12 bg-gradient-to-l from-transparent to-royal/60 sm:w-20" />
-              </div>
-            </Reveal>
-
-            {guestName && (
-              <Reveal direction="up" delay={400}>
-                <p className="text-sm font-light text-white/70">
-                  For{" "}
-                  <span className="font-display text-xl text-white">
-                    {guestName}
-                  </span>
-                </p>
-              </Reveal>
-            )}
-
-            <Reveal direction="up" delay={500}>
-              <blockquote className="mx-auto mt-6 max-w-md sm:mt-8">
-                <p className="text-sm font-light italic leading-relaxed text-white/60">
-                  &ldquo;{wedding.quote}&rdquo;
-                </p>
-                <cite className="mt-3 block text-[10px] not-italic tracking-widest text-royal/70">
-                  {wedding.quoteSource}
-                </cite>
-              </blockquote>
-            </Reveal>
-
-            <Reveal direction="up" delay={650}>
-              <div className="mt-10 w-full sm:mt-14">
-                <p className="mb-4 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/40 sm:mb-5">
-                  Countdown to Our Big Day
-                </p>
-                {eventDetails && (
-                  <p className="mb-4 text-xs leading-relaxed text-white/55">
-                    {eventDetails.dateLabel} · {eventDetails.time}
-                  </p>
-                )}
-                <CountdownTimer
-                  target={countdownTarget}
-                  settingsReady={weddingReady}
-                />
-              </div>
-            </Reveal>
-
-            <Reveal direction="up" delay={800}>
-              <button
-                type="button"
-                onClick={handleAddToCalendar}
-                disabled={!eventDetails}
-                className="btn-invite-primary mt-8 inline-flex w-full max-w-xs items-center justify-center gap-2 px-8 sm:mt-12 sm:w-auto sm:max-w-none sm:px-12 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Calendar className="h-4 w-4" />
-                Add to Calendar
-              </button>
-            </Reveal>
+        <Reveal direction="scale" delay={300}>
+          <div className="my-8 flex items-center justify-center gap-5">
+            <span className="h-px w-20 bg-gradient-to-r from-transparent to-royal/60" />
+            <Heart className="h-4 w-4 fill-royal/80 text-royal animate-pulse-soft" />
+            <span className="h-px w-20 bg-gradient-to-l from-transparent to-royal/60" />
           </div>
-        </div>
+        </Reveal>
+
+        {guestName && (
+          <Reveal direction="up" delay={400}>
+            <p className="text-sm font-light text-white/70">
+              For{" "}
+              <span className="font-display text-xl text-white">
+                {guestName}
+              </span>
+            </p>
+          </Reveal>
+        )}
+
+        <Reveal direction="up" delay={500}>
+          <blockquote className="mx-auto mt-8 max-w-md">
+            <p className="text-sm font-light italic leading-relaxed text-white/60">
+              &ldquo;{wedding.quote}&rdquo;
+            </p>
+            <cite className="mt-3 block text-[10px] not-italic tracking-widest text-royal/70">
+              {wedding.quoteSource}
+            </cite>
+          </blockquote>
+        </Reveal>
+
+        <Reveal direction="up" delay={650}>
+          <div className="mx-auto mt-14 w-full max-w-2xl">
+            <p className="mb-5 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/40">
+              Countdown to Our Big Day
+            </p>
+            {eventDetails && (
+              <p className="mb-4 text-xs text-white/55">
+                {eventDetails.dateLabel} · {eventDetails.time}
+              </p>
+            )}
+            <CountdownTimer
+              target={countdownTarget}
+              settingsReady={weddingReady}
+            />
+          </div>
+        </Reveal>
+
+        <Reveal direction="up" delay={800}>
+          <button
+            type="button"
+            onClick={handleAddToCalendar}
+            disabled={!eventDetails}
+            className="btn-invite-primary mt-10 inline-flex w-full max-w-xs items-center justify-center gap-2 px-8 sm:mt-12 sm:w-auto sm:max-w-none sm:px-12 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Calendar className="h-4 w-4" />
+            Add to Calendar
+          </button>
+        </Reveal>
       </div>
     </section>
   );

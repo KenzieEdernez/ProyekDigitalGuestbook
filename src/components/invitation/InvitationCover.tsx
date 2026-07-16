@@ -7,6 +7,7 @@ import InvitationHeroBackground from "@/components/invitation/InvitationHeroBack
 interface InvitationCoverProps {
   guestName: string | null;
   heroImage: string;
+  heroImagePortrait: string;
   weddingDate: string;
   coupleName: string;
   onOpen: () => void;
@@ -17,6 +18,7 @@ interface InvitationCoverProps {
 export default function InvitationCover({
   guestName,
   heroImage,
+  heroImagePortrait,
   weddingDate,
   coupleName,
   onOpen,
@@ -47,15 +49,14 @@ export default function InvitationCover({
       }`}
     >
       <InvitationHeroBackground
-        src={heroImage}
+        landscapeSrc={heroImage}
+        portraitSrc={heroImagePortrait || heroImage}
         animateIn={visible}
         isExiting={isExiting}
       />
-      <div className="invitation-hero-overlay-mobile absolute inset-0 md:bg-gradient-to-b md:from-navy-900/85 md:via-navy-900/40 md:to-navy-900/95" />
-      <div className="absolute inset-0 hidden bg-gradient-to-b from-navy-900/85 via-navy-900/40 to-navy-900/95 md:block" />
+      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/85 via-navy-900/40 to-navy-900/95" />
       <div className="absolute inset-0 bg-radial-gold" />
 
-      {/* Floating ornaments */}
       <div className="pointer-events-none absolute left-[10%] top-[20%] font-display text-6xl text-royal/10 float-slow select-none">
         &
       </div>
@@ -64,13 +65,12 @@ export default function InvitationCover({
       </div>
 
       <div
-        className={`invitation-hero-content relative z-10 flex w-full max-w-xl flex-col items-center px-5 py-10 text-center transition-all duration-[1.2s] ease-out-expo sm:px-8 ${
+        className={`relative z-10 mx-auto flex w-full max-w-xl flex-col items-center px-5 py-10 text-center transition-all duration-[1.2s] ease-out-expo sm:px-8 ${
           visible && !isExiting
             ? "translate-y-0 opacity-100"
             : "translate-y-12 opacity-0"
         }`}
       >
-        <div className="invitation-hero-content-panel w-full">
         <div
           className="mb-10 flex w-full items-center justify-between text-xs font-light tracking-[0.35em] text-white/70 transition-all duration-1000 delay-300"
           style={{ transitionDelay: visible ? "400ms" : "0ms" }}
@@ -103,7 +103,7 @@ export default function InvitationCover({
           {coupleName}
         </h1>
 
-        <div className="my-8 flex items-center gap-4">
+        <div className="my-8 flex items-center justify-center gap-4">
           <span className="h-px w-16 bg-gradient-to-r from-transparent to-royal/50" />
           <span className="font-display text-lg text-royal">♥</span>
           <span className="h-px w-16 bg-gradient-to-l from-transparent to-royal/50" />
@@ -128,7 +128,7 @@ export default function InvitationCover({
         )}
 
         <p
-          className="max-w-sm text-sm font-light leading-relaxed text-white/60"
+          className="mx-auto max-w-sm text-sm font-light leading-relaxed text-white/60"
           style={{
             transitionDelay: visible ? "950ms" : "0ms",
             opacity: visible ? 1 : 0,
@@ -150,10 +150,8 @@ export default function InvitationCover({
           <span className="relative z-10">Open Invitation</span>
           <ChevronDown className="relative z-10 h-4 w-4 transition-transform duration-500 group-hover:translate-y-1.5" />
         </button>
-        </div>
       </div>
 
-      {/* Scroll hint */}
       <div
         className="absolute bottom-10 left-1/2 -translate-x-1/2 transition-opacity duration-700"
         style={{ opacity: visible && !btnPressed ? 1 : 0 }}

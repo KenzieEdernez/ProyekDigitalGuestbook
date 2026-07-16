@@ -9,4 +9,5 @@ export interface EventSettings {
   dressLadies: string;
   dressGentlemen: string;
   heroImage: string;
+  heroImagePortrait: string;
 }

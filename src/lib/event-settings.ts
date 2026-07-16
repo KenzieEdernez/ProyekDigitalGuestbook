@@ -99,6 +99,9 @@ function buildSettings(input: Partial<EventSettings> & Record<string, unknown>):
         input.dress_note
     ),
     heroImage: textValue(input.heroImage ?? input.hero_image),
+    heroImagePortrait: textValue(
+      input.heroImagePortrait ?? input.hero_image_portrait
+    ),
   };
 }
 
@@ -148,6 +151,7 @@ export async function saveEventSettings(
   const settings = buildSettings(merged);
   validatePresentationSettings(settings);
   const heroImage = await saveHeroImage(settings.heroImage);
+  const heroImagePortrait = await saveHeroImage(settings.heroImagePortrait);
   const { error } = await supabase.from("event_settings").upsert({
     id: "default",
     name: settings.name,
@@ -161,9 +165,10 @@ export async function saveEventSettings(
     dress_ladies: settings.dressLadies,
     dress_gentlemen: settings.dressGentlemen,
     hero_image: heroImage || null,
+    hero_image_portrait: heroImagePortrait || null,
     updated_at: new Date().toISOString(),
   });
 
   if (error) throw new Error(error.message);
-  return { ...settings, heroImage };
+  return { ...settings, heroImage, heroImagePortrait };
 }

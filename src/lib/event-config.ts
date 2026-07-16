@@ -15,6 +15,8 @@ export const EVENT = {
   dressGentlemen: "Formal suit",
   heroImage:
     "https://images.unsplash.com/photo-1519167758481-83f550bb49b8?w=1920&q=80&auto=format&fit=crop",
+  heroImagePortrait:
+    "https://images.unsplash.com/photo-1519741497674-611481863552?w=1080&q=80&auto=format&fit=crop",
 } as const;
 
 export const DEFAULT_EVENT_SETTINGS: EventSettings = {
@@ -28,6 +30,7 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   dressLadies: EVENT.dressLadies,
   dressGentlemen: EVENT.dressGentlemen,
   heroImage: EVENT.heroImage,
+  heroImagePortrait: EVENT.heroImagePortrait,
 };
 
 export function mergeEventSettings(settings?: Partial<EventSettings>) {

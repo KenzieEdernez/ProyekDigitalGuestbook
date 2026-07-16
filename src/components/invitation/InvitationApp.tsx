@@ -247,6 +247,7 @@ export default function InvitationApp() {
         <InvitationCover
           guestName={guestName}
           heroImage={eventSettings.heroImage}
+          heroImagePortrait={eventSettings.heroImagePortrait}
           weddingDate={primaryCeremony?.date ?? ""}
           coupleName={getCoupleDisplayName(wedding)}
           onOpen={handleOpen}
