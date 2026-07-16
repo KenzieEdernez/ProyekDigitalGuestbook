@@ -32,6 +32,31 @@ const SECTION_IDS: InvitationSection[] = [
 
 type Phase = "cover" | "curtain" | "open";
 
+function waitForAudioReady(audio: HTMLAudioElement) {
+  if (audio.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve, reject) => {
+    const onReady = () => {
+      cleanup();
+      resolve();
+    };
+    const onError = () => {
+      cleanup();
+      reject(new Error("Audio failed to load."));
+    };
+    const cleanup = () => {
+      audio.removeEventListener("canplaythrough", onReady);
+      audio.removeEventListener("error", onError);
+    };
+
+    audio.addEventListener("canplaythrough", onReady);
+    audio.addEventListener("error", onError);
+    audio.load();
+  });
+}
+
 export default function InvitationApp() {
   const eventSettings = useEventSettings();
   const { wedding, weddingReady, musicAvailable } = useWeddingSettings();
@@ -44,6 +69,8 @@ export default function InvitationApp() {
   const [isNavigating, setIsNavigating] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const userPausedMusicRef = useRef(false);
+  const autoplayAttemptedRef = useRef(false);
 
   const cleanUrl = useCallback(() => {
     const url = `${window.location.pathname}${window.location.search}`;
@@ -107,14 +134,14 @@ export default function InvitationApp() {
 
   const startMusic = useCallback(async () => {
     const audio = audioRef.current;
-    if (!audio || !musicAvailable) return false;
+    if (!audio || !musicAvailable || userPausedMusicRef.current) {
+      return false;
+    }
 
     try {
       audio.muted = false;
       audio.volume = 1;
-      if (audio.readyState < 2) {
-        audio.load();
-      }
+      await waitForAudioReady(audio);
       await audio.play();
       setMusicPlaying(true);
       return true;
@@ -125,7 +152,21 @@ export default function InvitationApp() {
   }, [musicAvailable]);
 
   const handleOpen = () => {
-    void startMusic();
+    userPausedMusicRef.current = false;
+    autoplayAttemptedRef.current = true;
+
+    const audio = audioRef.current;
+    if (audio && musicAvailable) {
+      audio.muted = false;
+      audio.volume = 1;
+      void audio
+        .play()
+        .then(() => setMusicPlaying(true))
+        .catch(() => {
+          void startMusic();
+        });
+    }
+
     setPhase("curtain");
     setTimeout(() => {
       setPhase("open");
@@ -135,31 +176,34 @@ export default function InvitationApp() {
     }, 1100);
   };
 
-  const toggleMusic = async () => {
+  const toggleMusic = () => {
     const audio = audioRef.current;
     if (!audio || !musicAvailable) return;
 
     if (musicPlaying) {
+      userPausedMusicRef.current = true;
       audio.pause();
       setMusicPlaying(false);
       return;
     }
 
-    await startMusic();
+    userPausedMusicRef.current = false;
+    void startMusic();
   };
 
   useEffect(() => {
-    if (phase !== "open" || !musicAvailable || musicPlaying) return;
-    void startMusic();
-  }, [phase, musicAvailable, musicPlaying, startMusic]);
-
-  useEffect(() => {
-    setMusicPlaying(false);
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.load();
+    if (
+      phase !== "open" ||
+      !musicAvailable ||
+      userPausedMusicRef.current ||
+      autoplayAttemptedRef.current
+    ) {
+      return;
     }
-  }, [musicAvailable]);
+
+    autoplayAttemptedRef.current = true;
+    void startMusic();
+  }, [phase, musicAvailable, startMusic]);
 
   const primaryCeremony = getPrimaryCeremony(wedding);
 
@@ -186,13 +230,15 @@ export default function InvitationApp() {
           loop
           preload="auto"
           playsInline
-          onEnded={() => setMusicPlaying(false)}
-          onPause={() => setMusicPlaying(false)}
           onPlay={() => setMusicPlaying(true)}
+          onPause={() => {
+            if (userPausedMusicRef.current) {
+              setMusicPlaying(false);
+            }
+          }}
         />
       )}
 
-      {/* Curtain transition overlay */}
       {phase === "curtain" && (
         <div className="curtain-open pointer-events-none fixed inset-0 z-[100] flex">
           <div className="curtain-panel curtain-left h-full w-1/2 bg-navy-900" />
@@ -220,7 +266,7 @@ export default function InvitationApp() {
             onNavigate={navigateTo}
             musicPlaying={musicPlaying}
             musicAvailable={musicAvailable}
-            onToggleMusic={() => void toggleMusic()}
+            onToggleMusic={toggleMusic}
           />
 
           <main>

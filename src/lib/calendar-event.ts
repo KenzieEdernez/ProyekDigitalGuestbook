@@ -29,24 +29,17 @@ function buildCalendarEvent(input: CalendarEventInput) {
   };
 }
 
-export function buildGoogleCalendarUrl(input: CalendarEventInput) {
-  const event = buildCalendarEvent(input);
-  if (!event) return "";
-
-  const params = new URLSearchParams({
-    action: "TEMPLATE",
-    text: event.title,
-    dates: `${toGoogleCalendarUtc(event.start)}/${toGoogleCalendarUtc(event.end)}`,
-    location: event.location,
-    details: event.description,
-  });
-
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+function escapeIcsText(value: string) {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
 }
 
-export function downloadIcsFile(input: CalendarEventInput) {
+function buildIcsContent(input: CalendarEventInput) {
   const event = buildCalendarEvent(input);
-  if (!event) return false;
+  if (!event) return null;
 
   const lines = [
     "BEGIN:VCALENDAR",
@@ -59,33 +52,48 @@ export function downloadIcsFile(input: CalendarEventInput) {
     `DTSTAMP:${toGoogleCalendarUtc(new Date())}`,
     `DTSTART:${toIcsLocalDateTime(event.start)}`,
     `DTEND:${toIcsLocalDateTime(event.end)}`,
-    `SUMMARY:${event.title.replace(/\n/g, "\\n")}`,
-    `LOCATION:${event.location.replace(/\n/g, "\\n")}`,
-    event.description ? `DESCRIPTION:${event.description.replace(/\n/g, "\\n")}` : "",
+    `SUMMARY:${escapeIcsText(event.title)}`,
+    `LOCATION:${escapeIcsText(event.location)}`,
+    event.description
+      ? `DESCRIPTION:${escapeIcsText(event.description)}`
+      : "",
     "END:VEVENT",
     "END:VCALENDAR",
   ].filter(Boolean);
 
-  const blob = new Blob([lines.join("\r\n")], {
+  return `${lines.join("\r\n")}\r\n`;
+}
+
+function isIosDevice() {
+  if (typeof navigator === "undefined") return false;
+
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+export function addToCalendar(input: CalendarEventInput) {
+  const icsContent = buildIcsContent(input);
+  if (!icsContent) return false;
+
+  if (isIosDevice()) {
+    window.location.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
+    return true;
+  }
+
+  const blob = new Blob([icsContent], {
     type: "text/calendar;charset=utf-8",
   });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = "wedding-event.ics";
+  anchor.rel = "noopener noreferrer";
+
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 10000);
   return true;
-}
-
-export function addToCalendar(input: CalendarEventInput) {
-  const googleUrl = buildGoogleCalendarUrl(input);
-  if (googleUrl) {
-    window.open(googleUrl, "_blank", "noopener,noreferrer");
-    return true;
-  }
-
-  return downloadIcsFile(input);
 }
