@@ -105,7 +105,27 @@ export default function InvitationApp() {
     return () => observer.disconnect();
   }, [phase, isNavigating]);
 
+  const startMusic = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio || !musicAvailable) return false;
+
+    try {
+      audio.muted = false;
+      audio.volume = 1;
+      if (audio.readyState < 2) {
+        audio.load();
+      }
+      await audio.play();
+      setMusicPlaying(true);
+      return true;
+    } catch {
+      setMusicPlaying(false);
+      return false;
+    }
+  }, [musicAvailable]);
+
   const handleOpen = () => {
+    void startMusic();
     setPhase("curtain");
     setTimeout(() => {
       setPhase("open");
@@ -125,14 +145,13 @@ export default function InvitationApp() {
       return;
     }
 
-    try {
-      audio.load();
-      await audio.play();
-      setMusicPlaying(true);
-    } catch {
-      setMusicPlaying(false);
-    }
+    await startMusic();
   };
+
+  useEffect(() => {
+    if (phase !== "open" || !musicAvailable || musicPlaying) return;
+    void startMusic();
+  }, [phase, musicAvailable, musicPlaying, startMusic]);
 
   useEffect(() => {
     setMusicPlaying(false);
@@ -160,6 +179,19 @@ export default function InvitationApp() {
 
   return (
     <>
+      {musicAvailable && (
+        <audio
+          ref={audioRef}
+          src="/api/wedding-music"
+          loop
+          preload="auto"
+          playsInline
+          onEnded={() => setMusicPlaying(false)}
+          onPause={() => setMusicPlaying(false)}
+          onPlay={() => setMusicPlaying(true)}
+        />
+      )}
+
       {/* Curtain transition overlay */}
       {phase === "curtain" && (
         <div className="curtain-open pointer-events-none fixed inset-0 z-[100] flex">
@@ -181,17 +213,6 @@ export default function InvitationApp() {
       {phase === "open" && (
         <div className="invitation-app invitation-app-enter bg-champagne">
           <ScrollProgress />
-          {musicAvailable && (
-            <audio
-              ref={audioRef}
-              src="/api/wedding-music"
-              loop
-              preload="metadata"
-              onEnded={() => setMusicPlaying(false)}
-              onPause={() => setMusicPlaying(false)}
-              onPlay={() => setMusicPlaying(true)}
-            />
-          )}
 
           <InvitationNav
             active={activeSection}
