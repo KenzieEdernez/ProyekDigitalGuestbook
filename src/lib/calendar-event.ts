@@ -37,7 +37,7 @@ function escapeIcsText(value: string) {
     .replace(/;/g, "\\;");
 }
 
-function buildIcsContent(input: CalendarEventInput) {
+export function buildIcsContent(input: CalendarEventInput) {
   const event = buildCalendarEvent(input);
   if (!event) return null;
 
@@ -64,36 +64,18 @@ function buildIcsContent(input: CalendarEventInput) {
   return `${lines.join("\r\n")}\r\n`;
 }
 
-function isIosDevice() {
-  if (typeof navigator === "undefined") return false;
-
-  return (
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  );
-}
-
 export function addToCalendar(input: CalendarEventInput) {
-  const icsContent = buildIcsContent(input);
-  if (!icsContent) return false;
+  const params = new URLSearchParams({
+    title: input.title,
+    date: input.date,
+    time: input.time,
+    location: input.location,
+  });
 
-  if (isIosDevice()) {
-    window.location.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
-    return true;
+  if (input.description) {
+    params.set("description", input.description);
   }
 
-  const blob = new Blob([icsContent], {
-    type: "text/calendar;charset=utf-8",
-  });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = "wedding-event.ics";
-  anchor.rel = "noopener noreferrer";
-
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 10000);
+  window.location.assign(`/api/calendar/download?${params.toString()}`);
   return true;
 }

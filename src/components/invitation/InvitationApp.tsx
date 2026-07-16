@@ -32,31 +32,6 @@ const SECTION_IDS: InvitationSection[] = [
 
 type Phase = "cover" | "curtain" | "open";
 
-function waitForAudioReady(audio: HTMLAudioElement) {
-  if (audio.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
-    return Promise.resolve();
-  }
-
-  return new Promise<void>((resolve, reject) => {
-    const onReady = () => {
-      cleanup();
-      resolve();
-    };
-    const onError = () => {
-      cleanup();
-      reject(new Error("Audio failed to load."));
-    };
-    const cleanup = () => {
-      audio.removeEventListener("canplaythrough", onReady);
-      audio.removeEventListener("error", onError);
-    };
-
-    audio.addEventListener("canplaythrough", onReady);
-    audio.addEventListener("error", onError);
-    audio.load();
-  });
-}
-
 export default function InvitationApp() {
   const eventSettings = useEventSettings();
   const { wedding, weddingReady, musicAvailable } = useWeddingSettings();
@@ -132,40 +107,31 @@ export default function InvitationApp() {
     return () => observer.disconnect();
   }, [phase, isNavigating]);
 
-  const startMusic = useCallback(async () => {
+  const primeMusic = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || !musicAvailable || userPausedMusicRef.current) {
-      return false;
-    }
+    if (!audio || !musicAvailable || userPausedMusicRef.current) return;
 
-    try {
-      audio.muted = false;
-      audio.volume = 1;
-      await waitForAudioReady(audio);
-      await audio.play();
-      setMusicPlaying(true);
-      return true;
-    } catch {
-      setMusicPlaying(false);
-      return false;
-    }
+    audio.muted = false;
+    audio.volume = 1;
+
+    const playAttempt = audio.play();
+    if (!playAttempt) return;
+
+    playAttempt
+      .then(() => setMusicPlaying(true))
+      .catch(() => {
+        const retryOnCanPlay = () => {
+          audio.removeEventListener("canplay", retryOnCanPlay);
+          void audio.play().then(() => setMusicPlaying(true)).catch(() => {});
+        };
+        audio.addEventListener("canplay", retryOnCanPlay);
+      });
   }, [musicAvailable]);
 
   const handleOpen = () => {
     userPausedMusicRef.current = false;
     autoplayAttemptedRef.current = true;
-
-    const audio = audioRef.current;
-    if (audio && musicAvailable) {
-      audio.muted = false;
-      audio.volume = 1;
-      void audio
-        .play()
-        .then(() => setMusicPlaying(true))
-        .catch(() => {
-          void startMusic();
-        });
-    }
+    primeMusic();
 
     setPhase("curtain");
     setTimeout(() => {
@@ -188,8 +154,20 @@ export default function InvitationApp() {
     }
 
     userPausedMusicRef.current = false;
-    void startMusic();
+    primeMusic();
   };
+
+  useEffect(() => {
+    if (!musicAvailable) return;
+
+    const audio = audioRef.current;
+    if (audio) {
+      audio.preload = "auto";
+      audio.load();
+    }
+
+    void fetch("/api/wedding-music", { cache: "force-cache" }).catch(() => {});
+  }, [musicAvailable]);
 
   useEffect(() => {
     if (
@@ -202,8 +180,8 @@ export default function InvitationApp() {
     }
 
     autoplayAttemptedRef.current = true;
-    void startMusic();
-  }, [phase, musicAvailable, startMusic]);
+    primeMusic();
+  }, [phase, musicAvailable, primeMusic]);
 
   const primaryCeremony = getPrimaryCeremony(wedding);
 
@@ -227,7 +205,6 @@ export default function InvitationApp() {
         <audio
           ref={audioRef}
           src="/api/wedding-music"
-          loop
           preload="auto"
           playsInline
           onPlay={() => setMusicPlaying(true)}
@@ -236,6 +213,7 @@ export default function InvitationApp() {
               setMusicPlaying(false);
             }
           }}
+          onEnded={() => setMusicPlaying(false)}
         />
       )}
 
@@ -253,6 +231,7 @@ export default function InvitationApp() {
           weddingDate={primaryCeremony?.date ?? ""}
           coupleName={getCoupleDisplayName(wedding)}
           onOpen={handleOpen}
+          onPrimeMusic={primeMusic}
         />
       )}
 

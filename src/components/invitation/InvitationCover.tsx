@@ -9,6 +9,7 @@ interface InvitationCoverProps {
   weddingDate: string;
   coupleName: string;
   onOpen: () => void;
+  onPrimeMusic?: () => void;
   isExiting?: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function InvitationCover({
   weddingDate,
   coupleName,
   onOpen,
+  onPrimeMusic,
   isExiting = false,
 }: InvitationCoverProps) {
   const [visible, setVisible] = useState(false);
@@ -138,6 +140,7 @@ export default function InvitationCover({
         </p>
 
         <button
+          onPointerDown={onPrimeMusic}
           onClick={handleOpen}
           disabled={btnPressed}
           className={`btn-invite-ghost group mt-12 px-12 ${

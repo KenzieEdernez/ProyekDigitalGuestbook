@@ -26,11 +26,15 @@ export async function GET() {
       return new NextResponse("Music file not found", { status: 404 });
     }
 
+    const contentLength = upstream.headers.get("Content-Length");
+    const contentType = upstream.headers.get("Content-Type") || "audio/mpeg";
+
     return new NextResponse(upstream.body, {
       headers: {
-        "Content-Type": upstream.headers.get("Content-Type") || "audio/mpeg",
-        "Cache-Control": "public, max-age=3600",
+        "Content-Type": contentType,
+        ...(contentLength ? { "Content-Length": contentLength } : {}),
         "Accept-Ranges": "bytes",
+        "Cache-Control": "public, max-age=3600",
       },
     });
   } catch {
