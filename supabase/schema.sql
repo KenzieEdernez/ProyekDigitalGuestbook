@@ -66,17 +66,17 @@ $$;
 
 create table if not exists public.event_settings (
   id text primary key default 'default',
-  name text not null,
-  date text not null,
-  time text not null,
-  location text not null,
-  address text not null,
-  dress_code text not null,
-  dress_note text not null,
+  name text not null default '',
+  date text not null default '',
+  time text not null default '',
+  time_from text,
+  location text not null default '',
+  address text not null default '',
   dress_ladies text,
   dress_gentlemen text,
   hero_image text,
   hero_image_portrait text,
+  wedding_content jsonb,
   updated_at timestamptz not null default now()
 );
 
@@ -84,19 +84,19 @@ alter table public.event_settings
   add column if not exists hero_image_portrait text;
 
 alter table public.event_settings
-add column if not exists dress_ladies text;
+  add column if not exists dress_ladies text;
 
 alter table public.event_settings
-add column if not exists dress_gentlemen text;
+  add column if not exists dress_gentlemen text;
 
 alter table public.event_settings
-add column if not exists hero_image text;
+  add column if not exists hero_image text;
 
 alter table public.event_settings
-add column if not exists time_from text;
+  add column if not exists time_from text;
 
 alter table public.event_settings
-add column if not exists wedding_content jsonb;
+  add column if not exists wedding_content jsonb;
 
 alter table public.guests
 add column if not exists email text;

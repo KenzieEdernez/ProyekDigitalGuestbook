@@ -160,8 +160,6 @@ export async function saveEventSettings(
     time_from: settings.timeFrom,
     location: settings.location,
     address: settings.address,
-    dress_code: settings.dressLadies,
-    dress_note: settings.dressGentlemen,
     dress_ladies: settings.dressLadies,
     dress_gentlemen: settings.dressGentlemen,
     hero_image: heroImage || null,
