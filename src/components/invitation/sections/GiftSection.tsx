@@ -28,18 +28,23 @@ export default function GiftSection({ gifts, copy }: GiftSectionProps) {
       id="gift"
       className="invitation-section invitation-section-pad relative overflow-hidden bg-navy text-white"
     >
-      <div className="absolute inset-0 bg-radial-gold opacity-25" />
-      <div className="grain-overlay absolute inset-0" />
+      <div className="absolute inset-0 bg-radial-gold opacity-30" />
+      <div className="pointer-events-none absolute -left-10 top-16 h-40 w-40 rounded-full bg-royal/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-8 bottom-10 h-44 w-44 rounded-full bg-royal/10 blur-3xl" />
 
-      <div className="relative mx-auto max-w-3xl px-2 text-center lg:max-w-4xl">
+      <div className="relative mx-auto max-w-2xl px-4 text-center">
         <Reveal direction="blur">
-          <h2 className="font-display text-5xl font-light text-white sm:text-6xl">
+          <h2 className="font-display text-5xl font-light italic text-white sm:text-6xl">
             {copy.giftTitle}
           </h2>
         </Reveal>
 
-        <Reveal direction="up" delay={120}>
-          <p className="mx-auto mt-8 max-w-2xl text-xs font-light uppercase leading-[1.9] tracking-[0.18em] text-white/70 sm:text-sm">
+        <Reveal direction="up" delay={100}>
+          <div className="mx-auto my-6 h-px w-14 bg-gradient-to-r from-transparent via-royal/60 to-transparent" />
+        </Reveal>
+
+        <Reveal direction="up" delay={140}>
+          <p className="mx-auto max-w-xl text-[11px] font-light uppercase leading-[1.95] tracking-[0.16em] text-white/65 sm:text-xs">
             {copy.giftMessage}
           </p>
         </Reveal>
@@ -48,24 +53,24 @@ export default function GiftSection({ gifts, copy }: GiftSectionProps) {
           {gifts.map((account, i) => {
             const key = `${account.bank}-${account.accountNumber}`;
             return (
-              <Reveal key={account.id} direction="up" delay={i * 100 + 180}>
-                <div className="mx-auto max-w-md rounded-[2rem] border border-white/10 bg-white/5 px-6 py-8 backdrop-blur-md">
+              <Reveal key={account.id} direction="up" delay={i * 100 + 200}>
+                <div className="mx-auto max-w-sm rounded-[1.75rem] border border-royal/20 bg-white/[0.04] px-6 py-8 backdrop-blur-sm">
                   <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-royal">
                     {account.bank}
                   </p>
-                  <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-white/45">
+                  <p className="mt-5 text-[9px] uppercase tracking-[0.28em] text-white/40">
                     Account Name
                   </p>
                   <p className="mt-2 font-display text-2xl text-white">
                     {account.accountName}
                   </p>
-                  <p className="mt-6 font-mono text-3xl font-light tracking-[0.2em] text-white">
+                  <p className="mt-5 font-mono text-[1.65rem] font-light tracking-[0.18em] text-white sm:text-3xl">
                     {account.accountNumber}
                   </p>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(account.accountNumber, key)}
-                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-royal/30 bg-royal/10 px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-royal transition-all hover:bg-royal/20"
+                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-royal/35 bg-royal/10 px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.22em] text-royal transition-all hover:bg-royal/20"
                   >
                     {copied === key ? (
                       <>

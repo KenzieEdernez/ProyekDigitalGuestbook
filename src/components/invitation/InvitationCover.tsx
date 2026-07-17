@@ -48,29 +48,30 @@ export default function InvitationCover({
 
   return (
     <div
-      className={`invitation-cover grain-overlay relative min-h-[100dvh] overflow-hidden transition-opacity duration-700 ${
+      className={`invitation-cover relative min-h-[100dvh] overflow-hidden transition-opacity duration-700 ${
         isExiting ? "opacity-0" : "opacity-100"
       }`}
     >
       <div
-        className="invitation-cover-bg absolute inset-0 scale-105 md:hidden"
+        className="invitation-cover-bg absolute inset-0 scale-[1.03] md:hidden"
         style={{ backgroundImage: `url('${heroes.portrait}')` }}
       />
       <div
-        className="invitation-cover-bg absolute inset-0 hidden scale-105 md:block"
+        className="invitation-cover-bg absolute inset-0 hidden scale-[1.03] md:block"
         style={{ backgroundImage: `url('${heroes.landscape}')` }}
       />
-      <div className="absolute inset-0 bg-navy-900/38" />
+      <div className="absolute inset-0 bg-navy-900/42" />
+      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/25 via-transparent to-navy-900/55" />
 
-      <div className="relative z-10 flex min-h-[100dvh] items-center justify-center px-5 py-8">
+      <div className="relative z-10 flex min-h-[100dvh] items-center justify-center px-5 py-10">
         <div
-          className={`invitation-cover-card w-[17.5rem] overflow-hidden sm:w-[19rem] ${
+          className={`invitation-cover-card w-[16.75rem] overflow-hidden sm:w-[18.5rem] ${
             visible && !isExiting
               ? "translate-y-0 opacity-100"
               : "translate-y-8 opacity-0"
           } transition-all duration-[1.1s] ease-out-expo`}
         >
-          <div className="aspect-[4/3] w-full overflow-hidden bg-navy-800">
+          <div className="aspect-[5/4] w-full overflow-hidden bg-navy-800">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={heroes.card}
@@ -79,25 +80,27 @@ export default function InvitationCover({
             />
           </div>
 
-          <div className="bg-cream px-4 py-5 text-center">
-            <p className="text-[8px] font-semibold uppercase tracking-[0.38em] text-royal">
+          <div className="bg-[#f7f1e8] px-5 py-6 text-center">
+            <p className="text-[8px] font-semibold uppercase tracking-[0.4em] text-royal">
               {copy.engagementTitle}
             </p>
 
-            <h1 className="mt-3 font-display text-[1.65rem] font-light leading-tight text-navy">
+            <h1 className="mt-3 font-display text-[1.7rem] font-light italic leading-[1.15] text-navy">
               {coupleName}
             </h1>
 
+            <div className="mx-auto my-4 h-px w-10 bg-gradient-to-r from-transparent via-royal/50 to-transparent" />
+
             {guestName && (
-              <div className="mx-auto mt-3 max-w-[13rem] rounded-full border border-royal/15 bg-white/80 px-3 py-1.5">
-                <p className="text-[7px] font-semibold uppercase tracking-[0.32em] text-stone-400">
+              <p className="mb-3 font-display text-base text-navy/80">
+                <span className="mr-1 text-[8px] font-sans font-semibold uppercase tracking-[0.28em] text-stone-400">
                   Dear
-                </p>
-                <p className="mt-0.5 font-display text-sm text-navy">{guestName}</p>
-              </div>
+                </span>
+                {guestName}
+              </p>
             )}
 
-            <p className="mx-auto mt-3 max-w-[14rem] text-[11px] font-light leading-relaxed text-stone-600">
+            <p className="mx-auto max-w-[13.5rem] text-[11px] font-light leading-relaxed text-stone-500">
               {copy.coverMessage}
             </p>
 
@@ -105,7 +108,7 @@ export default function InvitationCover({
               onPointerDown={onPrimeMusic}
               onClick={handleOpen}
               disabled={btnPressed}
-              className={`btn-invite-primary mt-5 inline-flex w-full items-center justify-center gap-1.5 px-4 py-2.5 text-[10px] ${
+              className={`btn-invite-primary mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[10px] tracking-[0.18em] ${
                 btnPressed ? "scale-95 opacity-70" : ""
               }`}
             >
@@ -114,15 +117,6 @@ export default function InvitationCover({
             </button>
           </div>
         </div>
-      </div>
-
-      <div
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 transition-opacity duration-700"
-        style={{ opacity: visible && !btnPressed ? 1 : 0 }}
-      >
-        <p className="text-[7px] uppercase tracking-[0.38em] text-white/30">
-          Tap to open
-        </p>
       </div>
     </div>
   );

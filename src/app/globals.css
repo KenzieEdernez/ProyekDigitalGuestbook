@@ -195,22 +195,27 @@
   }
 
   .invitation-cover-card {
-    border-radius: 0.85rem;
-    border: 1px solid rgba(197, 160, 89, 0.16);
+    border-radius: 0.95rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow:
-      0 18px 40px rgba(15, 21, 32, 0.28),
-      0 0 0 1px rgba(255, 255, 255, 0.05);
+      0 22px 48px rgba(15, 21, 32, 0.38),
+      0 0 0 1px rgba(197, 160, 89, 0.12);
   }
 
   .invitation-hero-vignette {
     background:
       radial-gradient(
-        ellipse at center 42%,
-        rgba(15, 21, 32, 0.15) 0%,
-        rgba(15, 21, 32, 0.55) 52%,
-        rgba(15, 21, 32, 0.88) 100%
+        ellipse at center 40%,
+        rgba(15, 21, 32, 0.08) 0%,
+        rgba(15, 21, 32, 0.42) 58%,
+        rgba(15, 21, 32, 0.78) 100%
       ),
-      linear-gradient(180deg, rgba(15, 21, 32, 0.35) 0%, rgba(15, 21, 32, 0.2) 45%, rgba(15, 21, 32, 0.75) 100%);
+      linear-gradient(
+        180deg,
+        rgba(15, 21, 32, 0.28) 0%,
+        rgba(15, 21, 32, 0.12) 38%,
+        rgba(15, 21, 32, 0.62) 100%
+      );
   }
 
   .invitation-hero-stage {
@@ -226,20 +231,45 @@
 
   .invitation-hero-copy {
     margin-top: auto;
-    padding-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
   }
 
   .invitation-hero-names {
-    font-size: clamp(2.35rem, 9vw, 4rem);
+    font-size: clamp(2.5rem, 10vw, 4.25rem);
     font-weight: 300;
     font-style: italic;
     line-height: 1.05;
     letter-spacing: 0.01em;
-    text-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   }
 
   .invitation-logo-image {
     filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.28));
+  }
+
+  .invitation-logo-fallback {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: #fff;
+    font-family: var(--font-cormorant), serif;
+    font-size: clamp(2.4rem, 7vw, 3.4rem);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .invitation-logo-fallback-bar {
+    display: inline-block;
+    height: 2.6rem;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(197, 160, 89, 0.9),
+      rgba(255, 255, 255, 0.1)
+    );
   }
 
   .flying-bird {
@@ -398,49 +428,6 @@
     .dresscode-artwork-img {
       width: min(100%, 19.5rem);
     }
-  }
-
-  .dresscode-looks {
-    display: flex;
-    justify-content: center;
-  }
-
-  .dresscode-looks-line {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem 1rem;
-  }
-
-  .dresscode-look-inline {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-    min-width: 7.5rem;
-  }
-
-  .dresscode-look-label {
-    font-size: 0.58rem;
-    font-weight: 700;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: rgba(197, 160, 89, 0.95);
-  }
-
-  .dresscode-look-value {
-    font-family: var(--font-cormorant), serif;
-    font-size: 1.25rem;
-    line-height: 1.25;
-    color: #1a2332;
-  }
-
-  .dresscode-look-divider {
-    font-family: var(--font-cormorant), serif;
-    font-size: 1.4rem;
-    line-height: 1;
-    color: rgba(197, 160, 89, 0.75);
   }
 
   .invitation-photo {

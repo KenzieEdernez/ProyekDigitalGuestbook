@@ -47,6 +47,7 @@ export default function HomeSection({
     [eventDetails]
   );
   const spacedDate = formatSpacedDisplayDate(copy.displayDate);
+  const fallbackInitials = `${wedding.groom.name?.[0] ?? "L"}${wedding.bride.name?.[0] ?? "A"}`;
 
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY);
@@ -69,48 +70,51 @@ export default function HomeSection({
       <div className="invitation-hero-vignette absolute inset-0" />
       {showBirds && <FlyingBirds birdImage={event.birdImage} />}
 
-      <div className="invitation-hero-stage relative z-10 min-h-[100dvh] px-6 pb-10 pt-12 text-center text-white sm:px-8 sm:pb-12 sm:pt-14">
+      <div className="invitation-hero-stage relative z-10 min-h-[100dvh] px-6 pb-8 pt-14 text-center text-white sm:px-8 sm:pb-10 sm:pt-16">
         <Reveal direction="blur" duration={900}>
           <div className="invitation-hero-logo-wrap flex justify-center">
-            <InvitationLogo src={event.logoImage} />
+            <InvitationLogo
+              src={event.logoImage}
+              fallbackInitials={fallbackInitials}
+            />
           </div>
         </Reveal>
 
-        <div className="invitation-hero-copy mx-auto w-full max-w-md">
-          <Reveal direction="up" delay={180} duration={1000}>
-            <p className="text-[9px] font-light uppercase tracking-[0.42em] text-white/75 sm:text-[10px]">
+        <div className="invitation-hero-copy mx-auto w-full max-w-lg">
+          <Reveal direction="up" delay={160} duration={1000}>
+            <p className="text-[9px] font-light uppercase tracking-[0.46em] text-white/80 sm:text-[10px]">
               {copy.engagementTitle}
             </p>
           </Reveal>
 
-          <Reveal direction="up" delay={320} duration={1000}>
+          <Reveal direction="up" delay={280} duration={1000}>
             <h2 className="invitation-hero-names mt-4 font-display text-white">
               {getCoupleDisplayName(wedding)}
             </h2>
           </Reveal>
 
-          <Reveal direction="up" delay={460}>
-            <p className="mt-5 font-display text-sm tracking-[0.32em] text-white/85 sm:text-base">
+          <Reveal direction="up" delay={400}>
+            <p className="mt-5 font-display text-[0.95rem] tracking-[0.38em] text-white/90 sm:text-base">
               {spacedDate}
             </p>
           </Reveal>
 
           {guestName && (
-            <Reveal direction="up" delay={560}>
-              <p className="mt-5 text-xs font-light text-white/60">
+            <Reveal direction="up" delay={500}>
+              <p className="mt-5 text-xs font-light text-white/55">
                 For{" "}
                 <span className="font-display text-lg text-white">{guestName}</span>
               </p>
             </Reveal>
           )}
 
-          <Reveal direction="up" delay={680}>
-            <div className="mt-10 w-full">
-              <p className="mb-3 text-[8px] font-semibold uppercase tracking-[0.32em] text-white/35">
+          <Reveal direction="up" delay={620}>
+            <div className="invitation-hero-actions mt-9 w-full">
+              <p className="mb-2 text-[8px] font-semibold uppercase tracking-[0.3em] text-white/30">
                 Countdown to Our Big Day
               </p>
               {eventDetails && (
-                <p className="mb-3 text-[11px] text-white/45">
+                <p className="mb-3 text-[11px] text-white/40">
                   {eventDetails.dateLabel} · {eventDetails.time}
                 </p>
               )}
@@ -118,19 +122,16 @@ export default function HomeSection({
                 target={countdownTarget}
                 settingsReady={weddingReady}
               />
+              <button
+                type="button"
+                onClick={handleAddToCalendar}
+                disabled={!eventDetails}
+                className="btn-invite-ghost mt-7 inline-flex w-full max-w-[14rem] items-center justify-center gap-2 border-white/25 px-6 py-2.5 text-[10px] text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              >
+                <Calendar className="h-3.5 w-3.5" />
+                Add to Calendar
+              </button>
             </div>
-          </Reveal>
-
-          <Reveal direction="up" delay={820}>
-            <button
-              type="button"
-              onClick={handleAddToCalendar}
-              disabled={!eventDetails}
-              className="btn-invite-primary mt-8 inline-flex w-full max-w-xs items-center justify-center gap-2 px-8 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-            >
-              <Calendar className="h-4 w-4" />
-              Add to Calendar
-            </button>
           </Reveal>
         </div>
       </div>
