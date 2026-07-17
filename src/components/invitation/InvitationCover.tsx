@@ -53,14 +53,14 @@ export default function InvitationCover({
       }`}
     >
       <div
-        className="invitation-cover-bg absolute inset-0 scale-110 blur-[2px] md:hidden"
+        className="invitation-cover-bg absolute inset-0 scale-105 md:hidden"
         style={{ backgroundImage: `url('${heroes.portrait}')` }}
       />
       <div
-        className="invitation-cover-bg absolute inset-0 hidden scale-110 blur-[2px] md:block"
+        className="invitation-cover-bg absolute inset-0 hidden scale-105 md:block"
         style={{ backgroundImage: `url('${heroes.landscape}')` }}
       />
-      <div className="absolute inset-0 bg-navy-900/60 backdrop-blur-md" />
+      <div className="absolute inset-0 bg-navy-900/38" />
 
       <div className="relative z-10 flex min-h-[100dvh] items-center justify-center px-5 py-8">
         <div

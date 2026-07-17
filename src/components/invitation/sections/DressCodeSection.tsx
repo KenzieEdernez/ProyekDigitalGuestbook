@@ -15,66 +15,66 @@ export default function DressCodeSection({ event, copy }: DressCodeSectionProps)
   return (
     <section
       id="dresscode"
-      className="invitation-section invitation-section-pad relative overflow-hidden bg-champagne"
+      className="invitation-section invitation-section-pad dresscode-section relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-radial-gold opacity-35" />
+      <div className="absolute inset-0 bg-radial-gold opacity-30" />
 
-      <div className="relative mx-auto max-w-4xl lg:max-w-5xl">
+      <div className="relative mx-auto max-w-lg px-4 sm:max-w-xl sm:px-0">
         <Reveal direction="up">
-          <div className="overflow-hidden rounded-[2rem] border border-royal/15 bg-white/75 p-6 shadow-card backdrop-blur-sm sm:p-10">
-            <div className="text-center">
-              <p className="font-display text-3xl text-royal sm:text-4xl">
-                {copy.dressCodeTitle}
-              </p>
-              <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-stone-600">
-                {copy.dressCodeDescription}
-              </p>
-              <p className="mt-6 font-display text-2xl uppercase tracking-[0.2em] text-navy sm:text-3xl">
-                {copy.dressCodeTheme}
-              </p>
-              {copy.dressCodeNote && (
-                <p className="mt-2 text-sm italic text-royal">{copy.dressCodeNote}</p>
-              )}
-            </div>
+          <div className="dresscode-frame">
+            <div className="dresscode-border dresscode-border-left" aria-hidden />
+            <div className="dresscode-border dresscode-border-right" aria-hidden />
 
-            {event.dressCodeImage ? (
-              <Reveal direction="scale" delay={120}>
-                <div className="mx-auto mt-8 max-w-xl overflow-hidden rounded-2xl border border-royal/10 bg-cream">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={event.dressCodeImage}
-                    alt="Dress code reference"
-                    className="h-auto w-full object-cover"
-                  />
-                </div>
-              </Reveal>
-            ) : (
-              <div className="mx-auto mt-8 flex h-56 max-w-xl items-center justify-center rounded-2xl border border-dashed border-royal/20 bg-cream/80 text-sm text-stone-400">
-                Dress code reference image can be uploaded in Admin Settings
-              </div>
-            )}
+            <div className="dresscode-arch">
+              <div className="dresscode-arch-inner px-6 pb-8 pt-10 text-center sm:px-8 sm:pb-10 sm:pt-12">
+                <p className="font-display text-3xl text-royal sm:text-4xl">
+                  {copy.dressCodeTitle}
+                </p>
 
-            <div className="mt-8 grid gap-6 sm:grid-cols-2">
-              <Reveal direction="up" delay={180}>
-                <div className="rounded-2xl border border-royal/10 bg-cream/70 p-6 text-center">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-royal">
-                    Ladies
+                <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-stone-600">
+                  {copy.dressCodeDescription}
+                </p>
+
+                <p className="mt-6 font-display text-xl uppercase tracking-[0.22em] text-navy sm:text-2xl">
+                  {copy.dressCodeTheme}
+                </p>
+
+                {copy.dressCodeNote && (
+                  <p className="mt-2 font-display text-sm italic text-royal">
+                    {copy.dressCodeNote}
                   </p>
-                  <p className="mt-3 font-display text-xl leading-relaxed text-navy">
+                )}
+
+                <div className="mx-auto mt-7 max-w-xs sm:max-w-sm">
+                  {event.dressCodeImage ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={event.dressCodeImage}
+                      alt="Dress code reference"
+                      className="mx-auto h-auto w-full object-contain"
+                    />
+                  ) : (
+                    <div className="flex min-h-[12rem] items-center justify-center rounded-xl border border-dashed border-royal/20 bg-cream/60 px-4 text-xs leading-relaxed text-stone-400">
+                      Upload a combined outfit reference image in Admin Settings
+                    </div>
+                  )}
+                </div>
+
+                <div className="dresscode-outfits mt-7 space-y-3 border-t border-royal/15 pt-6">
+                  <p className="font-display text-lg leading-relaxed text-navy">
+                    <span className="mb-1 block text-[9px] font-bold uppercase tracking-[0.35em] text-royal">
+                      Ladies
+                    </span>
                     {event.dressLadies}
                   </p>
-                </div>
-              </Reveal>
-              <Reveal direction="up" delay={240}>
-                <div className="rounded-2xl border border-royal/10 bg-cream/70 p-6 text-center">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-royal">
-                    Gentlemen
-                  </p>
-                  <p className="mt-3 font-display text-xl leading-relaxed text-navy">
+                  <p className="font-display text-lg leading-relaxed text-navy">
+                    <span className="mb-1 block text-[9px] font-bold uppercase tracking-[0.35em] text-royal">
+                      Gentlemen
+                    </span>
                     {event.dressGentlemen}
                   </p>
                 </div>
-              </Reveal>
+              </div>
             </div>
           </div>
         </Reveal>
