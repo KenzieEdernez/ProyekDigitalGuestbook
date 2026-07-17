@@ -158,10 +158,7 @@ export default function WeddingContentSettings() {
       ...current,
       invitationCopy: {
         ...current.invitationCopy,
-        [field]:
-          field === "initials"
-            ? value.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase()
-            : value,
+        [field]: value,
       },
     }));
   };
@@ -306,7 +303,6 @@ export default function WeddingContentSettings() {
           <div className="grid gap-5 md:grid-cols-2">
             {(
               [
-                ["initials", "Initials (2 letters)", "LA"],
                 ["engagementTitle", "Engagement Title", "The Sangjit Engagement of"],
                 ["displayDate", "Display Date", "06.09.2026"],
                 ["openButtonLabel", "Open Button Label", "Open Invitation"],
@@ -322,7 +318,6 @@ export default function WeddingContentSettings() {
                 <input
                   className="input-field"
                   value={form.invitationCopy[field]}
-                  maxLength={field === "initials" ? 2 : undefined}
                   placeholder={placeholder}
                   onChange={(e) => updateInvitationCopy(field, e.target.value)}
                 />

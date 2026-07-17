@@ -1,5 +1,4 @@
 export interface InvitationCopy {
-  initials: string;
   engagementTitle: string;
   coverMessage: string;
   openButtonLabel: string;

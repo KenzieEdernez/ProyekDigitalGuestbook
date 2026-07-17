@@ -20,6 +20,8 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   heroImagePortrait: "",
   heroImageCard: "",
   dressCodeImage: "",
+  logoImage: "",
+  birdImage: "",
 };
 
 function readCroppedImage(file: File, width: number, height: number) {
@@ -83,12 +85,41 @@ function readPortraitImage(file: File) {
   return readCroppedImage(file, 900, 1600);
 }
 
+function readPngAsset(file: File, maxSize = 700) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Browser does not support image resizing."));
+          return;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      image.onerror = () => reject(new Error("Failed to read image."));
+      image.src = String(reader.result);
+    };
+    reader.onerror = () => reject(new Error("Failed to read image file."));
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function EventSettingsPage() {
   const [form, setForm] = useState<EventSettings>(EMPTY_EVENT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [imageProcessing, setImageProcessing] = useState<
-    "landscape" | "portrait" | "card" | "dresscode" | null
+    "landscape" | "portrait" | "card" | "dresscode" | "logo" | "bird" | null
   >(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -139,7 +170,7 @@ export default function EventSettingsPage() {
 
   const handleHeroImageChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    variant: "landscape" | "portrait" | "card" | "dresscode"
+    variant: "landscape" | "portrait" | "card" | "dresscode" | "logo" | "bird"
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -157,8 +188,12 @@ export default function EventSettingsPage() {
         processed = await readLandscapeImage(file);
       } else if (variant === "portrait") {
         processed = await readPortraitImage(file);
-      } else {
+      } else if (variant === "dresscode") {
         processed = await readCroppedImage(file, 1200, 900);
+      } else if (variant === "logo") {
+        processed = await readPngAsset(file, 500);
+      } else {
+        processed = await readPngAsset(file, 320);
       }
 
       setForm((current) => {
@@ -167,7 +202,11 @@ export default function EventSettingsPage() {
           return { ...current, heroImagePortrait: processed };
         }
         if (variant === "card") return { ...current, heroImageCard: processed };
-        return { ...current, dressCodeImage: processed };
+        if (variant === "dresscode") {
+          return { ...current, dressCodeImage: processed };
+        }
+        if (variant === "logo") return { ...current, logoImage: processed };
+        return { ...current, birdImage: processed };
       });
     } catch {
       setError("Failed to process image.");
@@ -323,6 +362,70 @@ export default function EventSettingsPage() {
               <p className="mt-2 text-xs text-stone-400">
                 Combined outfit reference image for the dress code section.
               </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Logo / Initial Image
+                </label>
+                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
+                  {form.logoImage ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={form.logoImage}
+                      alt="Logo preview"
+                      className="max-h-28 w-auto object-contain"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
+                      <ImageIcon className="h-8 w-8" />
+                      <p className="mt-2 text-sm">No logo yet</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => handleHeroImageChange(event, "logo")}
+                  disabled={saving || imageProcessing !== null}
+                  className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
+                />
+                <p className="mt-2 text-xs text-stone-400">
+                  PNG recommended. Shown at the top of the open invitation hero.
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Flying Bird Image
+                </label>
+                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
+                  {form.birdImage ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={form.birdImage}
+                      alt="Bird preview"
+                      className="max-h-16 w-auto object-contain"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
+                      <ImageIcon className="h-8 w-8" />
+                      <p className="mt-2 text-sm">No bird image yet</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => handleHeroImageChange(event, "bird")}
+                  disabled={saving || imageProcessing !== null}
+                  className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
+                />
+                <p className="mt-2 text-xs text-stone-400">
+                  PNG with transparent background. Used for 5 animated birds.
+                </p>
+              </div>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">

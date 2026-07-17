@@ -1,7 +1,6 @@
 import type { InvitationCopy, WeddingSettings } from "@/types/wedding";
 
 export const DEFAULT_INVITATION_COPY: InvitationCopy = {
-  initials: "LA",
   engagementTitle: "The Sangjit Engagement of",
   coverMessage:
     "With great joy, we invite you to attend and share your blessings on our special day.",
@@ -134,9 +133,6 @@ export function mergeWeddingSettings(
     invitationCopy: {
       ...DEFAULT_WEDDING.invitationCopy,
       ...stored.invitationCopy,
-      initials:
-        stored.invitationCopy?.initials?.trim().slice(0, 2).toUpperCase() ||
-        DEFAULT_WEDDING.invitationCopy.initials,
     },
     loveStory:
       stored.loveStory?.length ? stored.loveStory : DEFAULT_WEDDING.loveStory,

@@ -78,6 +78,8 @@ create table if not exists public.event_settings (
   hero_image_portrait text,
   hero_image_card text,
   dress_code_image text,
+  logo_image text,
+  bird_image text,
   wedding_content jsonb,
   updated_at timestamptz not null default now()
 );
@@ -90,6 +92,12 @@ alter table public.event_settings
 
 alter table public.event_settings
   add column if not exists dress_code_image text;
+
+alter table public.event_settings
+  add column if not exists logo_image text;
+
+alter table public.event_settings
+  add column if not exists bird_image text;
 
 alter table public.event_settings
   add column if not exists dress_ladies text;

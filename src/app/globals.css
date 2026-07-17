@@ -195,38 +195,51 @@
   }
 
   .invitation-cover-card {
-    border-radius: 1.5rem;
-    border: 1px solid rgba(197, 160, 89, 0.18);
+    border-radius: 0.85rem;
+    border: 1px solid rgba(197, 160, 89, 0.16);
     box-shadow:
-      0 24px 60px rgba(15, 21, 32, 0.35),
-      0 0 0 1px rgba(255, 255, 255, 0.04);
+      0 18px 40px rgba(15, 21, 32, 0.28),
+      0 0 0 1px rgba(255, 255, 255, 0.05);
   }
 
-  .invitation-monogram {
-    display: inline-flex;
+  .invitation-hero-vignette {
+    background:
+      radial-gradient(
+        ellipse at center 42%,
+        rgba(15, 21, 32, 0.15) 0%,
+        rgba(15, 21, 32, 0.55) 52%,
+        rgba(15, 21, 32, 0.88) 100%
+      ),
+      linear-gradient(180deg, rgba(15, 21, 32, 0.35) 0%, rgba(15, 21, 32, 0.2) 45%, rgba(15, 21, 32, 0.75) 100%);
+  }
+
+  .invitation-hero-stage {
+    display: flex;
+    min-height: 100dvh;
+    flex-direction: column;
     align-items: center;
-    gap: 0.85rem;
-    color: #fff;
   }
 
-  .invitation-monogram-letter {
-    font-family: var(--font-cormorant), serif;
-    font-size: clamp(3rem, 8vw, 4.5rem);
+  .invitation-hero-logo-wrap {
+    flex-shrink: 0;
+  }
+
+  .invitation-hero-copy {
+    margin-top: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .invitation-hero-names {
+    font-size: clamp(2.35rem, 9vw, 4rem);
     font-weight: 300;
-    line-height: 1;
-    letter-spacing: 0.08em;
+    font-style: italic;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    text-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
   }
 
-  .invitation-monogram-bar {
-    display: inline-block;
-    height: 3.5rem;
-    width: 1px;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.15),
-      rgba(197, 160, 89, 0.85),
-      rgba(255, 255, 255, 0.15)
-    );
+  .invitation-logo-image {
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.28));
   }
 
   .flying-bird {
@@ -235,6 +248,12 @@
     animation-name: bird-flight;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
+    transform: scale(var(--bird-scale, 0.7));
+  }
+
+  .flying-bird-image {
+    opacity: 0.82;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.25));
   }
 
   .flying-bird-2 {
@@ -247,18 +266,19 @@
 
   @keyframes bird-flight {
     0% {
-      transform: translateX(0) translateY(0) scaleX(1);
+      transform: translateX(0) translateY(0) scale(var(--bird-scale, 0.7));
       opacity: 0;
     }
     8% {
-      opacity: 0.85;
+      opacity: 0.9;
     }
     50% {
-      transform: translateX(70vw) translateY(-24px) scaleX(1);
-      opacity: 0.7;
+      transform: translateX(72vw) translateY(-20px)
+        scale(var(--bird-scale, 0.7));
+      opacity: 0.75;
     }
     100% {
-      transform: translateX(130vw) translateY(12px) scaleX(1);
+      transform: translateX(132vw) translateY(10px) scale(var(--bird-scale, 0.7));
       opacity: 0;
     }
   }

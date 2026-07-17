@@ -35,6 +35,8 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   heroImagePortrait: EVENT.heroImagePortrait,
   heroImageCard: EVENT.heroImageCard,
   dressCodeImage: "",
+  logoImage: "",
+  birdImage: "",
 };
 
 export function mergeEventSettings(settings?: Partial<EventSettings>) {

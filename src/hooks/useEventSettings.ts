@@ -18,6 +18,8 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   heroImagePortrait: "",
   heroImageCard: "",
   dressCodeImage: "",
+  logoImage: "",
+  birdImage: "",
 };
 
 export function useEventSettings() {

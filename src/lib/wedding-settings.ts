@@ -169,9 +169,6 @@ function sanitizeInvitationCopy(
 ): InvitationCopy {
   const fallback = DEFAULT_WEDDING.invitationCopy;
   return {
-    initials:
-      textValue(input?.initials).replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() ||
-      fallback.initials,
     engagementTitle: textValue(input?.engagementTitle) || fallback.engagementTitle,
     coverMessage: textValue(input?.coverMessage) || fallback.coverMessage,
     openButtonLabel: textValue(input?.openButtonLabel) || fallback.openButtonLabel,

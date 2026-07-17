@@ -12,7 +12,3 @@ export function resolveHeroImages(settings: HeroImageSettings) {
 
   return { landscape, portrait, card };
 }
-
-export function normalizeInitials(value: string) {
-  return value.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase();
-}

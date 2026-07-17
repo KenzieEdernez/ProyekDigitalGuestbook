@@ -12,4 +12,6 @@ export interface EventSettings {
   heroImagePortrait: string;
   heroImageCard: string;
   dressCodeImage: string;
+  logoImage: string;
+  birdImage: string;
 }
