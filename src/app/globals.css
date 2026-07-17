@@ -292,66 +292,27 @@
 
   .dresscode-section {
     background:
-      linear-gradient(180deg, #faf7f2 0%, #f3efe6 100%);
+      radial-gradient(ellipse at 50% 18%, rgba(197, 160, 89, 0.12), transparent 55%),
+      linear-gradient(180deg, #faf7f2 0%, #f5efe6 48%, #faf7f2 100%);
   }
 
-  .dresscode-frame {
+  .dresscode-card {
     position: relative;
-    padding-inline: 1.35rem;
+    padding: 2.25rem 1.25rem 2.5rem;
   }
 
-  .dresscode-border {
-    pointer-events: none;
-    position: absolute;
-    top: 0.75rem;
-    bottom: 0.75rem;
-    width: 0.85rem;
-    background-image: repeating-linear-gradient(
-      0deg,
-      rgba(197, 160, 89, 0.55) 0,
-      rgba(197, 160, 89, 0.55) 0.45rem,
-      transparent 0.45rem,
-      transparent 0.9rem
-    );
-    opacity: 0.65;
-  }
-
-  .dresscode-border-left {
-    left: 0;
-  }
-
-  .dresscode-border-right {
-    right: 0;
-  }
-
-  .dresscode-arch {
+  .dresscode-figure {
     position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(197, 160, 89, 0.28);
-    border-radius: 50% 50% 1.35rem 1.35rem / 14% 14% 1.35rem 1.35rem;
-    background: linear-gradient(180deg, #fffdf9 0%, #f8f3ea 100%);
-    box-shadow:
-      0 18px 40px rgba(26, 35, 50, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.85);
   }
 
-  .dresscode-arch::before {
-    content: "";
-    position: absolute;
-    inset: 0.65rem 0.85rem auto;
-    height: 0.55rem;
-    border-radius: 999px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(197, 160, 89, 0.25),
-      transparent
-    );
-    pointer-events: none;
+  .dresscode-figure-img {
+    filter: drop-shadow(0 18px 28px rgba(26, 35, 50, 0.12));
   }
 
-  .dresscode-outfits p + p {
-    margin-top: 0.85rem;
+  .dresscode-figure-placeholder {
+    border: 1px dashed rgba(197, 160, 89, 0.28);
+    border-radius: 1.25rem;
+    background: rgba(255, 253, 249, 0.7);
   }
 
   .invitation-photo {
