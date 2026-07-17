@@ -12,72 +12,84 @@ interface DressCodeSectionProps {
 }
 
 export default function DressCodeSection({ event, copy }: DressCodeSectionProps) {
-  const combinedLooks = [event.dressLadies, event.dressGentlemen]
-    .filter(Boolean)
-    .join("  ·  ");
+  const note = copy.dressCodeNote?.trim();
+  const noteText = note
+    ? note.startsWith("(")
+      ? note
+      : `(${note})`
+    : null;
 
   return (
     <section
       id="dresscode"
       className="invitation-section invitation-section-pad dresscode-section relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-radial-gold opacity-40" />
-      <div className="dresscode-glow pointer-events-none absolute left-1/2 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-royal/10 blur-3xl" />
+      <div className="absolute inset-0 bg-radial-gold opacity-35" />
 
-      <div className="relative mx-auto max-w-md px-5 sm:max-w-lg">
-        <Reveal direction="blur" duration={900}>
-          <div className="dresscode-card text-center">
-            <div className="dresscode-ornament mx-auto mb-6 flex items-center justify-center gap-3">
-              <span className="h-px w-10 bg-gradient-to-r from-transparent to-royal/50" />
-              <span className="font-display text-lg text-royal">✦</span>
-              <span className="h-px w-10 bg-gradient-to-l from-transparent to-royal/50" />
-            </div>
+      <div className="relative mx-auto max-w-md px-4 sm:max-w-lg">
+        <Reveal direction="up" duration={900}>
+          <div className="dresscode-stage">
+            <div className="dresscode-rail dresscode-rail-left" aria-hidden />
+            <div className="dresscode-rail dresscode-rail-right" aria-hidden />
 
-            <p className="font-display text-4xl font-light tracking-wide text-royal sm:text-5xl">
-              {copy.dressCodeTitle}
-            </p>
-
-            <p className="mx-auto mt-5 max-w-sm text-sm font-light leading-relaxed text-stone-600">
-              {copy.dressCodeDescription}
-            </p>
-
-            <p className="mt-7 font-display text-2xl uppercase tracking-[0.28em] text-navy sm:text-[1.7rem]">
-              {copy.dressCodeTheme}
-            </p>
-
-            {copy.dressCodeNote && (
-              <p className="mt-3 font-display text-base italic text-royal/90 sm:text-lg">
-                {copy.dressCodeNote.startsWith("(")
-                  ? copy.dressCodeNote
-                  : `(${copy.dressCodeNote})`}
-              </p>
-            )}
-
-            <div className="dresscode-figure mx-auto mt-8">
-              {event.dressCodeImage ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={event.dressCodeImage}
-                  alt="Dress code reference"
-                  className="dresscode-figure-img mx-auto h-auto w-full max-w-[18rem] object-contain sm:max-w-[20rem]"
-                />
-              ) : (
-                <div className="dresscode-figure-placeholder mx-auto flex min-h-[14rem] max-w-[18rem] items-center justify-center px-6 text-center text-xs leading-relaxed text-stone-400 sm:max-w-[20rem]">
-                  Upload a combined couple outfit image in Admin Settings
+            <div className="dresscode-panel">
+              <div className="dresscode-panel-inner text-center">
+                <div className="dresscode-crest" aria-hidden>
+                  <span className="dresscode-crest-ring" />
+                  <span className="dresscode-crest-dot">✦</span>
                 </div>
-              )}
-            </div>
 
-            {combinedLooks && (
-              <p className="mx-auto mt-7 max-w-xs font-display text-xl leading-snug text-navy sm:text-2xl">
-                {combinedLooks}
-              </p>
-            )}
+                <p className="mt-5 font-display text-[2.15rem] font-light leading-none tracking-wide text-royal sm:text-5xl">
+                  {copy.dressCodeTitle}
+                </p>
 
-            <div className="dresscode-ornament mx-auto mt-8 flex items-center justify-center gap-3">
-              <span className="h-px w-12 bg-gradient-to-r from-transparent to-royal/40" />
-              <span className="h-1.5 w-1.5 rounded-full bg-royal/50" />
-              <span className="h-px w-12 bg-gradient-to-l from-transparent to-royal/40" />
+                <p className="mx-auto mt-4 max-w-[17rem] text-[13px] font-light leading-relaxed text-stone-500 sm:max-w-sm sm:text-sm">
+                  {copy.dressCodeDescription}
+                </p>
+
+                <div className="mx-auto my-6 h-px w-16 bg-gradient-to-r from-transparent via-royal/45 to-transparent" />
+
+                <p className="font-display text-[1.35rem] uppercase tracking-[0.3em] text-navy sm:text-2xl">
+                  {copy.dressCodeTheme}
+                </p>
+
+                {noteText && (
+                  <p className="mt-2.5 font-display text-base italic tracking-wide text-royal sm:text-lg">
+                    {noteText}
+                  </p>
+                )}
+
+                {event.dressCodeImage ? (
+                  <div className="dresscode-artwork mt-8">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={event.dressCodeImage}
+                      alt="Dress code reference"
+                      className="dresscode-artwork-img"
+                    />
+                  </div>
+                ) : null}
+
+                <div className="dresscode-looks mt-8">
+                  <p className="dresscode-looks-line font-display text-navy">
+                    <span className="dresscode-look-inline">
+                      <span className="dresscode-look-label">Ladies</span>
+                      <span className="dresscode-look-value">
+                        {event.dressLadies || "—"}
+                      </span>
+                    </span>
+                    <span className="dresscode-look-divider" aria-hidden>
+                      ·
+                    </span>
+                    <span className="dresscode-look-inline">
+                      <span className="dresscode-look-label">Gentlemen</span>
+                      <span className="dresscode-look-value">
+                        {event.dressGentlemen || "—"}
+                      </span>
+                    </span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </Reveal>

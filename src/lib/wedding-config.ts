@@ -10,7 +10,7 @@ export const DEFAULT_INVITATION_COPY: InvitationCopy = {
   dressCodeDescription:
     "To support our wedding theme, we kindly request our guests to dress as follows on our special day:",
   dressCodeTheme: "Elegant Formal",
-  dressCodeNote: "",
+  dressCodeNote: "Think Batik / Kebaya",
   giftTitle: "Gift",
   giftMessage:
     "Your love, kind wishes and prayer on our wedding day is the greatest gift of all. However, should you wish to send us blessings via online registry, you can conveniently transfer through our bank account.",

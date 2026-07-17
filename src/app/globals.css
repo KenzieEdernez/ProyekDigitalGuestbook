@@ -292,27 +292,155 @@
 
   .dresscode-section {
     background:
-      radial-gradient(ellipse at 50% 18%, rgba(197, 160, 89, 0.12), transparent 55%),
-      linear-gradient(180deg, #faf7f2 0%, #f5efe6 48%, #faf7f2 100%);
+      radial-gradient(ellipse at 50% 12%, rgba(197, 160, 89, 0.16), transparent 52%),
+      linear-gradient(180deg, #f7f1e8 0%, #faf7f2 42%, #f3ebe0 100%);
   }
 
-  .dresscode-card {
+  .dresscode-stage {
     position: relative;
-    padding: 2.25rem 1.25rem 2.5rem;
+    padding-inline: 0.85rem;
   }
 
-  .dresscode-figure {
+  .dresscode-rail {
+    pointer-events: none;
+    position: absolute;
+    top: 1.4rem;
+    bottom: 1.4rem;
+    width: 0.7rem;
+    opacity: 0.55;
+    background-image: repeating-linear-gradient(
+      180deg,
+      rgba(197, 160, 89, 0.75) 0 0.38rem,
+      transparent 0.38rem 0.76rem
+    );
+  }
+
+  .dresscode-rail-left {
+    left: 0;
+  }
+
+  .dresscode-rail-right {
+    right: 0;
+  }
+
+  .dresscode-panel {
     position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(197, 160, 89, 0.28);
+    border-radius: 999px 999px 1.6rem 1.6rem / 11% 11% 1.6rem 1.6rem;
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.96) 0%, rgba(248, 242, 232, 0.98) 100%);
+    box-shadow:
+      0 24px 50px rgba(26, 35, 50, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
-  .dresscode-figure-img {
-    filter: drop-shadow(0 18px 28px rgba(26, 35, 50, 0.12));
+  .dresscode-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0.7rem 1rem auto;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(197, 160, 89, 0.35),
+      transparent
+    );
+    pointer-events: none;
   }
 
-  .dresscode-figure-placeholder {
-    border: 1px dashed rgba(197, 160, 89, 0.28);
-    border-radius: 1.25rem;
-    background: rgba(255, 253, 249, 0.7);
+  .dresscode-panel-inner {
+    padding: 2.4rem 1.35rem 2.2rem;
+  }
+
+  @media (min-width: 640px) {
+    .dresscode-panel-inner {
+      padding: 2.8rem 2rem 2.5rem;
+    }
+  }
+
+  .dresscode-crest {
+    position: relative;
+    margin-inline: auto;
+    display: grid;
+    place-items: center;
+    height: 3.1rem;
+    width: 3.1rem;
+  }
+
+  .dresscode-crest-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(197, 160, 89, 0.45);
+    box-shadow: 0 0 0 5px rgba(197, 160, 89, 0.08);
+  }
+
+  .dresscode-crest-dot {
+    font-family: var(--font-cormorant), serif;
+    font-size: 1rem;
+    color: #c5a059;
+  }
+
+  .dresscode-artwork {
+    display: flex;
+    justify-content: center;
+  }
+
+  .dresscode-artwork-img {
+    width: min(100%, 17.5rem);
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 16px 26px rgba(26, 35, 50, 0.14));
+  }
+
+  @media (min-width: 640px) {
+    .dresscode-artwork-img {
+      width: min(100%, 19.5rem);
+    }
+  }
+
+  .dresscode-looks {
+    display: flex;
+    justify-content: center;
+  }
+
+  .dresscode-looks-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem 1rem;
+  }
+
+  .dresscode-look-inline {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 7.5rem;
+  }
+
+  .dresscode-look-label {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(197, 160, 89, 0.95);
+  }
+
+  .dresscode-look-value {
+    font-family: var(--font-cormorant), serif;
+    font-size: 1.25rem;
+    line-height: 1.25;
+    color: #1a2332;
+  }
+
+  .dresscode-look-divider {
+    font-family: var(--font-cormorant), serif;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: rgba(197, 160, 89, 0.75);
   }
 
   .invitation-photo {
