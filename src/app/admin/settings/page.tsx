@@ -18,6 +18,8 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   dressGentlemen: "",
   heroImage: "",
   heroImagePortrait: "",
+  heroImageCard: "",
+  dressCodeImage: "",
 };
 
 function readCroppedImage(file: File, width: number, height: number) {
@@ -86,7 +88,7 @@ export default function EventSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [imageProcessing, setImageProcessing] = useState<
-    "landscape" | "portrait" | null
+    "landscape" | "portrait" | "card" | "dresscode" | null
   >(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -137,7 +139,7 @@ export default function EventSettingsPage() {
 
   const handleHeroImageChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    variant: "landscape" | "portrait"
+    variant: "landscape" | "portrait" | "card" | "dresscode"
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -150,15 +152,23 @@ export default function EventSettingsPage() {
     setImageProcessing(variant);
     setError(null);
     try {
-      const processed =
-        variant === "landscape"
-          ? await readLandscapeImage(file)
-          : await readPortraitImage(file);
-      setForm((current) =>
-        variant === "landscape"
-          ? { ...current, heroImage: processed }
-          : { ...current, heroImagePortrait: processed }
-      );
+      let processed = "";
+      if (variant === "landscape" || variant === "card") {
+        processed = await readLandscapeImage(file);
+      } else if (variant === "portrait") {
+        processed = await readPortraitImage(file);
+      } else {
+        processed = await readCroppedImage(file, 1200, 900);
+      }
+
+      setForm((current) => {
+        if (variant === "landscape") return { ...current, heroImage: processed };
+        if (variant === "portrait") {
+          return { ...current, heroImagePortrait: processed };
+        }
+        if (variant === "card") return { ...current, heroImageCard: processed };
+        return { ...current, dressCodeImage: processed };
+      });
     } catch {
       setError("Failed to process image.");
     } finally {
@@ -189,23 +199,23 @@ export default function EventSettingsPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-3">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Landscape Hero Image
+                  Landscape Background
                 </label>
                 <div className="overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
                   {form.heroImage ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={form.heroImage}
-                      alt="Landscape hero preview"
-                      className="h-40 w-full object-cover"
+                      alt="Landscape background preview"
+                      className="h-36 w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-40 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
+                    <div className="flex h-36 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
                       <ImageIcon className="h-8 w-8" />
-                      <p className="mt-2 text-sm">No landscape image yet</p>
+                      <p className="mt-2 text-sm">No image yet</p>
                     </div>
                   )}
                 </div>
@@ -217,26 +227,26 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  For laptop, iPad, and wide screens.
+                  Blurred background for desktop and open invitation hero.
                 </p>
               </div>
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Portrait Hero Image
+                  Portrait Background
                 </label>
                 <div className="overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
                   {form.heroImagePortrait ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={form.heroImagePortrait}
-                      alt="Portrait hero preview"
-                      className="mx-auto h-40 w-28 object-cover"
+                      alt="Portrait background preview"
+                      className="mx-auto h-36 w-24 object-cover"
                     />
                   ) : (
-                    <div className="flex h-40 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
+                    <div className="flex h-36 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
                       <ImageIcon className="h-8 w-8" />
-                      <p className="mt-2 text-sm">No portrait image yet</p>
+                      <p className="mt-2 text-sm">No image yet</p>
                     </div>
                   )}
                 </div>
@@ -248,9 +258,71 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  For mobile phones. Use a vertical photo of the couple.
+                  Blurred background for mobile phones.
                 </p>
               </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Cover Card Photo
+                </label>
+                <div className="overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
+                  {form.heroImageCard ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={form.heroImageCard}
+                      alt="Cover card preview"
+                      className="h-36 w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-36 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
+                      <ImageIcon className="h-8 w-8" />
+                      <p className="mt-2 text-sm">No image yet</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => handleHeroImageChange(event, "card")}
+                  disabled={saving || imageProcessing !== null}
+                  className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
+                />
+                <p className="mt-2 text-xs text-stone-400">
+                  Landscape photo shown inside the opening card.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                Dress Code Reference Image
+              </label>
+              <div className="overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
+                {form.dressCodeImage ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={form.dressCodeImage}
+                    alt="Dress code preview"
+                    className="mx-auto h-48 max-w-md object-contain"
+                  />
+                ) : (
+                  <div className="flex h-48 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
+                    <ImageIcon className="h-8 w-8" />
+                    <p className="mt-2 text-sm">No dress code image yet</p>
+                  </div>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => handleHeroImageChange(event, "dresscode")}
+                disabled={saving || imageProcessing !== null}
+                className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
+              />
+              <p className="mt-2 text-xs text-stone-400">
+                Combined outfit reference image for the dress code section.
+              </p>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
@@ -300,7 +372,7 @@ export default function EventSettingsPage() {
           {saving
             ? "Saving..."
             : imageProcessing
-              ? `Processing ${imageProcessing === "landscape" ? "Landscape" : "Portrait"} Image...`
+              ? `Processing ${imageProcessing} image...`
               : "Save Settings"}
         </button>
       </form>

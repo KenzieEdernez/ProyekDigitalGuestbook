@@ -11,6 +11,7 @@ import {
   Home,
   ImageIcon,
   Mail,
+  Shirt,
   X,
 } from "lucide-react";
 import { NAV_ITEMS, type InvitationSection } from "@/lib/wedding-config";
@@ -19,6 +20,7 @@ const NAV_ICONS: Record<InvitationSection, React.ElementType> = {
   home: Home,
   couple: Heart,
   event: Calendar,
+  dresscode: Shirt,
   gallery: ImageIcon,
   rsvp: ClipboardCheck,
   wishes: Mail,

@@ -17,6 +17,8 @@ export const EVENT = {
     "https://images.unsplash.com/photo-1519167758481-83f550bb49b8?w=1920&q=80&auto=format&fit=crop",
   heroImagePortrait:
     "https://images.unsplash.com/photo-1519741497674-611481863552?w=1080&q=80&auto=format&fit=crop",
+  heroImageCard:
+    "https://images.unsplash.com/photo-1465495976277-8127bfd548f7?w=1200&q=80&auto=format&fit=crop",
 } as const;
 
 export const DEFAULT_EVENT_SETTINGS: EventSettings = {
@@ -31,6 +33,8 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   dressGentlemen: EVENT.dressGentlemen,
   heroImage: EVENT.heroImage,
   heroImagePortrait: EVENT.heroImagePortrait,
+  heroImageCard: EVENT.heroImageCard,
+  dressCodeImage: "",
 };
 
 export function mergeEventSettings(settings?: Partial<EventSettings>) {

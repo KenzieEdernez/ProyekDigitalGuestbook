@@ -10,4 +10,6 @@ export interface EventSettings {
   dressGentlemen: string;
   heroImage: string;
   heroImagePortrait: string;
+  heroImageCard: string;
+  dressCodeImage: string;
 }

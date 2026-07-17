@@ -6,6 +6,7 @@ import type {
   CoupleProfile,
   GalleryImage,
   GiftAccount,
+  InvitationCopy,
   LoveStoryItem,
   WeddingSettings,
 } from "@/types/wedding";
@@ -163,12 +164,35 @@ function sanitizeGifts(items: GiftAccount[] | undefined): GiftAccount[] {
     .filter((item) => item.bank && item.accountNumber);
 }
 
+function sanitizeInvitationCopy(
+  input: Partial<InvitationCopy> | undefined
+): InvitationCopy {
+  const fallback = DEFAULT_WEDDING.invitationCopy;
+  return {
+    initials:
+      textValue(input?.initials).replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() ||
+      fallback.initials,
+    engagementTitle: textValue(input?.engagementTitle) || fallback.engagementTitle,
+    coverMessage: textValue(input?.coverMessage) || fallback.coverMessage,
+    openButtonLabel: textValue(input?.openButtonLabel) || fallback.openButtonLabel,
+    displayDate: textValue(input?.displayDate) || fallback.displayDate,
+    dressCodeTitle: textValue(input?.dressCodeTitle) || fallback.dressCodeTitle,
+    dressCodeDescription:
+      textValue(input?.dressCodeDescription) || fallback.dressCodeDescription,
+    dressCodeTheme: textValue(input?.dressCodeTheme) || fallback.dressCodeTheme,
+    dressCodeNote: textValue(input?.dressCodeNote) || fallback.dressCodeNote,
+    giftTitle: textValue(input?.giftTitle) || fallback.giftTitle,
+    giftMessage: textValue(input?.giftMessage) || fallback.giftMessage,
+  };
+}
+
 function sanitizeSettings(input: Partial<WeddingSettings>): WeddingSettings {
   const settings: WeddingSettings = {
     groom: sanitizeCouple(input.groom ?? {}, DEFAULT_WEDDING.groom),
     bride: sanitizeCouple(input.bride ?? {}, DEFAULT_WEDDING.bride),
     quote: textValue(input.quote) || DEFAULT_WEDDING.quote,
     quoteSource: textValue(input.quoteSource) || DEFAULT_WEDDING.quoteSource,
+    invitationCopy: sanitizeInvitationCopy(input.invitationCopy),
     loveStory: sanitizeLoveStory(input.loveStory),
     ceremonies: sanitizeCeremonies(input.ceremonies),
     gallery: sanitizeGallery(input.gallery),

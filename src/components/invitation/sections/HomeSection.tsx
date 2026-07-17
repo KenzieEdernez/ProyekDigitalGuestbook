@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Calendar, Heart } from "lucide-react";
+import { Calendar } from "lucide-react";
 import CountdownTimer from "@/components/invitation/CountdownTimer";
+import FlyingBirds from "@/components/invitation/FlyingBirds";
 import InvitationHeroBackground from "@/components/invitation/InvitationHeroBackground";
+import InvitationMonogram from "@/components/invitation/InvitationMonogram";
 import Reveal from "@/components/invitation/Reveal";
 import { addToCalendar } from "@/lib/calendar-event";
 import { resolveCeremonyEventDetails } from "@/lib/ceremony-event";
 import { parseEventDateTime } from "@/lib/event-datetime";
-import { resolveHeroImages } from "@/lib/hero-images";
 import { getCoupleDisplayName } from "@/lib/wedding-config";
-import type { WeddingSettings } from "@/types/wedding";
+import type { InvitationCopy, WeddingSettings } from "@/types/wedding";
 import type { mergeEventSettings } from "@/lib/event-config";
 
 type EventSettings = ReturnType<typeof mergeEventSettings>;
@@ -18,18 +19,21 @@ type EventSettings = ReturnType<typeof mergeEventSettings>;
 interface HomeSectionProps {
   event: EventSettings;
   wedding: WeddingSettings;
+  copy: InvitationCopy;
   guestName: string | null;
   weddingReady: boolean;
+  showBirds?: boolean;
 }
 
 export default function HomeSection({
   event,
   wedding,
+  copy,
   guestName,
   weddingReady,
+  showBirds = true,
 }: HomeSectionProps) {
   const [scrollY, setScrollY] = useState(0);
-  const heroImages = resolveHeroImages(event);
   const eventDetails = useMemo(() => {
     if (!weddingReady) return null;
     return resolveCeremonyEventDetails(wedding);
@@ -56,59 +60,49 @@ export default function HomeSection({
   return (
     <section id="home" className="invitation-section relative min-h-[100dvh] overflow-hidden">
       <InvitationHeroBackground
-        landscapeSrc={heroImages.landscape}
-        portraitSrc={heroImages.portrait}
+        landscapeSrc={event.heroImage}
+        portraitSrc={event.heroImagePortrait}
         scrollY={scrollY}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/75 via-navy-900/35 to-champagne" />
-      <div className="absolute inset-0 bg-radial-gold opacity-60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/80 via-navy-900/55 to-navy-900/85" />
+      <div className="absolute inset-0 bg-radial-gold opacity-45" />
+      {showBirds && <FlyingBirds />}
 
-      <div className="relative mx-auto flex min-h-[100dvh] max-w-5xl flex-col items-center justify-center px-5 py-20 text-center sm:px-6 sm:py-28 lg:max-w-6xl lg:px-10 lg:py-32">
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-4xl flex-col items-center justify-center px-6 py-24 text-center sm:px-8">
         <Reveal direction="blur" duration={900}>
-          <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-royal-200">
-            Wedding Invitation
-          </p>
+          <InvitationMonogram initials={copy.initials} />
         </Reveal>
 
         <Reveal direction="up" delay={150} duration={1000}>
-          <h2 className="mt-5 font-display text-4xl font-light leading-[1.1] text-white sm:text-5xl md:text-7xl">
+          <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.45em] text-royal-200">
+            {copy.engagementTitle}
+          </p>
+        </Reveal>
+
+        <Reveal direction="up" delay={280} duration={1000}>
+          <h2 className="mt-5 font-display text-4xl font-light leading-[1.1] text-white sm:text-5xl md:text-6xl">
             {getCoupleDisplayName(wedding)}
           </h2>
         </Reveal>
 
-        <Reveal direction="scale" delay={300}>
-          <div className="my-8 flex items-center justify-center gap-5">
-            <span className="h-px w-20 bg-gradient-to-r from-transparent to-royal/60" />
-            <Heart className="h-4 w-4 fill-royal/80 text-royal animate-pulse-soft" />
-            <span className="h-px w-20 bg-gradient-to-l from-transparent to-royal/60" />
-          </div>
+        <Reveal direction="up" delay={420}>
+          <p className="mt-6 font-display text-lg tracking-[0.35em] text-white/80 sm:text-xl">
+            {copy.displayDate}
+          </p>
         </Reveal>
 
         {guestName && (
-          <Reveal direction="up" delay={400}>
-            <p className="text-sm font-light text-white/70">
+          <Reveal direction="up" delay={520}>
+            <p className="mt-6 text-sm font-light text-white/65">
               For{" "}
-              <span className="font-display text-xl text-white">
-                {guestName}
-              </span>
+              <span className="font-display text-xl text-white">{guestName}</span>
             </p>
           </Reveal>
         )}
 
-        <Reveal direction="up" delay={500}>
-          <blockquote className="mx-auto mt-8 max-w-md">
-            <p className="text-sm font-light italic leading-relaxed text-white/60">
-              &ldquo;{wedding.quote}&rdquo;
-            </p>
-            <cite className="mt-3 block text-[10px] not-italic tracking-widest text-royal/70">
-              {wedding.quoteSource}
-            </cite>
-          </blockquote>
-        </Reveal>
-
         <Reveal direction="up" delay={650}>
-          <div className="mx-auto mt-14 w-full max-w-2xl">
-            <p className="mb-5 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/40">
+          <div className="mt-12 w-full max-w-2xl">
+            <p className="mb-4 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/40">
               Countdown to Our Big Day
             </p>
             {eventDetails && (
@@ -123,12 +117,12 @@ export default function HomeSection({
           </div>
         </Reveal>
 
-        <Reveal direction="up" delay={800}>
+        <Reveal direction="up" delay={780}>
           <button
             type="button"
             onClick={handleAddToCalendar}
             disabled={!eventDetails}
-            className="btn-invite-primary mt-10 inline-flex w-full max-w-xs items-center justify-center gap-2 px-8 sm:mt-12 sm:w-auto sm:max-w-none sm:px-12 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-invite-primary mt-10 inline-flex w-full max-w-xs items-center justify-center gap-2 px-8 sm:w-auto sm:max-w-none sm:px-12 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Calendar className="h-4 w-4" />
             Add to Calendar

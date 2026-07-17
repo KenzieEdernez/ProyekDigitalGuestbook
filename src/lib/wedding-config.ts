@@ -1,4 +1,21 @@
-import type { WeddingSettings } from "@/types/wedding";
+import type { InvitationCopy, WeddingSettings } from "@/types/wedding";
+
+export const DEFAULT_INVITATION_COPY: InvitationCopy = {
+  initials: "LA",
+  engagementTitle: "The Sangjit Engagement of",
+  coverMessage:
+    "With great joy, we invite you to attend and share your blessings on our special day.",
+  openButtonLabel: "Open Invitation",
+  displayDate: "06.09.2026",
+  dressCodeTitle: "Dress Code",
+  dressCodeDescription:
+    "To support our wedding theme, we kindly request our guests to dress as follows on our special day:",
+  dressCodeTheme: "Elegant Formal",
+  dressCodeNote: "",
+  giftTitle: "Gift",
+  giftMessage:
+    "Your love, kind wishes and prayer on our wedding day is the greatest gift of all. However, should you wish to send us blessings via online registry, you can conveniently transfer through our bank account.",
+};
 
 export const DEFAULT_WEDDING: WeddingSettings = {
   groom: {
@@ -24,6 +41,7 @@ export const DEFAULT_WEDDING: WeddingSettings = {
   quote:
     "And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquility with them.",
   quoteSource: "QS. Ar-Rum: 21",
+  invitationCopy: DEFAULT_INVITATION_COPY,
   loveStory: [
     {
       id: "story-1",
@@ -75,6 +93,7 @@ export type InvitationSection =
   | "home"
   | "couple"
   | "event"
+  | "dresscode"
   | "gallery"
   | "rsvp"
   | "gift"
@@ -84,6 +103,7 @@ export const NAV_ITEMS: { id: InvitationSection; label: string }[] = [
   { id: "home", label: "Home" },
   { id: "couple", label: "Couple" },
   { id: "event", label: "Event" },
+  { id: "dresscode", label: "Dress Code" },
   { id: "gallery", label: "Gallery" },
   { id: "rsvp", label: "RSVP" },
   { id: "wishes", label: "Wishes" },
@@ -111,6 +131,13 @@ export function mergeWeddingSettings(
     bride: { ...DEFAULT_WEDDING.bride, ...stored.bride },
     quote: stored.quote?.trim() || DEFAULT_WEDDING.quote,
     quoteSource: stored.quoteSource?.trim() || DEFAULT_WEDDING.quoteSource,
+    invitationCopy: {
+      ...DEFAULT_WEDDING.invitationCopy,
+      ...stored.invitationCopy,
+      initials:
+        stored.invitationCopy?.initials?.trim().slice(0, 2).toUpperCase() ||
+        DEFAULT_WEDDING.invitationCopy.initials,
+    },
     loveStory:
       stored.loveStory?.length ? stored.loveStory : DEFAULT_WEDDING.loveStory,
     ceremonies:

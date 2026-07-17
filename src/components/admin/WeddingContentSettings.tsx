@@ -12,6 +12,7 @@ import {
   Users,
   Quote,
   Music,
+  Sparkles,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import CeremonyDateInput from "@/components/admin/CeremonyDateInput";
@@ -19,7 +20,7 @@ import EventTimeInput from "@/components/admin/EventTimeInput";
 import { DEFAULT_WEDDING } from "@/lib/wedding-config";
 import type { WeddingSettings } from "@/types/wedding";
 
-type Tab = "couple" | "story" | "events" | "gallery" | "gifts" | "music" | "wishes";
+type Tab = "invitation" | "couple" | "story" | "events" | "gallery" | "gifts" | "music" | "wishes";
 
 const MAX_MUSIC_BYTES = 12 * 1024 * 1024;
 
@@ -68,6 +69,7 @@ function readImageFile(file: File) {
 }
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
+  { id: "invitation", label: "Invitation Copy", icon: Sparkles },
   { id: "couple", label: "Couple & Quote", icon: Users },
   { id: "story", label: "Love Story", icon: Heart },
   { id: "events", label: "Wedding Events", icon: Calendar },
@@ -146,6 +148,22 @@ export default function WeddingContentSettings() {
     } finally {
       setDeletingWishes(false);
     }
+  };
+
+  const updateInvitationCopy = (
+    field: keyof WeddingSettings["invitationCopy"],
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      invitationCopy: {
+        ...current.invitationCopy,
+        [field]:
+          field === "initials"
+            ? value.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase()
+            : value,
+      },
+    }));
   };
 
   const updateCouple = (
@@ -284,6 +302,78 @@ export default function WeddingContentSettings() {
       </div>
 
       <div className="card-premium p-6">
+        {tab === "invitation" && (
+          <div className="grid gap-5 md:grid-cols-2">
+            {(
+              [
+                ["initials", "Initials (2 letters)", "LA"],
+                ["engagementTitle", "Engagement Title", "The Sangjit Engagement of"],
+                ["displayDate", "Display Date", "06.09.2026"],
+                ["openButtonLabel", "Open Button Label", "Open Invitation"],
+                ["dressCodeTitle", "Dress Code Title", "Dress Code"],
+                ["dressCodeTheme", "Dress Code Theme", "Elegant Formal"],
+                ["giftTitle", "Gift Title", "Gift"],
+              ] as const
+            ).map(([field, label, placeholder]) => (
+              <div key={field}>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  {label}
+                </label>
+                <input
+                  className="input-field"
+                  value={form.invitationCopy[field]}
+                  maxLength={field === "initials" ? 2 : undefined}
+                  placeholder={placeholder}
+                  onChange={(e) => updateInvitationCopy(field, e.target.value)}
+                />
+              </div>
+            ))}
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Cover Message
+              </label>
+              <textarea
+                className="input-field min-h-24"
+                value={form.invitationCopy.coverMessage}
+                onChange={(e) => updateInvitationCopy("coverMessage", e.target.value)}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Dress Code Description
+              </label>
+              <textarea
+                className="input-field min-h-24"
+                value={form.invitationCopy.dressCodeDescription}
+                onChange={(e) =>
+                  updateInvitationCopy("dressCodeDescription", e.target.value)
+                }
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Dress Code Note
+              </label>
+              <input
+                className="input-field"
+                value={form.invitationCopy.dressCodeNote}
+                placeholder="Example: Think Batik / Kebaya"
+                onChange={(e) => updateInvitationCopy("dressCodeNote", e.target.value)}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Gift Message
+              </label>
+              <textarea
+                className="input-field min-h-32"
+                value={form.invitationCopy.giftMessage}
+                onChange={(e) => updateInvitationCopy("giftMessage", e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+
         {tab === "couple" && (
           <div className="space-y-8">
             <div className="grid gap-6 lg:grid-cols-2">

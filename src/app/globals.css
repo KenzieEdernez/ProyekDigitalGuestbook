@@ -188,6 +188,88 @@
     background-position: center center;
   }
 
+  .invitation-cover-bg {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
+
+  .invitation-cover-card {
+    border-radius: 1.5rem;
+    border: 1px solid rgba(197, 160, 89, 0.18);
+    box-shadow:
+      0 24px 60px rgba(15, 21, 32, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
+  .invitation-monogram {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    color: #fff;
+  }
+
+  .invitation-monogram-letter {
+    font-family: var(--font-cormorant), serif;
+    font-size: clamp(3rem, 8vw, 4.5rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: 0.08em;
+  }
+
+  .invitation-monogram-bar {
+    display: inline-block;
+    height: 3.5rem;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.15),
+      rgba(197, 160, 89, 0.85),
+      rgba(255, 255, 255, 0.15)
+    );
+  }
+
+  .flying-bird {
+    position: absolute;
+    left: -12%;
+    animation-name: bird-flight;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  .flying-bird-2 {
+    animation-direction: reverse;
+  }
+
+  .flying-bird-3 {
+    animation-duration: 24s !important;
+  }
+
+  @keyframes bird-flight {
+    0% {
+      transform: translateX(0) translateY(0) scaleX(1);
+      opacity: 0;
+    }
+    8% {
+      opacity: 0.85;
+    }
+    50% {
+      transform: translateX(70vw) translateY(-24px) scaleX(1);
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateX(130vw) translateY(12px) scaleX(1);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flying-bird {
+      animation: none;
+      opacity: 0;
+    }
+  }
+
   .invitation-photo {
     object-fit: cover;
     object-position: center 25%;

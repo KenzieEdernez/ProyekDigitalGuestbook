@@ -1,3 +1,17 @@
+export interface InvitationCopy {
+  initials: string;
+  engagementTitle: string;
+  coverMessage: string;
+  openButtonLabel: string;
+  displayDate: string;
+  dressCodeTitle: string;
+  dressCodeDescription: string;
+  dressCodeTheme: string;
+  dressCodeNote: string;
+  giftTitle: string;
+  giftMessage: string;
+}
+
 export interface CoupleProfile {
   name: string;
   fullName: string;
@@ -51,6 +65,7 @@ export interface WeddingSettings {
   bride: CoupleProfile;
   quote: string;
   quoteSource: string;
+  invitationCopy: InvitationCopy;
   loveStory: LoveStoryItem[];
   ceremonies: CeremonyItem[];
   gallery: GalleryImage[];

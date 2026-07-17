@@ -92,30 +92,6 @@ export default function EventSection({ event, ceremonies }: EventSectionProps) {
             </Reveal>
           ))}
         </div>
-
-        <Reveal direction="up" delay={300}>
-          <div className="mt-10 overflow-hidden rounded-2xl border border-royal/25 bg-gradient-to-br from-royal/15 to-royal/5 p-8 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-royal">
-              Dress Code
-            </p>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/40">
-                  Ladies
-                </p>
-                <p className="mt-2 font-display text-xl">{event.dressLadies}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/40">
-                  Gentlemen
-                </p>
-                <p className="mt-2 font-display text-xl">
-                  {event.dressGentlemen}
-                </p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
       </div>
     </section>
   );

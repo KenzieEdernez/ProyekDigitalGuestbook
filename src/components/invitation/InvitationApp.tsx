@@ -7,6 +7,7 @@ import InvitationCover from "@/components/invitation/InvitationCover";
 import InvitationNav from "@/components/invitation/InvitationNav";
 import ScrollProgress from "@/components/invitation/ScrollProgress";
 import WaveDivider from "@/components/invitation/WaveDivider";
+import DressCodeSection from "@/components/invitation/sections/DressCodeSection";
 import HomeSection from "@/components/invitation/sections/HomeSection";
 import CoupleSection from "@/components/invitation/sections/CoupleSection";
 import EventSection from "@/components/invitation/sections/EventSection";
@@ -18,12 +19,12 @@ import Reveal from "@/components/invitation/Reveal";
 import { useEventSettings } from "@/hooks/useEventSettings";
 import { useWeddingSettings } from "@/hooks/useWeddingSettings";
 import { getCoupleDisplayName, parseGuestName, type InvitationSection } from "@/lib/wedding-config";
-import { getPrimaryCeremony } from "@/lib/ceremony-event";
 
 const SECTION_IDS: InvitationSection[] = [
   "home",
   "couple",
   "event",
+  "dresscode",
   "gallery",
   "rsvp",
   "gift",
@@ -202,8 +203,6 @@ export default function InvitationApp() {
     primeMusic();
   }, [phase, musicAvailable, primeMusic]);
 
-  const primaryCeremony = getPrimaryCeremony(wedding);
-
   if (!eventSettings.settingsReady || !weddingReady) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-champagne px-6">
@@ -248,8 +247,9 @@ export default function InvitationApp() {
           guestName={guestName}
           heroImage={eventSettings.heroImage}
           heroImagePortrait={eventSettings.heroImagePortrait}
-          weddingDate={primaryCeremony?.date ?? ""}
+          heroImageCard={eventSettings.heroImageCard}
           coupleName={getCoupleDisplayName(wedding)}
+          copy={wedding.invitationCopy}
           onOpen={handleOpen}
           onPrimeMusic={primeMusic}
         />
@@ -272,14 +272,18 @@ export default function InvitationApp() {
             <HomeSection
               event={eventSettings}
               wedding={wedding}
+              copy={wedding.invitationCopy}
               guestName={guestName}
               weddingReady={weddingReady}
+              showBirds
             />
 
             <WaveDivider fill="#f9f0ed" />
             <CoupleSection wedding={wedding} />
             <WaveDivider fill="#1a2332" flip />
             <EventSection event={eventSettings} ceremonies={wedding.ceremonies} />
+            <WaveDivider fill="#faf7f2" />
+            <DressCodeSection event={eventSettings} copy={wedding.invitationCopy} />
             <WaveDivider fill="#f3efe6" />
             <GallerySection gallery={wedding.gallery} />
             <WaveDivider fill="#f8f6f2" />
@@ -289,8 +293,8 @@ export default function InvitationApp() {
               defaultName={guestName}
               onNavigateWishes={() => navigateTo("wishes")}
             />
-            <WaveDivider fill="#faf7f2" />
-            <GiftSection gifts={wedding.gifts} giftAddress={wedding.giftAddress} />
+            <WaveDivider fill="#1a2332" />
+            <GiftSection gifts={wedding.gifts} copy={wedding.invitationCopy} />
             <WaveDivider fill="#f5f0ea" />
             <WishLettersSection onNavigateRsvp={() => navigateTo("rsvp")} />
           </main>
