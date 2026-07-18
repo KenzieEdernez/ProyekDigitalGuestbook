@@ -26,67 +26,6 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   birdImage: "",
 };
 
-function readCroppedImage(file: File, width: number, height: number) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const image = new Image();
-      image.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          reject(new Error("Browser does not support image resizing."));
-          return;
-        }
-
-        const sourceRatio = image.width / image.height;
-        const targetRatio = width / height;
-        let sourceWidth = image.width;
-        let sourceHeight = image.height;
-        let sourceX = 0;
-        let sourceY = 0;
-
-        if (sourceRatio > targetRatio) {
-          sourceWidth = image.height * targetRatio;
-          sourceX = (image.width - sourceWidth) / 2;
-        } else {
-          sourceHeight = image.width / targetRatio;
-          sourceY = (image.height - sourceHeight) / 2;
-        }
-
-        ctx.drawImage(
-          image,
-          sourceX,
-          sourceY,
-          sourceWidth,
-          sourceHeight,
-          0,
-          0,
-          width,
-          height
-        );
-
-        resolve(canvas.toDataURL("image/jpeg", 0.85));
-      };
-      image.onerror = () => reject(new Error("Failed to read image."));
-      image.src = String(reader.result);
-    };
-    reader.onerror = () => reject(new Error("Failed to read image file."));
-    reader.readAsDataURL(file);
-  });
-}
-
-function readLandscapeImage(file: File) {
-  return readCroppedImage(file, 1600, 700);
-}
-
-function readPortraitImage(file: File) {
-  return readCroppedImage(file, 900, 1600);
-}
-
 function readFittedImage(file: File, maxSize = 1400, type: "image/jpeg" | "image/png" = "image/jpeg") {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -194,12 +133,10 @@ export default function EventSettingsPage() {
     setError(null);
     try {
       let processed = "";
-      if (variant === "landscape") {
-        processed = await readLandscapeImage(file);
-      } else if (variant === "card") {
-        processed = await processFittedPhotoFile(file, 1400);
+      if (variant === "landscape" || variant === "card") {
+        processed = await processFittedPhotoFile(file, 1600);
       } else if (variant === "portrait") {
-        processed = await readPortraitImage(file);
+        processed = await processFittedPhotoFile(file, 1400);
       } else if (variant === "dresscode") {
         processed = await processDressCodeImageFile(file, 1400);
       } else if (variant === "logo") {
@@ -261,7 +198,7 @@ export default function EventSettingsPage() {
                     <img
                       src={form.heroImage}
                       alt="Landscape background preview"
-                      className="h-36 w-full object-cover"
+                      className="mx-auto h-36 w-full object-contain"
                     />
                   ) : (
                     <div className="flex h-36 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
@@ -278,7 +215,8 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Blurred background for desktop and open invitation hero.
+                  Desktop background + opening card photo. Kept at original
+                  aspect ratio (not cropped). Re-upload for the full scene.
                 </p>
               </div>
 
@@ -340,9 +278,8 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Optional. The opening card currently uses the Mobile / Portrait
-                  hero so the full couple photo stays visible. Upload here only if
-                  you want a separate card asset later.
+                  Optional separate asset. Opening card uses the Desktop /
+                  Landscape hero, shown fully without cropping.
                 </p>
               </div>
             </div>

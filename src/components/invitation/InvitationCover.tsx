@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { resolveHeroImages } from "@/lib/hero-images";
 import type { InvitationCopy } from "@/types/wedding";
@@ -30,6 +30,9 @@ export default function InvitationCover({
 }: InvitationCoverProps) {
   const [visible, setVisible] = useState(false);
   const [btnPressed, setBtnPressed] = useState(false);
+  const [scale, setScale] = useState(1);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const heroes = resolveHeroImages({
     heroImage,
     heroImagePortrait,
@@ -40,6 +43,33 @@ export default function InvitationCover({
     const timer = setTimeout(() => setVisible(true), 150);
     return () => clearTimeout(timer);
   }, []);
+
+  useLayoutEffect(() => {
+    const shell = shellRef.current;
+    const card = cardRef.current;
+    if (!shell || !card) return;
+
+    const fit = () => {
+      card.style.transform = "scale(1)";
+      const available = shell.clientHeight;
+      const needed = card.scrollHeight;
+      if (!available || !needed) {
+        setScale(1);
+        return;
+      }
+      setScale(Math.min(1, available / needed));
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(shell);
+    observer.observe(card);
+    window.addEventListener("resize", fit);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", fit);
+    };
+  }, [heroes.landscape, guestName, copy.coverMessage, copy.engagementTitle]);
 
   const handleOpen = () => {
     setBtnPressed(true);
@@ -63,53 +93,67 @@ export default function InvitationCover({
       <div className="absolute inset-0 bg-navy-900/40" />
       <div className="absolute inset-0 bg-gradient-to-b from-navy-900/20 via-transparent to-navy-900/58" />
 
-      <div className="relative z-10 flex min-h-[100dvh] items-center justify-center px-5 py-10">
+      <div
+        ref={shellRef}
+        className="relative z-10 flex min-h-[100dvh] items-center justify-center px-4 py-6 sm:px-6"
+      >
         <div
-          className={`invitation-cover-card w-[17.25rem] overflow-hidden sm:w-[19rem] ${
+          ref={cardRef}
+          className={`invitation-cover-card ${
             visible && !isExiting
-              ? "translate-y-0 opacity-100"
-              : "translate-y-8 opacity-0"
-          } transition-all duration-[1.1s] ease-out-expo`}
+              ? "opacity-100"
+              : "opacity-0"
+          } transition-opacity duration-[1.1s] ease-out-expo`}
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: "center center",
+          }}
         >
           <div className="invitation-cover-card-media">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={heroes.card} alt="" />
+            <img
+              src={heroes.landscape}
+              alt=""
+              onLoad={() => {
+                const shell = shellRef.current;
+                const card = cardRef.current;
+                if (!shell || !card) return;
+                card.style.transform = "scale(1)";
+                const available = shell.clientHeight;
+                const needed = card.scrollHeight;
+                setScale(
+                  available && needed ? Math.min(1, available / needed) : 1
+                );
+              }}
+            />
           </div>
 
           <div className="invitation-cover-card-body">
-            <p className="text-[8px] font-semibold uppercase tracking-[0.4em] text-royal">
-              {copy.engagementTitle}
-            </p>
+            <p className="invitation-cover-kicker">{copy.engagementTitle}</p>
 
-            <h1 className="mt-3 font-display text-[1.75rem] font-light italic leading-[1.12] text-navy">
-              {coupleName}
-            </h1>
+            <h1 className="invitation-cover-names font-display">{coupleName}</h1>
 
-            <div className="mx-auto my-4 h-px w-10 bg-gradient-to-r from-transparent via-royal/50 to-transparent" />
+            <div className="invitation-cover-rule" aria-hidden />
 
             {guestName && (
-              <p className="mb-3 font-display text-base text-navy/80">
-                <span className="mr-1 text-[8px] font-sans font-semibold uppercase tracking-[0.28em] text-stone-400">
-                  Dear
-                </span>
+              <p className="invitation-cover-guest font-display">
+                <span>Dear</span>
                 {guestName}
               </p>
             )}
 
-            <p className="mx-auto max-w-[13.5rem] text-[11px] font-light leading-relaxed text-stone-500">
-              {copy.coverMessage}
-            </p>
+            <p className="invitation-cover-message">{copy.coverMessage}</p>
 
             <button
               onPointerDown={onPrimeMusic}
               onClick={handleOpen}
               disabled={btnPressed}
-              className={`btn-invite-primary mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[10px] tracking-[0.18em] ${
+              className={`btn-invite-primary invitation-cover-cta inline-flex items-center justify-center gap-1.5 ${
                 btnPressed ? "scale-95 opacity-70" : ""
               }`}
             >
               <span>{copy.openButtonLabel}</span>
-              <ChevronDown className="h-3.5 w-3.5" />
+              <ChevronDown className="invitation-cover-cta-icon" />
             </button>
           </div>
         </div>

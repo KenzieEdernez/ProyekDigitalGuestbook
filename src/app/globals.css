@@ -195,6 +195,8 @@
   }
 
   .invitation-cover-card {
+    width: min(92vw, 26.5rem);
+    overflow: hidden;
     border-radius: 1.05rem;
     border: 1px solid rgba(255, 255, 255, 0.14);
     background: #f7f1e8;
@@ -205,23 +207,107 @@
 
   .invitation-cover-card-media {
     line-height: 0;
-    background: #1a2332;
+    background: #efe6d8;
   }
 
   .invitation-cover-card-media img {
     display: block;
     width: 100%;
     height: auto;
-    max-height: min(52vh, 22rem);
     object-fit: contain;
     object-position: center center;
-    background: #efe6d8;
   }
 
   .invitation-cover-card-body {
-    padding: 1.35rem 1.25rem 1.5rem;
+    padding: 1.05rem 1.15rem 1.2rem;
     text-align: center;
     background: #f7f1e8;
+  }
+
+  .invitation-cover-kicker {
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: #c5a059;
+  }
+
+  .invitation-cover-names {
+    margin-top: 0.55rem;
+    font-size: 1.45rem;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.12;
+    color: #1a2332;
+  }
+
+  .invitation-cover-rule {
+    margin: 0.7rem auto;
+    height: 1px;
+    width: 2.25rem;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(197, 160, 89, 0.55),
+      transparent
+    );
+  }
+
+  .invitation-cover-guest {
+    margin-bottom: 0.55rem;
+    font-size: 0.95rem;
+    color: rgba(26, 35, 50, 0.8);
+  }
+
+  .invitation-cover-guest span {
+    margin-right: 0.3rem;
+    font-family: inherit;
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #a8a29e;
+  }
+
+  .invitation-cover-message {
+    margin-inline: auto;
+    max-width: 15rem;
+    font-size: 0.68rem;
+    font-weight: 300;
+    line-height: 1.55;
+    color: #78716c;
+  }
+
+  .invitation-cover-cta {
+    width: 100%;
+    margin-top: 0.95rem;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+  }
+
+  .invitation-cover-cta-icon {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  @media (min-width: 640px) {
+    .invitation-cover-card {
+      width: min(88vw, 30rem);
+    }
+
+    .invitation-cover-card-body {
+      padding: 1.15rem 1.35rem 1.35rem;
+    }
+
+    .invitation-cover-names {
+      font-size: 1.6rem;
+    }
+
+    .invitation-cover-message {
+      font-size: 0.72rem;
+      max-width: 16rem;
+    }
   }
 
   .couple-section {
@@ -426,15 +512,23 @@
     min-height: 100dvh;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    gap: 1.35rem;
+    padding-top: clamp(4.5rem, 10vh, 6.5rem);
+    padding-bottom: clamp(3.5rem, 8vh, 5.5rem);
   }
 
   .invitation-hero-logo-wrap {
     flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 0;
   }
 
   .invitation-hero-copy {
-    margin-top: auto;
-    padding-bottom: 0.25rem;
+    margin-top: 0;
+    padding-bottom: 0;
   }
 
   .invitation-hero-names {
