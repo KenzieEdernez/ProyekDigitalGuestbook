@@ -54,9 +54,6 @@ export default function LoveStoryTimeline({ loveStory }: LoveStoryTimelineProps)
             className={`love-story-slide love-story-slide-${direction} relative min-h-[320px] border border-royal/15 bg-white p-8 shadow-card md:min-h-[360px] md:p-12`}
           >
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-royal/[0.04] via-transparent to-blush/60" />
-            <div className="pointer-events-none absolute -right-6 -top-8 font-display text-[9rem] font-light leading-none text-royal/[0.06] md:text-[11rem]">
-              {item.year}
-            </div>
 
             <div className="relative flex h-full flex-col">
               <div className="flex items-center justify-between">

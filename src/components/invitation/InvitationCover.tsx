@@ -71,12 +71,12 @@ export default function InvitationCover({
               : "translate-y-8 opacity-0"
           } transition-all duration-[1.1s] ease-out-expo`}
         >
-          <div className="aspect-[5/4] w-full overflow-hidden bg-navy-800">
+          <div className="invitation-cover-card-media flex w-full items-center justify-center bg-[#efe6d8]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={heroes.card}
               alt=""
-              className="h-full w-full object-cover"
+              className="max-h-52 w-full object-contain sm:max-h-56"
             />
           </div>
 

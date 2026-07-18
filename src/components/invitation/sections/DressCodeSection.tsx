@@ -30,12 +30,7 @@ export default function DressCodeSection({ event, copy }: DressCodeSectionProps)
         <Reveal direction="up" duration={900}>
           <div className="dresscode-layout">
             <div className="dresscode-copy">
-              <div className="dresscode-crest" aria-hidden>
-                <span className="dresscode-crest-ring" />
-                <span className="dresscode-crest-dot">✦</span>
-              </div>
-
-              <p className="mt-5 font-display text-[2.4rem] font-light leading-none tracking-wide text-royal md:text-5xl lg:text-[3.4rem]">
+              <p className="font-display text-[2.4rem] font-light leading-none tracking-wide text-royal md:text-5xl lg:text-[3.4rem]">
                 {copy.dressCodeTitle}
               </p>
 
@@ -48,6 +43,12 @@ export default function DressCodeSection({ event, copy }: DressCodeSectionProps)
               <p className="font-display text-[1.45rem] uppercase tracking-[0.28em] text-navy md:text-2xl">
                 {copy.dressCodeTheme}
               </p>
+
+              {combinedLooks && (
+                <p className="dresscode-looks-caption mt-3 font-display">
+                  {combinedLooks}
+                </p>
+              )}
             </div>
 
             <div className="dresscode-visual">
@@ -57,12 +58,6 @@ export default function DressCodeSection({ event, copy }: DressCodeSectionProps)
                 <div className="dresscode-visual-empty">
                   Upload a dress code outfit image in Admin Settings
                 </div>
-              )}
-
-              {combinedLooks && (
-                <p className="dresscode-looks-caption font-display">
-                  {combinedLooks}
-                </p>
               )}
             </div>
           </div>
