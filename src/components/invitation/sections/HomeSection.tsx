@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calendar } from "lucide-react";
 import CountdownTimer from "@/components/invitation/CountdownTimer";
-import FlyingBirds from "@/components/invitation/FlyingBirds";
 import InvitationHeroBackground from "@/components/invitation/InvitationHeroBackground";
 import InvitationLogo from "@/components/invitation/InvitationLogo";
 import Reveal from "@/components/invitation/Reveal";
@@ -23,7 +22,6 @@ interface HomeSectionProps {
   copy: InvitationCopy;
   guestName: string | null;
   weddingReady: boolean;
-  showBirds?: boolean;
 }
 
 export default function HomeSection({
@@ -32,7 +30,6 @@ export default function HomeSection({
   copy,
   guestName,
   weddingReady,
-  showBirds = true,
 }: HomeSectionProps) {
   const [scrollY, setScrollY] = useState(0);
   const eventDetails = useMemo(() => {
@@ -68,7 +65,6 @@ export default function HomeSection({
         scrollY={scrollY}
       />
       <div className="invitation-hero-vignette absolute inset-0" />
-      {showBirds && <FlyingBirds birdImage={event.birdImage} />}
 
       <div className="invitation-hero-stage relative z-10 min-h-[100dvh] px-6 text-center text-white sm:px-8">
         <div className="invitation-hero-cluster mx-auto flex w-full max-w-lg flex-col items-center">

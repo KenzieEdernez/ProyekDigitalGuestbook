@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import FlyingBirds from "@/components/invitation/FlyingBirds";
 import InvitationCover from "@/components/invitation/InvitationCover";
 import InvitationNav from "@/components/invitation/InvitationNav";
 import ScrollProgress from "@/components/invitation/ScrollProgress";
@@ -258,6 +259,7 @@ export default function InvitationApp() {
       {phase === "open" && (
         <div className="invitation-app invitation-app-enter bg-champagne">
           <ScrollProgress />
+          <FlyingBirds birdImage={eventSettings.birdImage} />
 
           <InvitationNav
             active={activeSection}
@@ -275,7 +277,6 @@ export default function InvitationApp() {
               copy={wedding.invitationCopy}
               guestName={guestName}
               weddingReady={weddingReady}
-              showBirds
             />
 
             <WaveDivider fill="#f9f0ed" />

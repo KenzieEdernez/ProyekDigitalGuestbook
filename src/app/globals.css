@@ -569,11 +569,20 @@
     );
   }
 
+  .flying-birds {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    overflow: hidden;
+  }
+
   .flying-bird-actor {
     position: absolute;
+    top: 0;
     left: 0;
     will-change: transform, opacity;
-    transition: opacity 0.2s linear;
+    transition: opacity 0.18s linear;
   }
 
   .flying-bird-frame {
@@ -581,7 +590,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.28));
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.3));
     user-select: none;
     pointer-events: none;
   }
