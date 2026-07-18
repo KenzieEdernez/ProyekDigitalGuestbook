@@ -10,8 +10,8 @@ export function resolveHeroImages(settings: HeroImageSettings) {
   const portrait = settings.heroImagePortrait || landscape;
   const cardUpload = settings.heroImageCard?.trim() || "";
 
-  // Opening card uses the landscape hero, shown fully (no crop) edge-to-edge.
-  const card = landscape || cardUpload || portrait;
+  // Opening card uses Cover Card Photo (second landscape), falling back to hero landscape.
+  const card = cardUpload || landscape || portrait;
 
   return { landscape, portrait, card, cardUpload };
 }

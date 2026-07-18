@@ -282,7 +282,6 @@ export default function InvitationApp() {
             <CoupleSection wedding={wedding} />
             <WaveDivider fill="#1a2332" flip />
             <EventSection event={eventSettings} ceremonies={wedding.ceremonies} />
-            <WaveDivider fill="#faf7f2" />
             <DressCodeSection event={eventSettings} copy={wedding.invitationCopy} />
             <WaveDivider fill="#f3efe6" />
             <GallerySection gallery={wedding.gallery} />

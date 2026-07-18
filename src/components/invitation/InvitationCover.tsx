@@ -69,7 +69,7 @@ export default function InvitationCover({
       observer.disconnect();
       window.removeEventListener("resize", fit);
     };
-  }, [heroes.landscape, guestName, copy.coverMessage, copy.engagementTitle]);
+  }, [heroes.card, guestName, copy.coverMessage, copy.engagementTitle]);
 
   const handleOpen = () => {
     setBtnPressed(true);
@@ -112,7 +112,7 @@ export default function InvitationCover({
           <div className="invitation-cover-card-media">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={heroes.landscape}
+              src={heroes.card}
               alt=""
               onLoad={() => {
                 const shell = shellRef.current;

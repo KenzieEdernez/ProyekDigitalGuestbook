@@ -278,8 +278,8 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Optional separate asset. Opening card uses the Desktop /
-                  Landscape hero, shown fully without cropping.
+                  Landscape photo for the small opening card (shown fully, no
+                  crop). Falls back to Desktop Landscape if empty.
                 </p>
               </div>
             </div>
@@ -375,7 +375,8 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  PNG with transparent background. Used for 5 animated birds.
+                  Optional. Leave empty to use the built-in flapping dove
+                  animation on the hero.
                 </p>
               </div>
             </div>
