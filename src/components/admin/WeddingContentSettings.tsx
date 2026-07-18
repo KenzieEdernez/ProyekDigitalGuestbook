@@ -68,6 +68,24 @@ function readImageFile(file: File) {
   );
 }
 
+async function readCouplePhotoFile(file: File) {
+  const { processFittedPhotoFile } = await import("@/lib/trim-image-bars");
+  const dataUrl = await processFittedPhotoFile(file, 1400);
+  const probe = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Failed to probe image."));
+    image.src = dataUrl;
+  });
+  return {
+    dataUrl,
+    orientation:
+      probe.height >= probe.width
+        ? ("portrait" as const)
+        : ("landscape" as const),
+  };
+}
+
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "invitation", label: "Invitation Copy", icon: Sparkles },
   { id: "couple", label: "Couple & Quote", icon: Users },
@@ -180,7 +198,7 @@ export default function WeddingContentSettings() {
   ) => {
     if (!file) return;
     try {
-      const { dataUrl } = await readImageFile(file);
+      const { dataUrl } = await readCouplePhotoFile(file);
       updateCouple(role, "photo", dataUrl);
     } catch {
       setError("Failed to process photo.");

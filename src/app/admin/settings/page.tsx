@@ -5,6 +5,7 @@ import { ImageIcon, Save } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
 import WeddingContentSettings from "@/components/admin/WeddingContentSettings";
 import { processDressCodeImageFile } from "@/lib/process-dress-code-image";
+import { processFittedPhotoFile } from "@/lib/trim-image-bars";
 import type { EventSettings } from "@/types/event";
 
 const EMPTY_EVENT_SETTINGS: EventSettings = {
@@ -196,7 +197,7 @@ export default function EventSettingsPage() {
       if (variant === "landscape") {
         processed = await readLandscapeImage(file);
       } else if (variant === "card") {
-        processed = await readFittedImage(file, 1400, "image/jpeg");
+        processed = await processFittedPhotoFile(file, 1400);
       } else if (variant === "portrait") {
         processed = await readPortraitImage(file);
       } else if (variant === "dresscode") {
@@ -339,8 +340,9 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Cover card photo — kept at original aspect ratio (not cropped).
-                  Re-upload if an older crop is still showing.
+                  Optional. The opening card currently uses the Mobile / Portrait
+                  hero so the full couple photo stays visible. Upload here only if
+                  you want a separate card asset later.
                 </p>
               </div>
             </div>

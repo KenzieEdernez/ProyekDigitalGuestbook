@@ -60,32 +60,28 @@ export default function InvitationCover({
         className="invitation-cover-bg absolute inset-0 hidden scale-[1.03] md:block"
         style={{ backgroundImage: `url('${heroes.landscape}')` }}
       />
-      <div className="absolute inset-0 bg-navy-900/42" />
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/25 via-transparent to-navy-900/55" />
+      <div className="absolute inset-0 bg-navy-900/40" />
+      <div className="absolute inset-0 bg-gradient-to-b from-navy-900/20 via-transparent to-navy-900/58" />
 
       <div className="relative z-10 flex min-h-[100dvh] items-center justify-center px-5 py-10">
         <div
-          className={`invitation-cover-card w-[16.75rem] overflow-hidden sm:w-[18.5rem] ${
+          className={`invitation-cover-card w-[17.25rem] overflow-hidden sm:w-[19rem] ${
             visible && !isExiting
               ? "translate-y-0 opacity-100"
               : "translate-y-8 opacity-0"
           } transition-all duration-[1.1s] ease-out-expo`}
         >
-          <div className="invitation-cover-card-media bg-[#efe6d8]">
+          <div className="invitation-cover-card-media">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={heroes.card}
-              alt=""
-              className="block h-auto w-full object-contain"
-            />
+            <img src={heroes.card} alt="" />
           </div>
 
-          <div className="bg-[#f7f1e8] px-5 py-6 text-center">
+          <div className="invitation-cover-card-body">
             <p className="text-[8px] font-semibold uppercase tracking-[0.4em] text-royal">
               {copy.engagementTitle}
             </p>
 
-            <h1 className="mt-3 font-display text-[1.7rem] font-light italic leading-[1.15] text-navy">
+            <h1 className="mt-3 font-display text-[1.75rem] font-light italic leading-[1.12] text-navy">
               {coupleName}
             </h1>
 

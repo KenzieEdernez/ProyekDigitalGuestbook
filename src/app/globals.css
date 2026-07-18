@@ -195,87 +195,213 @@
   }
 
   .invitation-cover-card {
-    border-radius: 0.95rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1.05rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: #f7f1e8;
     box-shadow:
-      0 22px 48px rgba(15, 21, 32, 0.38),
-      0 0 0 1px rgba(197, 160, 89, 0.12);
+      0 26px 56px rgba(15, 21, 32, 0.42),
+      0 0 0 1px rgba(197, 160, 89, 0.14);
   }
 
   .invitation-cover-card-media {
     line-height: 0;
+    background: #1a2332;
+  }
+
+  .invitation-cover-card-media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: min(52vh, 22rem);
+    object-fit: contain;
+    object-position: center center;
+    background: #efe6d8;
+  }
+
+  .invitation-cover-card-body {
+    padding: 1.35rem 1.25rem 1.5rem;
+    text-align: center;
+    background: #f7f1e8;
+  }
+
+  .couple-section {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(197, 160, 89, 0.14), transparent 50%),
+      linear-gradient(180deg, #f8f3eb 0%, #faf7f2 48%, #f3ebe0 100%);
+  }
+
+  .couple-header {
+    margin-bottom: 2.25rem;
+    text-align: center;
+  }
+
+  .couple-kicker {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: #c5a059;
+  }
+
+  .couple-title {
+    margin-top: 0.7rem;
+    font-family: var(--font-cormorant), serif;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    color: #1a2332;
+  }
+
+  .couple-subtitle {
+    margin: 0.8rem auto 0;
+    max-width: 22rem;
+    font-size: 0.84rem;
+    font-weight: 300;
+    line-height: 1.65;
+    color: #8a8174;
   }
 
   .couple-stage {
     display: grid;
-    gap: 1.75rem;
+    gap: 1.5rem;
     justify-items: center;
   }
 
   .couple-ampersand {
     display: grid;
     place-items: center;
-    height: 2.25rem;
-    width: 2.25rem;
+    z-index: 2;
+    height: 2.4rem;
+    width: 2.4rem;
     border-radius: 999px;
-    border: 1px solid rgba(197, 160, 89, 0.35);
-    background: rgba(255, 252, 247, 0.92);
-    font-family: var(--font-cormorant), serif;
-    font-size: 1.25rem;
-    line-height: 1;
+    border: 1px solid rgba(197, 160, 89, 0.4);
+    background: rgba(255, 252, 247, 0.95);
+    box-shadow: 0 10px 24px rgba(26, 35, 50, 0.08);
     color: #c5a059;
-    box-shadow: 0 8px 18px rgba(26, 35, 50, 0.06);
+    font-family: var(--font-cormorant), serif;
+    font-size: 1.35rem;
+    line-height: 1;
   }
 
   .couple-person {
     width: 100%;
-    max-width: 16.5rem;
+    max-width: 15.5rem;
     text-align: center;
   }
 
-  .couple-photo-frame {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 11rem;
-    padding: 0.65rem;
-    border-radius: 1rem;
+  .couple-photo-ring {
+    margin-inline: auto;
+    width: min(100%, 11.5rem);
+    padding: 0.35rem;
+    border-radius: 999px;
     background:
-      linear-gradient(180deg, rgba(255, 252, 247, 0.95), rgba(247, 241, 232, 0.9));
-    box-shadow:
-      inset 0 0 0 1px rgba(197, 160, 89, 0.18),
-      0 12px 28px rgba(26, 35, 50, 0.06);
+      linear-gradient(145deg, rgba(197, 160, 89, 0.55), rgba(197, 160, 89, 0.12) 45%, rgba(197, 160, 89, 0.45));
+    box-shadow: 0 16px 34px rgba(26, 35, 50, 0.1);
   }
 
-  .couple-photo {
+  .couple-photo-oval {
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    border-radius: 999px;
+    background: #efe6d8;
+  }
+
+  .couple-photo-img {
     display: block;
-    width: auto;
-    max-width: 100%;
-    height: auto;
-    max-height: 13.5rem;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 18%;
+  }
+
+  .couple-role {
+    margin-top: 1.15rem;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: #c5a059;
+  }
+
+  .couple-name {
+    margin-top: 0.4rem;
+    font-family: var(--font-cormorant), serif;
+    font-size: 1.55rem;
+    font-weight: 300;
+    line-height: 1.2;
+    color: #1a2332;
+  }
+
+  .couple-divider {
+    margin: 0.85rem auto;
+    height: 1px;
+    width: 2.25rem;
+    background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.55), transparent);
+  }
+
+  .couple-parents {
+    margin-inline: auto;
+    max-width: 14rem;
+    font-size: 0.78rem;
+    font-weight: 300;
+    line-height: 1.65;
+    color: #8a8174;
+  }
+
+  .couple-parents span {
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(26, 35, 50, 0.55);
+  }
+
+  .couple-ig {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.9rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: #c5a059;
+    transition: opacity 0.25s ease;
+  }
+
+  .couple-ig:hover {
+    opacity: 0.72;
   }
 
   @media (min-width: 768px) {
+    .couple-header {
+      margin-bottom: 2.75rem;
+    }
+
     .couple-stage {
       grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
       align-items: start;
-      gap: 1.25rem 1.75rem;
+      gap: 1rem 2.25rem;
     }
 
     .couple-ampersand {
-      margin-top: 6.5rem;
-      height: 2.5rem;
-      width: 2.5rem;
-      font-size: 1.4rem;
+      margin-top: 5.25rem;
+      height: 2.75rem;
+      width: 2.75rem;
+      font-size: 1.5rem;
     }
 
     .couple-person {
-      max-width: 18rem;
+      max-width: 17rem;
     }
 
-    .couple-photo {
-      max-height: 15.5rem;
+    .couple-photo-ring {
+      width: min(100%, 13rem);
+    }
+
+    .couple-name {
+      font-size: 1.7rem;
     }
   }
 
