@@ -569,95 +569,26 @@
     );
   }
 
-  .flying-bird {
+  .flying-bird-actor {
     position: absolute;
-    left: -14%;
-    animation-name: bird-flight;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
+    left: 0;
     will-change: transform, opacity;
+    transition: opacity 0.2s linear;
   }
 
-  .flying-bird-sprite {
+  .flying-bird-frame {
     display: block;
-    background-repeat: no-repeat;
-    background-position: 0 0;
-    transform-origin: center center;
-    opacity: 0.9;
-    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.28));
-    animation-name: bird-flap;
-    animation-timing-function: steps(15);
-    animation-iteration-count: infinite;
-  }
-
-  .flying-bird-image {
-    opacity: 0.82;
-    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.25));
-  }
-
-  .flying-bird-2 .flying-bird-sprite,
-  .flying-bird-4 .flying-bird-sprite {
-    transform: scaleX(-1);
-  }
-
-  .flying-bird-2 {
-    animation-name: bird-flight-reverse;
-  }
-
-  .flying-bird-4 {
-    animation-name: bird-flight-reverse;
-  }
-
-  @keyframes bird-flap {
-    from {
-      background-position: 0 0;
-    }
-    to {
-      background-position: var(--bird-flap-end, -780px) 0;
-    }
-  }
-
-  @keyframes bird-flight {
-    0% {
-      transform: translate3d(0, 0, 0) scale(var(--bird-scale, 0.7));
-      opacity: 0;
-    }
-    8% {
-      opacity: 0.95;
-    }
-    50% {
-      transform: translate3d(70vw, -18px, 0) scale(var(--bird-scale, 0.7));
-      opacity: 0.85;
-    }
-    100% {
-      transform: translate3d(130vw, 12px, 0) scale(var(--bird-scale, 0.7));
-      opacity: 0;
-    }
-  }
-
-  @keyframes bird-flight-reverse {
-    0% {
-      transform: translate3d(110vw, 8px, 0) scale(var(--bird-scale, 0.7));
-      opacity: 0;
-    }
-    8% {
-      opacity: 0.95;
-    }
-    50% {
-      transform: translate3d(40vw, -16px, 0) scale(var(--bird-scale, 0.7));
-      opacity: 0.85;
-    }
-    100% {
-      transform: translate3d(-20vw, 10px, 0) scale(var(--bird-scale, 0.7));
-      opacity: 0;
-    }
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.28));
+    user-select: none;
+    pointer-events: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .flying-bird,
-    .flying-bird-sprite {
-      animation: none !important;
-      opacity: 0;
+    .flying-birds {
+      display: none;
     }
   }
 

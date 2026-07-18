@@ -1,51 +1,131 @@
 "use client";
 
-const DEFAULT_SPRITE = "/invitation/dove-sprite.png";
+import { useEffect, useRef, useState } from "react";
+
 const FRAME_COUNT = 15;
-const DISPLAY_SIZE = 52;
+const FRAME_PATHS = Array.from(
+  { length: FRAME_COUNT },
+  (_, i) => `/invitation/dove/${String(i).padStart(2, "0")}.png`
+);
 
 const BIRDS = [
-  { delay: "0s", duration: "16s", flap: "0.42s", top: "11%", scale: 0.78 },
-  { delay: "2.2s", duration: "20s", flap: "0.5s", top: "24%", scale: 0.58 },
-  { delay: "4.4s", duration: "18s", flap: "0.38s", top: "34%", scale: 0.9 },
-  { delay: "1.1s", duration: "22s", flap: "0.46s", top: "46%", scale: 0.64 },
-  { delay: "3.3s", duration: "17s", flap: "0.4s", top: "17%", scale: 0.72 },
+  { delayMs: 0, durationMs: 16000, fps: 14, top: "12%", size: 46, dir: 1 },
+  { delayMs: 2200, durationMs: 19000, fps: 12, top: "26%", size: 36, dir: -1 },
+  { delayMs: 4200, durationMs: 17000, fps: 15, top: "38%", size: 52, dir: 1 },
+  { delayMs: 1100, durationMs: 21000, fps: 13, top: "48%", size: 40, dir: -1 },
+  { delayMs: 3000, durationMs: 18000, fps: 14, top: "18%", size: 44, dir: 1 },
 ];
 
 interface FlyingBirdsProps {
-  /** Kept for API compatibility; flapping uses the bundled dove sprite. */
   birdImage?: string;
 }
 
+function DoveActor({
+  delayMs,
+  durationMs,
+  fps,
+  top,
+  size,
+  dir,
+  framesReady,
+}: (typeof BIRDS)[number] & { framesReady: boolean }) {
+  const [frame, setFrame] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const startRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!framesReady) return;
+    let raf = 0;
+    let active = true;
+
+    const tick = (now: number) => {
+      if (!active) return;
+      if (startRef.current == null) startRef.current = now + delayMs;
+      const origin = startRef.current;
+      if (now < origin) {
+        setVisible(false);
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+
+      const elapsed = now - origin;
+      const cycle = elapsed % durationMs;
+      const p = cycle / durationMs;
+      setProgress(p);
+      setVisible(p > 0.02 && p < 0.96);
+      setFrame(Math.floor((elapsed / 1000) * fps) % FRAME_COUNT);
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => {
+      active = false;
+      cancelAnimationFrame(raf);
+    };
+  }, [delayMs, durationMs, fps, framesReady]);
+
+  if (!framesReady) return null;
+
+  const x =
+    dir === 1
+      ? -18 + progress * 130
+      : 112 - progress * 130;
+  const y = Math.sin(progress * Math.PI * 2) * 10;
+  const opacity = visible ? 0.92 : 0;
+
+  return (
+    <div
+      className="flying-bird-actor"
+      style={{
+        top,
+        width: size,
+        height: size,
+        opacity,
+        transform: `translate3d(${x}vw, ${y}px, 0) scaleX(${dir})`,
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={FRAME_PATHS[frame]}
+        alt=""
+        className="flying-bird-frame"
+        draggable={false}
+      />
+    </div>
+  );
+}
+
 export default function FlyingBirds(_props: FlyingBirdsProps) {
+  const [framesReady, setFramesReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(
+      FRAME_PATHS.map(
+        (src) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            img.src = src;
+          })
+      )
+    ).then(() => {
+      if (!cancelled) setFramesReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div
       className="flying-birds pointer-events-none absolute inset-0 z-20 overflow-hidden"
       aria-hidden
     >
       {BIRDS.map((bird, index) => (
-        <div
-          key={index}
-          className={`flying-bird flying-bird-${index + 1}`}
-          style={{
-            top: bird.top,
-            animationDelay: bird.delay,
-            animationDuration: bird.duration,
-            ["--bird-scale" as string]: String(bird.scale),
-          }}
-        >
-          <span
-            className="flying-bird-sprite"
-            style={{
-              width: DISPLAY_SIZE,
-              height: DISPLAY_SIZE,
-              backgroundImage: `url('${DEFAULT_SPRITE}')`,
-              backgroundSize: `${DISPLAY_SIZE * FRAME_COUNT}px ${DISPLAY_SIZE}px`,
-              ["--bird-flap-end" as string]: `-${DISPLAY_SIZE * FRAME_COUNT}px`,
-              animationDuration: bird.flap,
-            }}
-          />
-        </div>
+        <DoveActor key={index} {...bird} framesReady={framesReady} />
       ))}
     </div>
   );
