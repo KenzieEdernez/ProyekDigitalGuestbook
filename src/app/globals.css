@@ -582,7 +582,7 @@
     top: 0;
     left: 0;
     will-change: transform, opacity;
-    transition: opacity 0.18s linear;
+    transition: opacity 0.35s ease;
   }
 
   .flying-bird-frame {

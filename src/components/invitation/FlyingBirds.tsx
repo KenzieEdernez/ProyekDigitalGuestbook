@@ -11,28 +11,30 @@ const FRAME_PATHS = Array.from(
 type BirdConfig = {
   delayMs: number;
   durationMs: number;
+  /** Wing-flap frames per second (lower = slower flap) */
   fps: number;
   size: number;
-  /** Vertical band start (0–100 vh) */
   yStart: number;
-  /** Vertical drift across the flight (vh units) */
   yDrift: number;
-  /** 1 = left→right, -1 = right→left */
   dir: 1 | -1;
-  /** Soft bob amplitude in px */
   bob: number;
 };
 
+/** Slow, floating paths across the full screen */
 const BIRDS: BirdConfig[] = [
-  { delayMs: 0, durationMs: 18000, fps: 14, size: 48, yStart: 8, yDrift: 18, dir: 1, bob: 12 },
-  { delayMs: 1800, durationMs: 21000, fps: 12, size: 36, yStart: 22, yDrift: -14, dir: -1, bob: 10 },
-  { delayMs: 3600, durationMs: 19000, fps: 15, size: 54, yStart: 40, yDrift: 22, dir: 1, bob: 14 },
-  { delayMs: 900, durationMs: 23000, fps: 13, size: 40, yStart: 58, yDrift: -20, dir: -1, bob: 11 },
-  { delayMs: 2800, durationMs: 20000, fps: 14, size: 44, yStart: 72, yDrift: 16, dir: 1, bob: 13 },
-  { delayMs: 5200, durationMs: 17000, fps: 15, size: 34, yStart: 14, yDrift: 28, dir: -1, bob: 9 },
-  { delayMs: 7000, durationMs: 22000, fps: 12, size: 50, yStart: 48, yDrift: -24, dir: 1, bob: 15 },
-  { delayMs: 4200, durationMs: 25000, fps: 13, size: 38, yStart: 82, yDrift: -18, dir: -1, bob: 10 },
+  { delayMs: 0, durationMs: 42000, fps: 8, size: 48, yStart: 8, yDrift: 14, dir: 1, bob: 10 },
+  { delayMs: 4000, durationMs: 48000, fps: 7, size: 36, yStart: 22, yDrift: -12, dir: -1, bob: 9 },
+  { delayMs: 8000, durationMs: 45000, fps: 8, size: 54, yStart: 40, yDrift: 18, dir: 1, bob: 12 },
+  { delayMs: 2500, durationMs: 52000, fps: 7, size: 40, yStart: 58, yDrift: -16, dir: -1, bob: 10 },
+  { delayMs: 6500, durationMs: 46000, fps: 8, size: 44, yStart: 72, yDrift: 12, dir: 1, bob: 11 },
+  { delayMs: 11000, durationMs: 40000, fps: 7, size: 34, yStart: 14, yDrift: 22, dir: -1, bob: 8 },
+  { delayMs: 15000, durationMs: 50000, fps: 8, size: 50, yStart: 48, yDrift: -20, dir: 1, bob: 13 },
+  { delayMs: 9000, durationMs: 55000, fps: 7, size: 38, yStart: 82, yDrift: -14, dir: -1, bob: 9 },
 ];
+
+function easeInOutSine(t: number) {
+  return 0.5 - Math.cos(Math.PI * t) / 2;
+}
 
 interface FlyingBirdsProps {
   birdImage?: string;
@@ -49,10 +51,10 @@ function DoveActor({
   bob,
   framesReady,
 }: BirdConfig & { framesReady: boolean }) {
-  const [frame, setFrame] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [visible, setVisible] = useState(false);
+  const actorRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const startRef = useRef<number | null>(null);
+  const lastFrameRef = useRef(-1);
 
   useEffect(() => {
     if (!framesReady) return;
@@ -63,18 +65,35 @@ function DoveActor({
       if (!active) return;
       if (startRef.current == null) startRef.current = now + delayMs;
       const origin = startRef.current;
-      if (now < origin) {
-        setVisible(false);
+      const el = actorRef.current;
+      const img = imgRef.current;
+
+      if (!el || !img || now < origin) {
+        if (el) el.style.opacity = "0";
         raf = requestAnimationFrame(tick);
         return;
       }
 
       const elapsed = now - origin;
-      const cycle = elapsed % durationMs;
-      const p = cycle / durationMs;
-      setProgress(p);
-      setVisible(p > 0.015 && p < 0.985);
-      setFrame(Math.floor((elapsed / 1000) * fps) % FRAME_COUNT);
+      const raw = (elapsed % durationMs) / durationMs;
+      const p = easeInOutSine(raw);
+
+      const x = dir === 1 ? -18 + p * 136 : 118 - p * 136;
+      const y =
+        yStart +
+        p * yDrift +
+        Math.sin(raw * Math.PI * 2) * (bob * 0.08);
+      const visible = raw > 0.01 && raw < 0.99;
+
+      el.style.opacity = visible ? "0.9" : "0";
+      el.style.transform = `translate3d(${x}vw, ${y}vh, 0) scaleX(${dir})`;
+
+      const frame = Math.floor((elapsed / 1000) * fps) % FRAME_COUNT;
+      if (frame !== lastFrameRef.current) {
+        lastFrameRef.current = frame;
+        img.src = FRAME_PATHS[frame];
+      }
+
       raf = requestAnimationFrame(tick);
     };
 
@@ -83,28 +102,24 @@ function DoveActor({
       active = false;
       cancelAnimationFrame(raf);
     };
-  }, [delayMs, durationMs, fps, framesReady]);
+  }, [bob, delayMs, dir, durationMs, fps, framesReady, yDrift, yStart]);
 
   if (!framesReady) return null;
 
-  // Full-viewport horizontal sweep with slight overscan so birds enter/exit cleanly.
-  const x = dir === 1 ? -16 + progress * 132 : 116 - progress * 132;
-  const y = yStart + progress * yDrift + Math.sin(progress * Math.PI * 2) * (bob / 10);
-  const opacity = visible ? 0.9 : 0;
-
   return (
     <div
+      ref={actorRef}
       className="flying-bird-actor"
       style={{
         width: size,
         height: size,
-        opacity,
-        transform: `translate3d(${x}vw, ${y}vh, 0) scaleX(${dir})`,
+        opacity: 0,
       }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={FRAME_PATHS[frame]}
+        ref={imgRef}
+        src={FRAME_PATHS[0]}
         alt=""
         className="flying-bird-frame"
         draggable={false}
