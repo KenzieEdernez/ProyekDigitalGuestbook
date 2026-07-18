@@ -345,17 +345,10 @@ export default function WeddingContentSettings() {
                 }
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                Dress Code Note
-              </label>
-              <input
-                className="input-field"
-                value={form.invitationCopy.dressCodeNote}
-                placeholder="Example: Think Batik / Kebaya"
-                onChange={(e) => updateInvitationCopy("dressCodeNote", e.target.value)}
-              />
-            </div>
+            <p className="md:col-span-2 text-xs text-stone-400">
+              Outfit looks under the dress code image come from Ladies / Gentlemen in
+              Page Settings (for example: Modern Kebaya · Formal Batik).
+            </p>
             <div className="md:col-span-2">
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
                 Gift Message

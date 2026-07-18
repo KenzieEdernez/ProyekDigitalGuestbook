@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ImageIcon, Save } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
 import WeddingContentSettings from "@/components/admin/WeddingContentSettings";
+import { processDressCodeImageFile } from "@/lib/process-dress-code-image";
 import type { EventSettings } from "@/types/event";
 
 const EMPTY_EVENT_SETTINGS: EventSettings = {
@@ -189,7 +190,7 @@ export default function EventSettingsPage() {
       } else if (variant === "portrait") {
         processed = await readPortraitImage(file);
       } else if (variant === "dresscode") {
-        processed = await readCroppedImage(file, 1200, 900);
+        processed = await processDressCodeImageFile(file, 1400);
       } else if (variant === "logo") {
         processed = await readPngAsset(file, 500);
       } else {
@@ -337,7 +338,7 @@ export default function EventSettingsPage() {
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
                 Dress Code Reference Image
               </label>
-              <div className="overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
+              <div className="overflow-hidden rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#f3ebe0_25%,transparent_25%),linear-gradient(-45deg,#f3ebe0_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f3ebe0_75%),linear-gradient(-45deg,transparent_75%,#f3ebe0_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] dark:border-stone-700">
                 {form.dressCodeImage ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -346,7 +347,7 @@ export default function EventSettingsPage() {
                     className="mx-auto h-48 max-w-md object-contain"
                   />
                 ) : (
-                  <div className="flex h-48 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
+                  <div className="flex h-48 flex-col items-center justify-center bg-stone-50 text-stone-400 dark:bg-navy-900 dark:text-stone-500">
                     <ImageIcon className="h-8 w-8" />
                     <p className="mt-2 text-sm">No dress code image yet</p>
                   </div>
@@ -360,7 +361,8 @@ export default function EventSettingsPage() {
                 className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
               />
               <p className="mt-2 text-xs text-stone-400">
-                Combined outfit reference image for the dress code section.
+                Outfit photo for the dress code section. Dark/black backgrounds are
+                removed automatically on upload (saved as transparent PNG).
               </p>
             </div>
 
@@ -441,7 +443,7 @@ export default function EventSettingsPage() {
                       dressLadies: e.target.value,
                     }))
                   }
-                  placeholder="Example: Evening dress in neutral tones"
+                  placeholder="Example: Modern Kebaya"
                   disabled={saving}
                   className="input-field"
                 />
@@ -458,11 +460,14 @@ export default function EventSettingsPage() {
                       dressGentlemen: e.target.value,
                     }))
                   }
-                  placeholder="Example: Formal suit in dark tones"
+                  placeholder="Example: Formal Batik"
                   disabled={saving}
                   className="input-field"
                 />
               </div>
+              <p className="md:col-span-2 text-xs text-stone-400">
+                Shown under the dress code image as: Ladies · Gentlemen
+              </p>
             </div>
           </div>
         )}
