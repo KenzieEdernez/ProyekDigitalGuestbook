@@ -86,7 +86,7 @@ function readPortraitImage(file: File) {
   return readCroppedImage(file, 900, 1600);
 }
 
-function readPngAsset(file: File, maxSize = 700) {
+function readFittedImage(file: File, maxSize = 1400, type: "image/jpeg" | "image/png" = "image/jpeg") {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -105,7 +105,11 @@ function readPngAsset(file: File, maxSize = 700) {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/png"));
+        resolve(
+          type === "image/png"
+            ? canvas.toDataURL("image/png")
+            : canvas.toDataURL("image/jpeg", 0.88)
+        );
       };
       image.onerror = () => reject(new Error("Failed to read image."));
       image.src = String(reader.result);
@@ -113,6 +117,10 @@ function readPngAsset(file: File, maxSize = 700) {
     reader.onerror = () => reject(new Error("Failed to read image file."));
     reader.readAsDataURL(file);
   });
+}
+
+function readPngAsset(file: File, maxSize = 700) {
+  return readFittedImage(file, maxSize, "image/png");
 }
 
 export default function EventSettingsPage() {
@@ -185,8 +193,10 @@ export default function EventSettingsPage() {
     setError(null);
     try {
       let processed = "";
-      if (variant === "landscape" || variant === "card") {
+      if (variant === "landscape") {
         processed = await readLandscapeImage(file);
+      } else if (variant === "card") {
+        processed = await readFittedImage(file, 1400, "image/jpeg");
       } else if (variant === "portrait") {
         processed = await readPortraitImage(file);
       } else if (variant === "dresscode") {
@@ -312,7 +322,7 @@ export default function EventSettingsPage() {
                     <img
                       src={form.heroImageCard}
                       alt="Cover card preview"
-                      className="h-36 w-full object-cover"
+                      className="mx-auto max-h-48 w-full object-contain"
                     />
                   ) : (
                     <div className="flex h-36 flex-col items-center justify-center text-stone-400 dark:text-stone-500">
@@ -329,7 +339,8 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Landscape photo shown inside the opening card.
+                  Cover card photo — kept at original aspect ratio (not cropped).
+                  Re-upload if an older crop is still showing.
                 </p>
               </div>
             </div>

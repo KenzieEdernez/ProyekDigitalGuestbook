@@ -16,7 +16,7 @@ export default function InvitationLogo({
         src={src}
         alt=""
         aria-hidden
-        className="invitation-logo-image h-[5.5rem] w-auto max-w-[11rem] object-contain sm:h-28 sm:max-w-[13rem]"
+        className="invitation-logo-image h-28 w-auto max-w-[14rem] object-contain sm:h-36 sm:max-w-[18rem] md:h-40 md:max-w-[20rem]"
       />
     );
   }

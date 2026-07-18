@@ -33,7 +33,7 @@ export default function LoveStoryTimeline({ loveStory }: LoveStoryTimelineProps)
   const item = loveStory[active];
 
   return (
-    <div className="mt-28">
+    <div className="mt-16 md:mt-20">
       <Reveal direction="blur" duration={900}>
         <div className="mb-12 text-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-royal">
