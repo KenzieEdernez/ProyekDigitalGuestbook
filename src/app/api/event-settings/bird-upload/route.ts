@@ -9,8 +9,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const MAX_WEBM_BYTES = 8 * 1024 * 1024;
-const MAX_IOS_BYTES = 25 * 1024 * 1024;
+const MAX_BIRD_BYTES = 25 * 1024 * 1024;
 
 export async function POST(request: Request) {
   if (!(await isAdminLoggedIn())) {
@@ -23,8 +22,9 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file");
-    const formatRaw = String(formData.get("format") || "webm").toLowerCase();
-    const format: BirdVideoFormat = formatRaw === "ios" ? "ios" : "webm";
+    const formatRaw = String(formData.get("format") || "main").toLowerCase();
+    const format: BirdVideoFormat =
+      formatRaw === "ios" ? "ios" : "main";
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
@@ -35,40 +35,23 @@ export async function POST(request: Request) {
 
     const name = file.name.toLowerCase();
     const type = (file.type || "").toLowerCase();
-
-    const isWebm =
-      type.includes("webm") || name.endsWith(".webm");
-    const isIosVideo =
-      type.includes("quicktime") ||
-      type.includes("mp4") ||
-      type.includes("m4v") ||
-      name.endsWith(".mov") ||
+    const isVideo =
+      type.startsWith("video/") ||
       name.endsWith(".mp4") ||
-      name.endsWith(".m4v");
+      name.endsWith(".m4v") ||
+      name.endsWith(".mov") ||
+      name.endsWith(".webm");
 
-    if (format === "webm" && !isWebm) {
+    if (!isVideo) {
       return NextResponse.json(
-        { error: "Please upload a WebM video (.webm)." },
+        { error: "Please upload an MP4 bird video (greenscreen OK)." },
         { status: 400 }
       );
     }
 
-    if (format === "ios" && !isIosVideo) {
+    if (file.size > MAX_BIRD_BYTES) {
       return NextResponse.json(
-        { error: "Please upload an iOS bird video (.mov or .mp4 HEVC)." },
-        { status: 400 }
-      );
-    }
-
-    const maxBytes = format === "ios" ? MAX_IOS_BYTES : MAX_WEBM_BYTES;
-    if (file.size > maxBytes) {
-      return NextResponse.json(
-        {
-          error:
-            format === "ios"
-              ? "iOS bird video must be under 25MB."
-              : "Bird video must be under 8MB.",
-        },
+        { error: "Bird video must be under 25MB." },
         { status: 400 }
       );
     }
@@ -76,7 +59,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const url = await uploadBirdVideoBuffer(
       buffer,
-      file.type || (format === "ios" ? "video/quicktime" : "video/webm"),
+      file.type || "video/mp4",
       format
     );
 

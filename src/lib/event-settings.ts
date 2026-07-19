@@ -65,42 +65,37 @@ async function saveHeroImage(value: string) {
   return data.publicUrl;
 }
 
-const MAX_BIRD_WEBM_BYTES = 8 * 1024 * 1024;
-const MAX_BIRD_IOS_BYTES = 25 * 1024 * 1024;
+const MAX_BIRD_VIDEO_BYTES = 25 * 1024 * 1024;
 
-export type BirdVideoFormat = "webm" | "ios";
+export type BirdVideoFormat = "main" | "ios";
 
-/** Upload a looping bird clip (WebM alpha or HEVC/MOV alpha) to public storage. */
+/** Upload a looping bird clip (MP4 greenscreen recommended) to public storage. */
 export async function uploadBirdVideoBuffer(
   buffer: Buffer,
-  mimeType = "video/webm",
-  format: BirdVideoFormat = "webm"
+  mimeType = "video/mp4",
+  format: BirdVideoFormat = "main"
 ) {
-  const maxBytes = format === "ios" ? MAX_BIRD_IOS_BYTES : MAX_BIRD_WEBM_BYTES;
-  if (buffer.length > maxBytes) {
-    throw new Error(
-      format === "ios"
-        ? "iOS bird video must be under 25MB."
-        : "Bird video must be under 8MB."
-    );
+  if (buffer.length > MAX_BIRD_VIDEO_BYTES) {
+    throw new Error("Bird video must be under 25MB.");
   }
 
   const supabase = getSupabaseAdmin();
   const bucket = getPhotoBucket();
   const mime = mimeType.toLowerCase();
-  const ext =
-    format === "ios"
-      ? mime.includes("mp4") || mime.includes("m4v")
-        ? "mp4"
-        : "mov"
-      : "webm";
+  const ext = mime.includes("webm")
+    ? "webm"
+    : mime.includes("quicktime") || mime.includes("mov")
+      ? "mov"
+      : mime.includes("m4v")
+        ? "m4v"
+        : "mp4";
   const filename = `event/bird-${format}-${Date.now()}.${ext}`;
   const contentType =
-    format === "ios"
-      ? ext === "mp4"
-        ? "video/mp4"
-        : "video/quicktime"
-      : "video/webm";
+    ext === "webm"
+      ? "video/webm"
+      : ext === "mov"
+        ? "video/quicktime"
+        : "video/mp4";
 
   const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
     contentType,
@@ -113,7 +108,7 @@ export async function uploadBirdVideoBuffer(
   return data.publicUrl;
 }
 
-async function saveBirdAsset(value: string, format: BirdVideoFormat = "webm") {
+async function saveBirdAsset(value: string, format: BirdVideoFormat = "main") {
   if (!value) return "";
   if (!value.startsWith("data:")) return value;
 
@@ -234,7 +229,7 @@ export async function saveEventSettings(
   const heroImageCard = await saveHeroImage(settings.heroImageCard);
   const dressCodeImage = await saveHeroImage(settings.dressCodeImage);
   const logoImage = await saveHeroImage(settings.logoImage);
-  const birdImage = await saveBirdAsset(settings.birdImage, "webm");
+  const birdImage = await saveBirdAsset(settings.birdImage, "main");
   const birdImageIos = await saveBirdAsset(settings.birdImageIos, "ios");
   const { error } = await supabase.from("event_settings").upsert({
     id: "default",

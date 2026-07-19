@@ -13,8 +13,9 @@ export interface EventSettings {
   heroImageCard: string;
   dressCodeImage: string;
   logoImage: string;
+  /** Primary bird video (MP4 with greenscreen; keyed out in the app). */
   birdImage: string;
-  /** HEVC-with-alpha .mov/.mp4 for iOS/Safari transparency. */
+  /** Optional legacy / alternate bird video URL. */
   birdImageIos: string;
   /** How many flying birds to show on the invitation (1–12). */
   birdCount: number;

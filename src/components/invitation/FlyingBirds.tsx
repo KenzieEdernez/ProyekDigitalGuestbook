@@ -7,6 +7,7 @@ import {
   useState,
   type MutableRefObject,
 } from "react";
+import { keyOutGreenscreen } from "@/lib/bird-chroma-key";
 
 type BirdConfig = {
   delayMs: number;
@@ -69,45 +70,6 @@ function isVideoSrc(src: string) {
     value.includes("video/quicktime") ||
     value.includes("video/mp4")
   );
-}
-
-/** Safari / iOS need HEVC/MOV path, not WebM alpha. */
-function prefersIosBirdVideo() {
-  if (typeof navigator === "undefined") return false;
-  const ua = navigator.userAgent;
-  const isiOS =
-    /iPhone|iPad|iPod/i.test(ua) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const isSafari =
-    /Safari/i.test(ua) && !/Chrome|CriOS|Chromium|Android/i.test(ua);
-  return isiOS || isSafari;
-}
-
-/** Cut solid black plates out of bird frames (soft edge for feathers). */
-function keyOutBlack(imageData: ImageData) {
-  const data = imageData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    const alpha = data[i + 3];
-    if (alpha === 0) continue;
-
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-    const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    const max = Math.max(r, g, b);
-
-    // Near-black plate → fully transparent
-    if (luma < 32 && max < 40) {
-      data[i + 3] = 0;
-      continue;
-    }
-
-    // Soft fade for dark edge / compression fringing
-    if (luma < 85 && max < 110) {
-      const t = (luma - 32) / 53;
-      data[i + 3] = Math.round(alpha * Math.max(0, Math.min(1, t)));
-    }
-  }
 }
 
 interface FlyingBirdsProps {
@@ -188,11 +150,9 @@ function useFlight(config: FlightConfig) {
 function KeyedBirdActor({
   sheetRef,
   size,
-  useScreenBlend,
   ...config
 }: BirdConfig & {
   sheetRef: MutableRefObject<HTMLCanvasElement | null>;
-  useScreenBlend: boolean;
 }) {
   const actorRef = useFlight(config);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -234,7 +194,7 @@ function KeyedBirdActor({
     >
       <canvas
         ref={canvasRef}
-        className={`flying-bird-video${useScreenBlend ? " flying-bird-video--screen" : ""}`}
+        className="flying-bird-video"
         width={size}
         height={size}
       />
@@ -242,26 +202,21 @@ function KeyedBirdActor({
   );
 }
 
-/** One shared video → keyed canvas; birds only blit the transparent sheet. */
+/** One shared MP4 → greenscreen-keyed canvas; birds blit the transparent sheet. */
 function KeyedVideoBirds({
   src,
-  kind,
   birds,
 }: {
   src: string;
-  kind: "webm" | "ios";
   birds: BirdConfig[];
 }) {
   const sheetRef = useRef<HTMLCanvasElement | null>(null);
   const [ready, setReady] = useState(false);
-  const [useScreenBlend, setUseScreenBlend] = useState(false);
 
   useEffect(() => {
     let active = true;
     let raf = 0;
-    let keyingFailed = false;
     let markedReady = false;
-    let markedScreenBlend = false;
 
     const video = document.createElement("video");
     video.muted = true;
@@ -272,28 +227,7 @@ function KeyedVideoBirds({
     video.setAttribute("webkit-playsinline", "true");
     video.preload = "auto";
     video.crossOrigin = "anonymous";
-
-    if (kind === "ios") {
-      const s1 = document.createElement("source");
-      s1.src = src;
-      s1.type = 'video/mp4; codecs="hvc1"';
-      const s2 = document.createElement("source");
-      s2.src = src;
-      s2.type = "video/quicktime";
-      const s3 = document.createElement("source");
-      s3.src = src;
-      s3.type = "video/mp4";
-      video.appendChild(s1);
-      video.appendChild(s2);
-      video.appendChild(s3);
-    } else {
-      const s = document.createElement("source");
-      s.src = src;
-      s.type = "video/webm";
-      video.appendChild(s);
-    }
-
-    video.load();
+    video.src = src;
 
     const sheet = document.createElement("canvas");
     sheetRef.current = sheet;
@@ -328,18 +262,12 @@ function KeyedVideoBirds({
         ctx.clearRect(0, 0, w, h);
         ctx.drawImage(video, 0, 0, w, h);
 
-        if (!keyingFailed) {
-          try {
-            const imageData = ctx.getImageData(0, 0, w, h);
-            keyOutBlack(imageData);
-            ctx.putImageData(imageData, 0, 0);
-          } catch {
-            keyingFailed = true;
-            if (active && !markedScreenBlend) {
-              markedScreenBlend = true;
-              setUseScreenBlend(true);
-            }
-          }
+        try {
+          const imageData = ctx.getImageData(0, 0, w, h);
+          keyOutGreenscreen(imageData);
+          ctx.putImageData(imageData, 0, 0);
+        } catch {
+          // If CORS blocks pixel read, birds may show green — storage must allow CORS.
         }
 
         if (active && !markedReady) {
@@ -359,11 +287,11 @@ function KeyedVideoBirds({
       video.removeEventListener("loadeddata", play);
       video.removeEventListener("canplay", play);
       video.pause();
-      while (video.firstChild) video.removeChild(video.firstChild);
+      video.removeAttribute("src");
       video.load();
       sheetRef.current = null;
     };
-  }, [kind, src]);
+  }, [src]);
 
   if (!ready) return null;
 
@@ -371,9 +299,8 @@ function KeyedVideoBirds({
     <div className="flying-birds" aria-hidden>
       {birds.map((bird, index) => (
         <KeyedBirdActor
-          key={`${kind}-${src}-${index}`}
+          key={`${src}-${index}`}
           sheetRef={sheetRef}
-          useScreenBlend={useScreenBlend}
           {...bird}
         />
       ))}
@@ -443,35 +370,20 @@ export default function FlyingBirds({
   birdImageIos,
   birdCount = 6,
 }: FlyingBirdsProps) {
-  const webm = birdImage?.trim() || "";
-  const ios = birdImageIos?.trim() || "";
+  const primary = birdImage?.trim() || "";
+  const fallback = birdImageIos?.trim() || "";
+  const src = primary || fallback;
   const birds = useMemo(() => buildBirdConfigs(birdCount), [birdCount]);
-  const [mode, setMode] = useState<"pending" | "webm" | "ios" | "png">(
-    "pending"
-  );
+  const [mode, setMode] = useState<"pending" | "video" | "png">("pending");
   const [framesReady, setFramesReady] = useState(false);
 
   useEffect(() => {
-    const apple = prefersIosBirdVideo();
-    if (apple && ios && isVideoSrc(ios)) {
-      setMode("ios");
-      return;
-    }
-    if (!apple && webm && isVideoSrc(webm)) {
-      setMode("webm");
-      return;
-    }
-    // Prefer any available video before PNG fallback.
-    if (ios && isVideoSrc(ios)) {
-      setMode("ios");
-      return;
-    }
-    if (webm && isVideoSrc(webm)) {
-      setMode("webm");
+    if (src && isVideoSrc(src)) {
+      setMode("video");
       return;
     }
     setMode("png");
-  }, [ios, webm]);
+  }, [src]);
 
   useEffect(() => {
     if (mode !== "png") return;
@@ -496,22 +408,19 @@ export default function FlyingBirds({
 
   if (mode === "pending") return null;
 
-  if (mode === "png") {
-    return (
-      <div className="flying-birds" aria-hidden>
-        {birds.map((bird, index) => (
-          <PngBirdActor
-            key={`png-${birdCount}-${index}`}
-            {...bird}
-            framesReady={framesReady}
-          />
-        ))}
-      </div>
-    );
+  if (mode === "video" && src && isVideoSrc(src)) {
+    return <KeyedVideoBirds src={src} birds={birds} />;
   }
 
-  const src = mode === "ios" ? ios : webm;
-  if (!src || !isVideoSrc(src)) return null;
-
-  return <KeyedVideoBirds src={src} kind={mode} birds={birds} />;
+  return (
+    <div className="flying-birds" aria-hidden>
+      {birds.map((bird, index) => (
+        <PngBirdActor
+          key={`png-${birdCount}-${index}`}
+          {...bird}
+          framesReady={framesReady}
+        />
+      ))}
+    </div>
+  );
 }

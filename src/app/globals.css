@@ -603,11 +603,6 @@
     mix-blend-mode: normal;
   }
 
-  /* Used only if canvas pixel keying is blocked (CORS). */
-  .flying-bird-video--screen {
-    mix-blend-mode: screen;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .flying-birds {
       display: none;
