@@ -81,7 +81,15 @@ export default function EventSettingsPage() {
       try {
         const res = await fetch("/api/event-settings", { cache: "no-store" });
         const data = await res.json();
-        if (data.settings) setForm(data.settings);
+        if (data.settings) {
+          const bird =
+            data.settings.birdImage || data.settings.birdImageIos || "";
+          setForm({
+            ...data.settings,
+            birdImage: bird,
+            birdImageIos: "",
+          });
+        }
       } catch {
         setError("Failed to load event settings.");
       } finally {
@@ -111,7 +119,15 @@ export default function EventSettingsPage() {
         return;
       }
 
-      setForm(data.settings);
+      if (data.settings) {
+        const bird =
+          data.settings.birdImage || data.settings.birdImageIos || "";
+        setForm({
+          ...data.settings,
+          birdImage: bird,
+          birdImageIos: "",
+        });
+      }
       setMessage("Page settings saved successfully.");
     } catch {
       setError("Failed to connect to the server.");
