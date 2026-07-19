@@ -37,6 +37,7 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   dressCodeImage: "",
   logoImage: "",
   birdImage: "",
+  birdImageIos: "",
   birdCount: 6,
 };
 

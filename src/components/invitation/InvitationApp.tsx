@@ -261,6 +261,7 @@ export default function InvitationApp() {
           <ScrollProgress />
           <FlyingBirds
             birdImage={eventSettings.birdImage}
+            birdImageIos={eventSettings.birdImageIos}
             birdCount={eventSettings.birdCount}
           />
 

@@ -24,6 +24,7 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   dressCodeImage: "",
   logoImage: "",
   birdImage: "",
+  birdImageIos: "",
   birdCount: 6,
 };
 
@@ -69,7 +70,14 @@ export default function EventSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [imageProcessing, setImageProcessing] = useState<
-    "landscape" | "portrait" | "card" | "dresscode" | "logo" | "bird" | null
+    | "landscape"
+    | "portrait"
+    | "card"
+    | "dresscode"
+    | "logo"
+    | "bird"
+    | "bird-ios"
+    | null
   >(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -163,32 +171,51 @@ export default function EventSettingsPage() {
   };
 
   const handleBirdVideoChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
+    format: "webm" | "ios"
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     const name = file.name.toLowerCase();
-    const isWebm =
-      file.type.includes("webm") || name.endsWith(".webm");
+    const type = (file.type || "").toLowerCase();
+    const isWebm = type.includes("webm") || name.endsWith(".webm");
+    const isIosVideo =
+      type.includes("quicktime") ||
+      type.includes("mp4") ||
+      type.includes("m4v") ||
+      name.endsWith(".mov") ||
+      name.endsWith(".mp4") ||
+      name.endsWith(".m4v");
 
-    if (!isWebm) {
+    if (format === "webm" && !isWebm) {
       setError("Bird file must be a WebM video (.webm).");
       return;
     }
 
-    if (file.size > 8 * 1024 * 1024) {
-      setError("Bird video must be under 8MB.");
+    if (format === "ios" && !isIosVideo) {
+      setError("iOS bird file must be .mov or .mp4 (HEVC with alpha).");
       return;
     }
 
-    setImageProcessing("bird");
+    const maxBytes = format === "ios" ? 25 * 1024 * 1024 : 8 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setError(
+        format === "ios"
+          ? "iOS bird video must be under 25MB."
+          : "Bird video must be under 8MB."
+      );
+      return;
+    }
+
+    setImageProcessing(format === "ios" ? "bird-ios" : "bird");
     setError(null);
     setMessage(null);
 
     try {
       const body = new FormData();
       body.append("file", file);
+      body.append("format", format);
       const res = await fetch("/api/event-settings/bird-upload", {
         method: "POST",
         body,
@@ -202,9 +229,17 @@ export default function EventSettingsPage() {
 
       if (data.settings) setForm(data.settings);
       else if (data.url) {
-        setForm((current) => ({ ...current, birdImage: data.url }));
+        setForm((current) =>
+          format === "ios"
+            ? { ...current, birdImageIos: data.url }
+            : { ...current, birdImage: data.url }
+        );
       }
-      setMessage("Bird WebM uploaded successfully.");
+      setMessage(
+        format === "ios"
+          ? "iOS bird video (.mov) uploaded successfully."
+          : "Bird WebM uploaded successfully."
+      );
     } catch {
       setError("Failed to upload bird video.");
     } finally {
@@ -399,7 +434,7 @@ export default function EventSettingsPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Flying Bird Video (WebM)
+                  Flying Bird Video (WebM — Chrome/Android)
                 </label>
                 <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
                   {form.birdImage ? (
@@ -414,23 +449,78 @@ export default function EventSettingsPage() {
                   ) : (
                     <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
                       <ImageIcon className="h-8 w-8" />
-                      <p className="mt-2 text-sm">No bird video yet</p>
+                      <p className="mt-2 text-sm">No WebM bird yet</p>
                     </div>
                   )}
                 </div>
                 <input
                   type="file"
                   accept="video/webm,.webm"
-                  onChange={handleBirdVideoChange}
+                  onChange={(event) => handleBirdVideoChange(event, "webm")}
                   disabled={saving || imageProcessing !== null}
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Upload a looping WebM of a bird flapping in place (transparent
-                  background recommended, max 8MB). The invitation moves it
-                  across the screen.
+                  WebM with alpha for Chrome / Android / Edge (max 8MB).
                 </p>
-                <label className="mb-1.5 mt-4 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                {form.birdImage && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((current) => ({ ...current, birdImage: "" }))
+                    }
+                    disabled={saving || imageProcessing !== null}
+                    className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
+                  >
+                    Remove WebM bird
+                  </button>
+                )}
+
+                <label className="mb-1.5 mt-5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Flying Bird Video (MOV — iPhone/Safari)
+                </label>
+                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
+                  {form.birdImageIos ? (
+                    <video
+                      src={form.birdImageIos}
+                      className="max-h-28 w-auto object-contain"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
+                      <ImageIcon className="h-8 w-8" />
+                      <p className="mt-2 text-sm">No iOS bird yet</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="video/quicktime,video/mp4,.mov,.mp4,.m4v"
+                  onChange={(event) => handleBirdVideoChange(event, "ios")}
+                  disabled={saving || imageProcessing !== null}
+                  className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
+                />
+                <p className="mt-2 text-xs text-stone-400">
+                  HEVC-with-alpha .mov/.mp4 for iPhone &amp; Safari (max 25MB).
+                  Without this, iOS falls back to PNG doves.
+                </p>
+                {form.birdImageIos && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((current) => ({ ...current, birdImageIos: "" }))
+                    }
+                    disabled={saving || imageProcessing !== null}
+                    className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
+                  >
+                    Remove iOS bird
+                  </button>
+                )}
+
+                <label className="mb-1.5 mt-5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
                   Bird Count
                 </label>
                 <input
@@ -454,18 +544,6 @@ export default function EventSettingsPage() {
                   Number of birds on the invitation (1–12). Save page settings
                   after changing.
                 </p>
-                {form.birdImage && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setForm((current) => ({ ...current, birdImage: "" }))
-                    }
-                    disabled={saving || imageProcessing !== null}
-                    className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
-                  >
-                    Remove bird video
-                  </button>
-                )}
               </div>
             </div>
 
@@ -518,7 +596,9 @@ export default function EventSettingsPage() {
           <Save className="h-4 w-4" />
           {saving
             ? "Saving..."
-            : imageProcessing
+            : imageProcessing === "bird" || imageProcessing === "bird-ios"
+              ? `Uploading ${imageProcessing === "bird-ios" ? "iOS" : "WebM"} bird video...`
+              : imageProcessing
               ? `Processing ${imageProcessing} image...`
               : "Save Settings"}
         </button>

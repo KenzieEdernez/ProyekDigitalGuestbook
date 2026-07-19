@@ -55,31 +55,30 @@ function isVideoSrc(src: string) {
   return (
     value.startsWith("data:video/") ||
     value.includes(".webm") ||
-    value.includes("video/webm")
+    value.includes("video/webm") ||
+    value.includes(".mov") ||
+    value.includes(".mp4") ||
+    value.includes(".m4v") ||
+    value.includes("video/quicktime") ||
+    value.includes("video/mp4")
   );
 }
 
-/** WebM alpha is unreliable on iOS/Safari and many phones show a solid plate. */
-function needsPngBirdFallback() {
-  if (typeof navigator === "undefined" || typeof window === "undefined") {
-    return false;
-  }
-
+/** Safari / iOS need HEVC-with-alpha (.mov), not WebM alpha. */
+function prefersIosBirdVideo() {
+  if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent;
   const isiOS =
     /iPhone|iPad|iPod/i.test(ua) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isSafari =
     /Safari/i.test(ua) && !/Chrome|CriOS|Chromium|Android/i.test(ua);
-  const isTouchMobile =
-    /Android|Mobile/i.test(ua) ||
-    window.matchMedia("(pointer: coarse)").matches;
-
-  return isiOS || isSafari || isTouchMobile;
+  return isiOS || isSafari;
 }
 
 interface FlyingBirdsProps {
   birdImage?: string;
+  birdImageIos?: string;
   birdCount?: number;
 }
 
@@ -154,10 +153,11 @@ function useFlight(config: FlightConfig) {
 
 function VideoBirdActor({
   src,
+  kind,
   size,
   playbackRate,
   ...config
-}: BirdConfig & { src: string }) {
+}: BirdConfig & { src: string; kind: "webm" | "ios" }) {
   const actorRef = useFlight(config);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -192,14 +192,23 @@ function VideoBirdActor({
       <video
         ref={videoRef}
         className="flying-bird-video"
-        src={src}
         autoPlay
         muted
         loop
         playsInline
         preload="auto"
         disablePictureInPicture
-      />
+      >
+        {kind === "ios" ? (
+          <>
+            <source src={src} type='video/mp4; codecs="hvc1"' />
+            <source src={src} type="video/quicktime" />
+            <source src={src} type="video/mp4" />
+          </>
+        ) : (
+          <source src={src} type="video/webm" />
+        )}
+      </video>
     </div>
   );
 }
@@ -263,19 +272,33 @@ function PngBirdActor({
 
 export default function FlyingBirds({
   birdImage,
+  birdImageIos,
   birdCount = 6,
 }: FlyingBirdsProps) {
-  const src = birdImage?.trim() || "";
+  const webm = birdImage?.trim() || "";
+  const ios = birdImageIos?.trim() || "";
   const birds = useMemo(() => buildBirdConfigs(birdCount), [birdCount]);
-  const [usePngFallback, setUsePngFallback] = useState(false);
+  const [mode, setMode] = useState<"pending" | "webm" | "ios" | "png">(
+    "pending"
+  );
   const [framesReady, setFramesReady] = useState(false);
 
   useEffect(() => {
-    setUsePngFallback(needsPngBirdFallback());
-  }, []);
+    const apple = prefersIosBirdVideo();
+    if (apple && ios && isVideoSrc(ios)) {
+      setMode("ios");
+      return;
+    }
+    if (!apple && webm && isVideoSrc(webm)) {
+      setMode("webm");
+      return;
+    }
+    // Missing the platform-preferred video → transparent PNG frames.
+    setMode("png");
+  }, [ios, webm]);
 
   useEffect(() => {
-    if (!usePngFallback) return;
+    if (mode !== "png") return;
     let cancelled = false;
     Promise.all(
       FRAME_PATHS.map(
@@ -293,10 +316,11 @@ export default function FlyingBirds({
     return () => {
       cancelled = true;
     };
-  }, [usePngFallback]);
+  }, [mode]);
 
-  // Mobile / Safari: PNG frames with real alpha (no black plate).
-  if (usePngFallback) {
+  if (mode === "pending") return null;
+
+  if (mode === "png") {
     return (
       <div className="flying-birds" aria-hidden>
         {birds.map((bird, index) => (
@@ -310,15 +334,16 @@ export default function FlyingBirds({
     );
   }
 
-  // Desktop: custom WebM with alpha.
+  const src = mode === "ios" ? ios : webm;
   if (!src || !isVideoSrc(src)) return null;
 
   return (
     <div className="flying-birds" aria-hidden>
       {birds.map((bird, index) => (
         <VideoBirdActor
-          key={`${src}-${birdCount}-${index}`}
+          key={`${mode}-${src}-${birdCount}-${index}`}
           src={src}
+          kind={mode}
           {...bird}
         />
       ))}

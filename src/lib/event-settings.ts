@@ -65,23 +65,42 @@ async function saveHeroImage(value: string) {
   return data.publicUrl;
 }
 
-const MAX_BIRD_VIDEO_BYTES = 8 * 1024 * 1024;
+const MAX_BIRD_WEBM_BYTES = 8 * 1024 * 1024;
+const MAX_BIRD_IOS_BYTES = 25 * 1024 * 1024;
 
-/** Upload a looping WebM bird clip (preferably with alpha) to public storage. */
+export type BirdVideoFormat = "webm" | "ios";
+
+/** Upload a looping bird clip (WebM alpha or HEVC/MOV alpha) to public storage. */
 export async function uploadBirdVideoBuffer(
   buffer: Buffer,
-  mimeType = "video/webm"
+  mimeType = "video/webm",
+  format: BirdVideoFormat = "webm"
 ) {
-  if (buffer.length > MAX_BIRD_VIDEO_BYTES) {
-    throw new Error("Bird video must be under 8MB.");
+  const maxBytes = format === "ios" ? MAX_BIRD_IOS_BYTES : MAX_BIRD_WEBM_BYTES;
+  if (buffer.length > maxBytes) {
+    throw new Error(
+      format === "ios"
+        ? "iOS bird video must be under 25MB."
+        : "Bird video must be under 8MB."
+    );
   }
 
   const supabase = getSupabaseAdmin();
   const bucket = getPhotoBucket();
-  const filename = `event/bird-${Date.now()}.webm`;
-  const contentType = mimeType.toLowerCase().includes("webm")
-    ? "video/webm"
-    : mimeType;
+  const mime = mimeType.toLowerCase();
+  const ext =
+    format === "ios"
+      ? mime.includes("mp4") || mime.includes("m4v")
+        ? "mp4"
+        : "mov"
+      : "webm";
+  const filename = `event/bird-${format}-${Date.now()}.${ext}`;
+  const contentType =
+    format === "ios"
+      ? ext === "mp4"
+        ? "video/mp4"
+        : "video/quicktime"
+      : "video/webm";
 
   const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
     contentType,
@@ -94,7 +113,7 @@ export async function uploadBirdVideoBuffer(
   return data.publicUrl;
 }
 
-async function saveBirdAsset(value: string) {
+async function saveBirdAsset(value: string, format: BirdVideoFormat = "webm") {
   if (!value) return "";
   if (!value.startsWith("data:")) return value;
 
@@ -107,7 +126,7 @@ async function saveBirdAsset(value: string) {
   const buffer = Buffer.from(matches[2], "base64");
 
   if (mime.startsWith("video/")) {
-    return uploadBirdVideoBuffer(buffer, mime);
+    return uploadBirdVideoBuffer(buffer, mime, format);
   }
 
   return saveHeroImage(value);
@@ -160,6 +179,7 @@ function buildSettings(input: Partial<EventSettings> & Record<string, unknown>):
     dressCodeImage: textValue(input.dressCodeImage ?? input.dress_code_image),
     logoImage: textValue(input.logoImage ?? input.logo_image),
     birdImage: textValue(input.birdImage ?? input.bird_image),
+    birdImageIos: textValue(input.birdImageIos ?? input.bird_image_ios),
     birdCount: clampBirdCount(input.birdCount ?? input.bird_count ?? 6),
   };
 }
@@ -214,7 +234,8 @@ export async function saveEventSettings(
   const heroImageCard = await saveHeroImage(settings.heroImageCard);
   const dressCodeImage = await saveHeroImage(settings.dressCodeImage);
   const logoImage = await saveHeroImage(settings.logoImage);
-  const birdImage = await saveBirdAsset(settings.birdImage);
+  const birdImage = await saveBirdAsset(settings.birdImage, "webm");
+  const birdImageIos = await saveBirdAsset(settings.birdImageIos, "ios");
   const { error } = await supabase.from("event_settings").upsert({
     id: "default",
     name: settings.name,
@@ -231,6 +252,7 @@ export async function saveEventSettings(
     dress_code_image: dressCodeImage || null,
     logo_image: logoImage || null,
     bird_image: birdImage || null,
+    bird_image_ios: birdImageIos || null,
     bird_count: settings.birdCount,
     updated_at: new Date().toISOString(),
   });
@@ -244,6 +266,7 @@ export async function saveEventSettings(
     dressCodeImage,
     logoImage,
     birdImage,
+    birdImageIos,
     birdCount: settings.birdCount,
   };
 }
