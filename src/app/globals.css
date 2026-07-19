@@ -585,14 +585,20 @@
     transition: opacity 0.35s ease;
   }
 
-  .flying-bird-frame {
+  .flying-bird-frame,
+  .flying-bird-video {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.3));
+    background: transparent;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.28));
     user-select: none;
     pointer-events: none;
+  }
+
+  .flying-bird-video {
+    mix-blend-mode: normal;
   }
 
   @media (prefers-reduced-motion: reduce) {

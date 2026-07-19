@@ -59,6 +59,54 @@ async function saveHeroImage(value: string) {
   return data.publicUrl;
 }
 
+const MAX_BIRD_VIDEO_BYTES = 8 * 1024 * 1024;
+
+/** Upload a looping WebM bird clip (preferably with alpha) to public storage. */
+export async function uploadBirdVideoBuffer(
+  buffer: Buffer,
+  mimeType = "video/webm"
+) {
+  if (buffer.length > MAX_BIRD_VIDEO_BYTES) {
+    throw new Error("Bird video must be under 8MB.");
+  }
+
+  const supabase = getSupabaseAdmin();
+  const bucket = getPhotoBucket();
+  const filename = `event/bird-${Date.now()}.webm`;
+  const contentType = mimeType.toLowerCase().includes("webm")
+    ? "video/webm"
+    : mimeType;
+
+  const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
+    contentType,
+    upsert: true,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
+  return data.publicUrl;
+}
+
+async function saveBirdAsset(value: string) {
+  if (!value) return "";
+  if (!value.startsWith("data:")) return value;
+
+  const matches = value.match(/^data:(video\/[\w.+-]+|image\/\w+);base64,(.+)$/);
+  if (!matches) {
+    throw new Error("Invalid bird media format.");
+  }
+
+  const mime = matches[1].toLowerCase();
+  const buffer = Buffer.from(matches[2], "base64");
+
+  if (mime.startsWith("video/")) {
+    return uploadBirdVideoBuffer(buffer, mime);
+  }
+
+  return saveHeroImage(value);
+}
+
 function resolveTimeFields(input: Partial<EventSettings> & Record<string, unknown>) {
   const rawFrom = textValue(input.timeFrom ?? input.time_from);
   const legacyTime = textValue(input.time);
@@ -159,7 +207,7 @@ export async function saveEventSettings(
   const heroImageCard = await saveHeroImage(settings.heroImageCard);
   const dressCodeImage = await saveHeroImage(settings.dressCodeImage);
   const logoImage = await saveHeroImage(settings.logoImage);
-  const birdImage = await saveHeroImage(settings.birdImage);
+  const birdImage = await saveBirdAsset(settings.birdImage);
   const { error } = await supabase.from("event_settings").upsert({
     id: "default",
     name: settings.name,

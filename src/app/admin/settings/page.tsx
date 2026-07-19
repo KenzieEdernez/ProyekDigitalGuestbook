@@ -119,7 +119,7 @@ export default function EventSettingsPage() {
 
   const handleHeroImageChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    variant: "landscape" | "portrait" | "card" | "dresscode" | "logo" | "bird"
+    variant: "landscape" | "portrait" | "card" | "dresscode" | "logo"
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -139,10 +139,8 @@ export default function EventSettingsPage() {
         processed = await processFittedPhotoFile(file, 1400);
       } else if (variant === "dresscode") {
         processed = await processDressCodeImageFile(file, 1400);
-      } else if (variant === "logo") {
-        processed = await readPngAsset(file, 500);
       } else {
-        processed = await readPngAsset(file, 320);
+        processed = await readPngAsset(file, 500);
       }
 
       setForm((current) => {
@@ -154,13 +152,63 @@ export default function EventSettingsPage() {
         if (variant === "dresscode") {
           return { ...current, dressCodeImage: processed };
         }
-        if (variant === "logo") return { ...current, logoImage: processed };
-        return { ...current, birdImage: processed };
+        return { ...current, logoImage: processed };
       });
     } catch {
       setError("Failed to process image.");
     } finally {
       setImageProcessing(null);
+    }
+  };
+
+  const handleBirdVideoChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const name = file.name.toLowerCase();
+    const isWebm =
+      file.type.includes("webm") || name.endsWith(".webm");
+
+    if (!isWebm) {
+      setError("Bird file must be a WebM video (.webm).");
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setError("Bird video must be under 8MB.");
+      return;
+    }
+
+    setImageProcessing("bird");
+    setError(null);
+    setMessage(null);
+
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch("/api/event-settings/bird-upload", {
+        method: "POST",
+        body,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Failed to upload bird video.");
+        return;
+      }
+
+      if (data.settings) setForm(data.settings);
+      else if (data.url) {
+        setForm((current) => ({ ...current, birdImage: data.url }));
+      }
+      setMessage("Bird WebM uploaded successfully.");
+    } catch {
+      setError("Failed to upload bird video.");
+    } finally {
+      setImageProcessing(null);
+      event.target.value = "";
     }
   };
 
@@ -350,34 +398,49 @@ export default function EventSettingsPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Flying Bird Image
+                  Flying Bird Video (WebM)
                 </label>
                 <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
                   {form.birdImage ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
+                    <video
                       src={form.birdImage}
-                      alt="Bird preview"
-                      className="max-h-16 w-auto object-contain"
+                      className="max-h-28 w-auto object-contain"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
                     />
                   ) : (
                     <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
                       <ImageIcon className="h-8 w-8" />
-                      <p className="mt-2 text-sm">No bird image yet</p>
+                      <p className="mt-2 text-sm">No bird video yet</p>
                     </div>
                   )}
                 </div>
                 <input
                   type="file"
-                  accept="image/*"
-                  onChange={(event) => handleHeroImageChange(event, "bird")}
+                  accept="video/webm,.webm"
+                  onChange={handleBirdVideoChange}
                   disabled={saving || imageProcessing !== null}
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Optional. Leave empty to use the built-in flapping dove
-                  animation on the hero.
+                  Upload a looping WebM of a bird flapping in place (transparent
+                  background recommended, max 8MB). The invitation moves it
+                  across the screen.
                 </p>
+                {form.birdImage && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((current) => ({ ...current, birdImage: "" }))
+                    }
+                    disabled={saving || imageProcessing !== null}
+                    className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
+                  >
+                    Remove bird video
+                  </button>
+                )}
               </div>
             </div>
 
