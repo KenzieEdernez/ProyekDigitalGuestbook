@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 type BirdConfig = {
   delayMs: number;
+  /** 0–1 progress offset so birds can already be on-screen at open */
+  startOffset: number;
   durationMs: number;
   size: number;
   yStart: number;
@@ -13,16 +15,14 @@ type BirdConfig = {
   playbackRate: number;
 };
 
-/** Slow floating paths — video already contains in-place wing animation. */
+/** Standard size, quick entrance, still calm flight across the screen. */
 const BIRDS: BirdConfig[] = [
-  { delayMs: 0, durationMs: 42000, size: 72, yStart: 8, yDrift: 14, dir: 1, bob: 10, playbackRate: 0.9 },
-  { delayMs: 4500, durationMs: 48000, size: 56, yStart: 24, yDrift: -12, dir: -1, bob: 9, playbackRate: 1 },
-  { delayMs: 9000, durationMs: 45000, size: 84, yStart: 42, yDrift: 18, dir: 1, bob: 12, playbackRate: 0.85 },
-  { delayMs: 2500, durationMs: 52000, size: 60, yStart: 58, yDrift: -16, dir: -1, bob: 10, playbackRate: 1.05 },
-  { delayMs: 7000, durationMs: 46000, size: 68, yStart: 72, yDrift: 12, dir: 1, bob: 11, playbackRate: 0.95 },
-  { delayMs: 12000, durationMs: 40000, size: 52, yStart: 16, yDrift: 22, dir: -1, bob: 8, playbackRate: 1 },
-  { delayMs: 16000, durationMs: 50000, size: 76, yStart: 48, yDrift: -20, dir: 1, bob: 13, playbackRate: 0.9 },
-  { delayMs: 10000, durationMs: 55000, size: 58, yStart: 80, yDrift: -14, dir: -1, bob: 9, playbackRate: 1 },
+  { delayMs: 0, startOffset: 0.18, durationMs: 32000, size: 118, yStart: 10, yDrift: 12, dir: 1, bob: 10, playbackRate: 1 },
+  { delayMs: 200, startOffset: 0.08, durationMs: 34000, size: 102, yStart: 28, yDrift: -10, dir: -1, bob: 9, playbackRate: 1 },
+  { delayMs: 450, startOffset: 0.22, durationMs: 30000, size: 128, yStart: 44, yDrift: 14, dir: 1, bob: 11, playbackRate: 1 },
+  { delayMs: 700, startOffset: 0.05, durationMs: 36000, size: 110, yStart: 62, yDrift: -12, dir: -1, bob: 10, playbackRate: 1 },
+  { delayMs: 950, startOffset: 0.15, durationMs: 33000, size: 120, yStart: 76, yDrift: 10, dir: 1, bob: 10, playbackRate: 1 },
+  { delayMs: 1200, startOffset: 0.1, durationMs: 31000, size: 98, yStart: 18, yDrift: 16, dir: -1, bob: 8, playbackRate: 1 },
 ];
 
 function easeInOutSine(t: number) {
@@ -45,6 +45,7 @@ interface FlyingBirdsProps {
 function BirdActor({
   src,
   delayMs,
+  startOffset,
   durationMs,
   size,
   yStart,
@@ -61,15 +62,22 @@ function BirdActor({
     const video = videoRef.current;
     if (!video) return;
 
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
     video.playbackRate = playbackRate;
+
     const play = () => {
-      video.play().catch(() => {
-        /* autoplay can be blocked until a user gesture; muted + playsInline usually ok */
-      });
+      void video.play().catch(() => undefined);
     };
+
     play();
+    video.addEventListener("loadeddata", play);
     video.addEventListener("canplay", play);
-    return () => video.removeEventListener("canplay", play);
+    return () => {
+      video.removeEventListener("loadeddata", play);
+      video.removeEventListener("canplay", play);
+    };
   }, [playbackRate, src]);
 
   useEffect(() => {
@@ -82,16 +90,30 @@ function BirdActor({
       const origin = startRef.current;
       const el = actorRef.current;
 
-      if (!el || now < origin) {
-        if (el) el.style.opacity = "0";
+      if (!el) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+
+      if (now < origin) {
+        // Keep first birds visible immediately using their start offset preview.
+        if (delayMs === 0 || startOffset > 0) {
+          const p = easeInOutSine(startOffset);
+          const x = dir === 1 ? -12 + p * 124 : 112 - p * 124;
+          const y = yStart + p * yDrift;
+          el.style.opacity = "0.95";
+          el.style.transform = `translate3d(${x}vw, ${y}vh, 0) scaleX(${dir})`;
+        } else {
+          el.style.opacity = "0";
+        }
         raf = requestAnimationFrame(tick);
         return;
       }
 
       const elapsed = now - origin;
-      const raw = (elapsed % durationMs) / durationMs;
+      const raw = ((elapsed / durationMs) + startOffset) % 1;
       const p = easeInOutSine(raw);
-      const x = dir === 1 ? -20 + p * 140 : 120 - p * 140;
+      const x = dir === 1 ? -12 + p * 124 : 112 - p * 124;
       const y = yStart + p * yDrift + Math.sin(raw * Math.PI * 2) * (bob * 0.08);
       const visible = raw > 0.01 && raw < 0.99;
 
@@ -105,7 +127,7 @@ function BirdActor({
       active = false;
       cancelAnimationFrame(raf);
     };
-  }, [bob, delayMs, dir, durationMs, yDrift, yStart]);
+  }, [bob, delayMs, dir, durationMs, startOffset, yDrift, yStart]);
 
   return (
     <div
@@ -130,37 +152,7 @@ function BirdActor({
 
 export default function FlyingBirds({ birdImage }: FlyingBirdsProps) {
   const src = birdImage?.trim() || "";
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!src || !isVideoSrc(src)) {
-      setReady(false);
-      return;
-    }
-
-    let cancelled = false;
-    const probe = document.createElement("video");
-    probe.preload = "auto";
-    probe.muted = true;
-    probe.playsInline = true;
-    const markReady = () => {
-      if (!cancelled) setReady(true);
-    };
-    probe.addEventListener("loadeddata", markReady);
-    probe.addEventListener("error", () => {
-      if (!cancelled) setReady(false);
-    });
-    probe.src = src;
-    probe.load();
-
-    return () => {
-      cancelled = true;
-      probe.removeAttribute("src");
-      probe.load();
-    };
-  }, [src]);
-
-  if (!src || !isVideoSrc(src) || !ready) return null;
+  if (!src || !isVideoSrc(src)) return null;
 
   return (
     <div className="flying-birds" aria-hidden>
