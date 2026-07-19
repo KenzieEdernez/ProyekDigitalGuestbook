@@ -7,7 +7,10 @@ import {
   useState,
   type MutableRefObject,
 } from "react";
-import { keyOutGreenscreen } from "@/lib/bird-chroma-key";
+import {
+  birdMediaProxyUrl,
+  keyOutGreenscreen,
+} from "@/lib/bird-chroma-key";
 
 type BirdConfig = {
   delayMs: number;
@@ -217,6 +220,7 @@ function KeyedVideoBirds({
     let active = true;
     let raf = 0;
     let markedReady = false;
+    const playableSrc = birdMediaProxyUrl(src);
 
     const video = document.createElement("video");
     video.muted = true;
@@ -226,12 +230,15 @@ function KeyedVideoBirds({
     video.setAttribute("playsinline", "true");
     video.setAttribute("webkit-playsinline", "true");
     video.preload = "auto";
-    video.crossOrigin = "anonymous";
-    video.src = src;
+    // Same-origin proxy → pixels are readable for chroma-key.
+    video.src = playableSrc;
 
     const sheet = document.createElement("canvas");
     sheetRef.current = sheet;
-    const ctx = sheet.getContext("2d", { willReadFrequently: true });
+    const ctx = sheet.getContext("2d", {
+      willReadFrequently: true,
+      alpha: true,
+    });
     if (!ctx) return;
 
     const play = () => {
@@ -267,7 +274,7 @@ function KeyedVideoBirds({
           keyOutGreenscreen(imageData);
           ctx.putImageData(imageData, 0, 0);
         } catch {
-          // If CORS blocks pixel read, birds may show green — storage must allow CORS.
+          // Should not happen with same-origin proxy; keep frame if it does.
         }
 
         if (active && !markedReady) {

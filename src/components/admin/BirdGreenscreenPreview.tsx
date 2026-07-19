@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { keyOutGreenscreen } from "@/lib/bird-chroma-key";
+import {
+  birdMediaProxyUrl,
+  keyOutGreenscreen,
+} from "@/lib/bird-chroma-key";
 
 /** Admin preview: plays MP4 and strips greenscreen live. */
 export default function BirdGreenscreenPreview({ src }: { src: string }) {
@@ -12,6 +15,7 @@ export default function BirdGreenscreenPreview({ src }: { src: string }) {
 
     let active = true;
     let raf = 0;
+    const playableSrc = birdMediaProxyUrl(src);
 
     const video = document.createElement("video");
     video.muted = true;
@@ -20,8 +24,7 @@ export default function BirdGreenscreenPreview({ src }: { src: string }) {
     video.playsInline = true;
     video.setAttribute("playsinline", "true");
     video.preload = "auto";
-    video.crossOrigin = "anonymous";
-    video.src = src;
+    video.src = playableSrc;
 
     const play = () => {
       void video.play().catch(() => undefined);
@@ -51,7 +54,10 @@ export default function BirdGreenscreenPreview({ src }: { src: string }) {
           canvas.width = w;
           canvas.height = h;
         }
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        const ctx = canvas.getContext("2d", {
+          willReadFrequently: true,
+          alpha: true,
+        });
         if (ctx) {
           ctx.clearRect(0, 0, w, h);
           ctx.drawImage(video, 0, 0, w, h);
@@ -60,7 +66,7 @@ export default function BirdGreenscreenPreview({ src }: { src: string }) {
             keyOutGreenscreen(imageData);
             ctx.putImageData(imageData, 0, 0);
           } catch {
-            // CORS: show raw frame
+            // Proxy should make this readable.
           }
         }
       }
