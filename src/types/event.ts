@@ -14,4 +14,6 @@ export interface EventSettings {
   dressCodeImage: string;
   logoImage: string;
   birdImage: string;
+  /** How many flying birds to show on the invitation (1–12). */
+  birdCount: number;
 }

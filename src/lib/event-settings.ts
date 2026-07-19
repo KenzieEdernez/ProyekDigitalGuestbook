@@ -34,6 +34,12 @@ function textValue(value: unknown) {
   return String(value ?? "").trim();
 }
 
+function clampBirdCount(value: unknown) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 6;
+  return Math.min(12, Math.max(1, Math.round(parsed)));
+}
+
 async function saveHeroImage(value: string) {
   if (!value.startsWith("data:image/")) return value;
 
@@ -154,6 +160,7 @@ function buildSettings(input: Partial<EventSettings> & Record<string, unknown>):
     dressCodeImage: textValue(input.dressCodeImage ?? input.dress_code_image),
     logoImage: textValue(input.logoImage ?? input.logo_image),
     birdImage: textValue(input.birdImage ?? input.bird_image),
+    birdCount: clampBirdCount(input.birdCount ?? input.bird_count ?? 6),
   };
 }
 
@@ -224,6 +231,7 @@ export async function saveEventSettings(
     dress_code_image: dressCodeImage || null,
     logo_image: logoImage || null,
     bird_image: birdImage || null,
+    bird_count: settings.birdCount,
     updated_at: new Date().toISOString(),
   });
 
@@ -236,5 +244,6 @@ export async function saveEventSettings(
     dressCodeImage,
     logoImage,
     birdImage,
+    birdCount: settings.birdCount,
   };
 }

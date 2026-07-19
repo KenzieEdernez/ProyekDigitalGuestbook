@@ -259,7 +259,10 @@ export default function InvitationApp() {
       {phase === "open" && (
         <div className="invitation-app invitation-app-enter bg-champagne">
           <ScrollProgress />
-          <FlyingBirds birdImage={eventSettings.birdImage} />
+          <FlyingBirds
+            birdImage={eventSettings.birdImage}
+            birdCount={eventSettings.birdCount}
+          />
 
           <InvitationNav
             active={activeSection}

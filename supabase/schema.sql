@@ -100,6 +100,9 @@ alter table public.event_settings
   add column if not exists bird_image text;
 
 alter table public.event_settings
+  add column if not exists bird_count integer default 6;
+
+alter table public.event_settings
   add column if not exists dress_ladies text;
 
 alter table public.event_settings

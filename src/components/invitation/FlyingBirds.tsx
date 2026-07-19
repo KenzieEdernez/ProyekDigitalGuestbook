@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 type BirdConfig = {
   delayMs: number;
-  /** 0–1 progress offset so birds can already be on-screen at open */
   startOffset: number;
   durationMs: number;
   size: number;
@@ -15,15 +14,31 @@ type BirdConfig = {
   playbackRate: number;
 };
 
-/** Standard size, quick entrance, still calm flight across the screen. */
-const BIRDS: BirdConfig[] = [
-  { delayMs: 0, startOffset: 0.18, durationMs: 32000, size: 118, yStart: 10, yDrift: 12, dir: 1, bob: 10, playbackRate: 1 },
-  { delayMs: 200, startOffset: 0.08, durationMs: 34000, size: 102, yStart: 28, yDrift: -10, dir: -1, bob: 9, playbackRate: 1 },
-  { delayMs: 450, startOffset: 0.22, durationMs: 30000, size: 128, yStart: 44, yDrift: 14, dir: 1, bob: 11, playbackRate: 1 },
-  { delayMs: 700, startOffset: 0.05, durationMs: 36000, size: 110, yStart: 62, yDrift: -12, dir: -1, bob: 10, playbackRate: 1 },
-  { delayMs: 950, startOffset: 0.15, durationMs: 33000, size: 120, yStart: 76, yDrift: 10, dir: 1, bob: 10, playbackRate: 1 },
-  { delayMs: 1200, startOffset: 0.1, durationMs: 31000, size: 98, yStart: 18, yDrift: 16, dir: -1, bob: 8, playbackRate: 1 },
-];
+const MAX_BIRDS = 12;
+
+function buildBirdConfigs(count: number): BirdConfig[] {
+  const total = Math.min(MAX_BIRDS, Math.max(1, Math.round(count)));
+  const configs: BirdConfig[] = [];
+
+  for (let i = 0; i < total; i += 1) {
+    const t = total === 1 ? 0.5 : i / (total - 1);
+    const dir: 1 | -1 = i % 2 === 0 ? 1 : -1;
+    configs.push({
+      delayMs: i * 180,
+      startOffset: 0.06 + (i % 5) * 0.04,
+      // Slightly faster crossings
+      durationMs: 20000 + (i % 4) * 1500,
+      size: 100 + (i % 3) * 12,
+      yStart: 8 + t * 74,
+      yDrift: dir * (8 + (i % 4) * 3),
+      dir,
+      bob: 8 + (i % 3) * 2,
+      playbackRate: 1,
+    });
+  }
+
+  return configs;
+}
 
 function easeInOutSine(t: number) {
   return 0.5 - Math.cos(Math.PI * t) / 2;
@@ -40,6 +55,7 @@ function isVideoSrc(src: string) {
 
 interface FlyingBirdsProps {
   birdImage?: string;
+  birdCount?: number;
 }
 
 function BirdActor({
@@ -96,7 +112,6 @@ function BirdActor({
       }
 
       if (now < origin) {
-        // Keep first birds visible immediately using their start offset preview.
         if (delayMs === 0 || startOffset > 0) {
           const p = easeInOutSine(startOffset);
           const x = dir === 1 ? -12 + p * 124 : 112 - p * 124;
@@ -111,7 +126,7 @@ function BirdActor({
       }
 
       const elapsed = now - origin;
-      const raw = ((elapsed / durationMs) + startOffset) % 1;
+      const raw = (elapsed / durationMs + startOffset) % 1;
       const p = easeInOutSine(raw);
       const x = dir === 1 ? -12 + p * 124 : 112 - p * 124;
       const y = yStart + p * yDrift + Math.sin(raw * Math.PI * 2) * (bob * 0.08);
@@ -150,14 +165,19 @@ function BirdActor({
   );
 }
 
-export default function FlyingBirds({ birdImage }: FlyingBirdsProps) {
+export default function FlyingBirds({
+  birdImage,
+  birdCount = 6,
+}: FlyingBirdsProps) {
   const src = birdImage?.trim() || "";
+  const birds = useMemo(() => buildBirdConfigs(birdCount), [birdCount]);
+
   if (!src || !isVideoSrc(src)) return null;
 
   return (
     <div className="flying-birds" aria-hidden>
-      {BIRDS.map((bird, index) => (
-        <BirdActor key={`${src}-${index}`} src={src} {...bird} />
+      {birds.map((bird, index) => (
+        <BirdActor key={`${src}-${birdCount}-${index}`} src={src} {...bird} />
       ))}
     </div>
   );

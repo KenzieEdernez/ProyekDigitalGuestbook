@@ -24,6 +24,7 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   dressCodeImage: "",
   logoImage: "",
   birdImage: "",
+  birdCount: 6,
 };
 
 function readFittedImage(file: File, maxSize = 1400, type: "image/jpeg" | "image/png" = "image/jpeg") {
@@ -428,6 +429,30 @@ export default function EventSettingsPage() {
                   Upload a looping WebM of a bird flapping in place (transparent
                   background recommended, max 8MB). The invitation moves it
                   across the screen.
+                </p>
+                <label className="mb-1.5 mt-4 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Bird Count
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={12}
+                  value={form.birdCount}
+                  onChange={(e) =>
+                    setForm((current) => ({
+                      ...current,
+                      birdCount: Math.min(
+                        12,
+                        Math.max(1, Number(e.target.value) || 1)
+                      ),
+                    }))
+                  }
+                  disabled={saving || imageProcessing !== null}
+                  className="input-field"
+                />
+                <p className="mt-2 text-xs text-stone-400">
+                  Number of birds on the invitation (1–12). Save page settings
+                  after changing.
                 </p>
                 {form.birdImage && (
                   <button

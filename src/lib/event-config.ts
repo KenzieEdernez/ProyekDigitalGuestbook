@@ -37,6 +37,7 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   dressCodeImage: "",
   logoImage: "",
   birdImage: "",
+  birdCount: 6,
 };
 
 export function mergeEventSettings(settings?: Partial<EventSettings>) {
