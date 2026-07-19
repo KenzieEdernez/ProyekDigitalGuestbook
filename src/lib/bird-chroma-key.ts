@@ -1,6 +1,6 @@
 /**
  * Aggressive greenscreen removal for neon chroma plates (#00FF00 style).
- * White/light birds stay; green plate becomes transparent.
+ * Only alpha is cleared — RGB left intact (helps Safari compositing).
  */
 export function keyOutGreenscreen(imageData: ImageData) {
   const data = imageData.data;
@@ -16,17 +16,14 @@ export function keyOutGreenscreen(imageData: ImageData) {
     const minRB = Math.min(r, b);
     const dominance = g - maxRB;
 
-    // Pure / neon greenscreen boxes (as seen in admin + iPhone screenshots)
+    // Neon / solid greenscreen
     if (g >= 35 && dominance >= 14 && g >= r + 14 && g >= b + 14) {
       if (
         dominance >= 22 ||
         (g >= 80 && maxRB <= 130) ||
         (g >= 120 && minRB <= 100) ||
-        g - ((r + b) / 2) >= 40
+        g - (r + b) / 2 >= 40
       ) {
-        data[i] = 0;
-        data[i + 1] = 0;
-        data[i + 2] = 0;
         data[i + 3] = 0;
         continue;
       }
@@ -39,7 +36,6 @@ export function keyOutGreenscreen(imageData: ImageData) {
       continue;
     }
 
-    // Despill leftover green on pale feathers
     if (dominance > 8 && g > maxRB + 6) {
       data[i + 1] = Math.min(g, maxRB + 4);
     }
@@ -54,4 +50,13 @@ export function birdMediaProxyUrl(src: string) {
   if (value.startsWith("data:")) return value;
   if (value.startsWith("blob:")) return value;
   return `/api/event-settings/bird-media?url=${encodeURIComponent(value)}`;
+}
+
+export function isAppleTouchDevice() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return (
+    /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
 }

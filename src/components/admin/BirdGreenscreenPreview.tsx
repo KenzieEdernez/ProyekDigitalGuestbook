@@ -35,7 +35,7 @@ export default function BirdGreenscreenPreview({ src }: { src: string }) {
   return (
     <canvas
       ref={canvasRef}
-      className="max-h-32 w-auto object-contain"
+      className="max-h-32 w-auto object-contain [background:transparent] supports-[-webkit-touch-callout:none]:mix-blend-screen"
       aria-hidden
     />
   );

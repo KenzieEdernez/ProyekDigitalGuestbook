@@ -15,6 +15,52 @@ type VideoWithFrameCallback = HTMLVideoElement & {
 };
 
 /**
+ * Safari/iOS bug: putImageData() with alpha=0 often paints opaque black.
+ * createImageBitmap(ImageData) + drawImage preserves transparency correctly.
+ */
+async function paintKeyedFrame(
+  ctx: CanvasRenderingContext2D,
+  imageData: ImageData,
+  w: number,
+  h: number
+) {
+  if (typeof createImageBitmap === "function") {
+    const bitmap = await createImageBitmap(imageData);
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close();
+    return;
+  }
+
+  // Fallback: punch greenscreen out with destination-out (no putImageData alpha).
+  const mask = document.createElement("canvas");
+  mask.width = w;
+  mask.height = h;
+  const maskCtx = mask.getContext("2d");
+  if (!maskCtx) {
+    ctx.putImageData(imageData, 0, 0);
+    return;
+  }
+
+  const maskData = maskCtx.createImageData(w, h);
+  const src = imageData.data;
+  const dst = maskData.data;
+  for (let i = 0; i < src.length; i += 4) {
+    const alpha = src[i + 3];
+    // Opaque white where we want to erase (keyed-out green)
+    const erase = alpha === 0 ? 255 : 0;
+    dst[i] = 255;
+    dst[i + 1] = 255;
+    dst[i + 2] = 255;
+    dst[i + 3] = erase;
+  }
+  maskCtx.putImageData(maskData, 0, 0);
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.drawImage(mask, 0, 0);
+  ctx.globalCompositeOperation = "source-over";
+}
+
+/**
  * Plays a greenscreen bird video and writes keyed frames into a canvas.
  * Attaches the video to the DOM (required for reliable iOS/Safari decoding).
  */
@@ -27,6 +73,8 @@ export function startKeyedBirdDrawer({
   let raf = 0;
   let frameCallback = 0;
   let gotFrame = false;
+  let busy = false;
+  let wantsFrame = false;
 
   const playableSrc = birdMediaProxyUrl(src);
   const sheet = document.createElement("canvas");
@@ -61,9 +109,13 @@ export function startKeyedBirdDrawer({
   play();
 
   const process = () => {
-    if (!active || !ctx) return false;
+    if (!active || !ctx) return;
+    if (busy) {
+      wantsFrame = true;
+      return;
+    }
     if (video.readyState < 2 || video.videoWidth <= 0 || video.videoHeight <= 0) {
-      return false;
+      return;
     }
 
     const scale = Math.min(
@@ -79,20 +131,41 @@ export function startKeyedBirdDrawer({
       sheet.height = h;
     }
 
+    // Draw raw frame first (needed for destination-out fallback too).
     ctx.clearRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(video, 0, 0, w, h);
 
+    let imageData: ImageData;
     try {
-      const imageData = ctx.getImageData(0, 0, w, h);
-      keyOutGreenscreen(imageData);
-      ctx.putImageData(imageData, 0, 0);
-      gotFrame = true;
+      imageData = ctx.getImageData(0, 0, w, h);
     } catch {
-      // Proxy should keep this readable.
+      return;
     }
 
-    onFrame?.(sheet);
-    return gotFrame;
+    keyOutGreenscreen(imageData);
+    busy = true;
+
+    void paintKeyedFrame(ctx, imageData, w, h)
+      .then(() => {
+        if (!active) return;
+        gotFrame = true;
+        onFrame?.(sheet);
+      })
+      .catch(() => {
+        if (!active || !ctx) return;
+        // Last resort — may show black on old iOS; CSS screen-blend covers it.
+        ctx.putImageData(imageData, 0, 0);
+        gotFrame = true;
+        onFrame?.(sheet);
+      })
+      .finally(() => {
+        busy = false;
+        if (active && wantsFrame) {
+          wantsFrame = false;
+          process();
+        }
+      });
   };
 
   const tickRaf = () => {
@@ -109,7 +182,6 @@ export function startKeyedBirdDrawer({
     };
     frameCallback = video.requestVideoFrameCallback(onVideoFrame);
 
-    // Bootstrap until the first decoded frame arrives.
     const waitTick = () => {
       if (!active) return;
       if (!gotFrame) {

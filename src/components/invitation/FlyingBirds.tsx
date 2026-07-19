@@ -198,6 +198,7 @@ function KeyedBirdActor({
         className="flying-bird-video"
         width={size}
         height={size}
+        style={{ background: "transparent" }}
       />
     </div>
   );
