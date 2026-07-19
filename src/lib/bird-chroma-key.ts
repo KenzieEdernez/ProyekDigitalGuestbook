@@ -15,17 +15,15 @@ export function keyOutGreenscreen(imageData: ImageData) {
     const maxRB = Math.max(r, b);
     const minRB = Math.min(r, b);
     const dominance = g - maxRB;
-    const avgRB = (r + b) * 0.5;
 
-    // Neon / solid greenscreen (very common in bird stock clips)
-    const isStrongGreen =
-      g >= 40 &&
-      dominance >= 18 &&
-      g >= avgRB * 1.25 &&
-      (dominance >= 30 || (g >= 90 && maxRB <= 140) || (g >= 150 && minRB <= 120));
-
-    if (isStrongGreen) {
-      if (dominance >= 28 || (g >= 100 && maxRB <= 110) || g - minRB >= 50) {
+    // Pure / neon greenscreen boxes (as seen in admin + iPhone screenshots)
+    if (g >= 35 && dominance >= 14 && g >= r + 14 && g >= b + 14) {
+      if (
+        dominance >= 22 ||
+        (g >= 80 && maxRB <= 130) ||
+        (g >= 120 && minRB <= 100) ||
+        g - ((r + b) / 2) >= 40
+      ) {
         data[i] = 0;
         data[i + 1] = 0;
         data[i + 2] = 0;
@@ -33,19 +31,17 @@ export function keyOutGreenscreen(imageData: ImageData) {
         continue;
       }
 
-      // Soft edge
-      const t = Math.min(1, Math.max(0, (dominance - 18) / 18));
+      const t = Math.min(1, Math.max(0, (dominance - 14) / 16));
       data[i + 3] = Math.round(a * (1 - t));
       if (data[i + 3] > 0) {
-        // Despill green fringe onto bird silhouette
-        data[i + 1] = Math.min(g, maxRB + 6);
+        data[i + 1] = Math.min(g, maxRB + 4);
       }
       continue;
     }
 
-    // Residual spill on pale feathers
-    if (dominance > 12 && g > maxRB + 8) {
-      data[i + 1] = Math.min(g, maxRB + 6);
+    // Despill leftover green on pale feathers
+    if (dominance > 8 && g > maxRB + 6) {
+      data[i + 1] = Math.min(g, maxRB + 4);
     }
   }
 }

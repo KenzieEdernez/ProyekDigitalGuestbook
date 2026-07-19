@@ -208,12 +208,22 @@ export default function EventSettingsPage() {
         return;
       }
 
-      if (data.settings) setForm(data.settings);
-      else if (data.url) {
-        setForm((current) => ({ ...current, birdImage: data.url }));
+      if (data.settings) {
+        setForm({
+          ...data.settings,
+          // Prefer the new MP4; drop legacy iOS MOV so greenscreen isn't shown raw.
+          birdImage: data.settings.birdImage || data.url || "",
+          birdImageIos: "",
+        });
+      } else if (data.url) {
+        setForm((current) => ({
+          ...current,
+          birdImage: data.url,
+          birdImageIos: "",
+        }));
       }
       setMessage(
-        "Bird MP4 uploaded. Greenscreen is removed automatically in preview and on the invitation."
+        "Bird MP4 uploaded. Greenscreen is removed automatically in this preview and on the invitation."
       );
     } catch {
       setError("Failed to upload bird video.");
@@ -412,8 +422,10 @@ export default function EventSettingsPage() {
                   Flying Bird Video (MP4 + Greenscreen)
                 </label>
                 <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] dark:border-stone-700">
-                  {form.birdImage ? (
-                    <BirdGreenscreenPreview src={form.birdImage} />
+                  {form.birdImage || form.birdImageIos ? (
+                    <BirdGreenscreenPreview
+                      src={form.birdImage || form.birdImageIos}
+                    />
                   ) : (
                     <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
                       <ImageIcon className="h-8 w-8" />
@@ -429,15 +441,19 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Upload MP4 with a green background (max 25MB). Greenscreen is
-                  removed automatically in this preview and on the invitation
-                  (all devices).
+                  Upload MP4 with green background (max 25MB). Preview below
+                  removes the greenscreen automatically — same as on iPhone /
+                  invitation.
                 </p>
-                {form.birdImage && (
+                {(form.birdImage || form.birdImageIos) && (
                   <button
                     type="button"
                     onClick={() =>
-                      setForm((current) => ({ ...current, birdImage: "" }))
+                      setForm((current) => ({
+                        ...current,
+                        birdImage: "",
+                        birdImageIos: "",
+                      }))
                     }
                     disabled={saving || imageProcessing !== null}
                     className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"

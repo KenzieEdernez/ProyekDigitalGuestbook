@@ -7,10 +7,7 @@ import {
   useState,
   type MutableRefObject,
 } from "react";
-import {
-  birdMediaProxyUrl,
-  keyOutGreenscreen,
-} from "@/lib/bird-chroma-key";
+import { startKeyedBirdDrawer } from "@/lib/keyed-bird-drawer";
 
 type BirdConfig = {
   delayMs: number;
@@ -31,8 +28,6 @@ const FRAME_PATHS = Array.from(
   { length: FRAME_COUNT },
   (_, i) => `/invitation/dove/${String(i).padStart(2, "0")}.png`
 );
-const PROCESS_MAX = 180;
-
 function buildBirdConfigs(count: number): BirdConfig[] {
   const total = Math.min(MAX_BIRDS, Math.max(1, Math.round(count)));
   const configs: BirdConfig[] = [];
@@ -220,85 +215,21 @@ function KeyedVideoBirds({
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    let active = true;
-    let raf = 0;
     let markedReady = false;
-    const playableSrc = birdMediaProxyUrl(src);
-
-    const video = document.createElement("video");
-    video.muted = true;
-    video.defaultMuted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.setAttribute("playsinline", "true");
-    video.setAttribute("webkit-playsinline", "true");
-    video.preload = "auto";
-    // Same-origin proxy → pixels are readable for chroma-key.
-    video.src = playableSrc;
-
-    const sheet = document.createElement("canvas");
-    sheetRef.current = sheet;
-    const ctx = sheet.getContext("2d", {
-      willReadFrequently: true,
-      alpha: true,
-    });
-    if (!ctx) return;
-
-    const play = () => {
-      void video.play().catch(() => undefined);
-    };
-
-    video.addEventListener("loadeddata", play);
-    video.addEventListener("canplay", play);
-    play();
-
-    const draw = () => {
-      if (!active) return;
-
-      if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
-        const scale = Math.min(
-          PROCESS_MAX / video.videoWidth,
-          PROCESS_MAX / video.videoHeight,
-          1
-        );
-        const w = Math.max(1, Math.round(video.videoWidth * scale));
-        const h = Math.max(1, Math.round(video.videoHeight * scale));
-
-        if (sheet.width !== w || sheet.height !== h) {
-          sheet.width = w;
-          sheet.height = h;
-        }
-
-        ctx.clearRect(0, 0, w, h);
-        ctx.drawImage(video, 0, 0, w, h);
-
-        try {
-          const imageData = ctx.getImageData(0, 0, w, h);
-          keyOutGreenscreen(imageData);
-          ctx.putImageData(imageData, 0, 0);
-        } catch {
-          // Should not happen with same-origin proxy; keep frame if it does.
-        }
-
-        if (active && !markedReady) {
+    const drawer = startKeyedBirdDrawer({
+      src,
+      maxSize: 180,
+      onFrame: (sheet) => {
+        sheetRef.current = sheet;
+        if (!markedReady) {
           markedReady = true;
           setReady(true);
         }
-      }
-
-      raf = requestAnimationFrame(draw);
-    };
-
-    raf = requestAnimationFrame(draw);
+      },
+    });
 
     return () => {
-      active = false;
-      cancelAnimationFrame(raf);
-      video.removeEventListener("loadeddata", play);
-      video.removeEventListener("canplay", play);
-      video.pause();
-      video.removeAttribute("src");
-      video.load();
+      drawer.stop();
       sheetRef.current = null;
     };
   }, [src]);
