@@ -8,20 +8,50 @@ function clearContainer(containerId: string) {
   if (el) el.innerHTML = "";
 }
 
-async function resolveCameraId(): Promise<string | { facingMode: string }> {
+function isAppleMobile() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return (
+    /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+/**
+ * Prefer the rear camera. On iOS, device labels are often empty, so
+ * facingMode "environment" is more reliable than devices[0] (often front).
+ */
+async function resolveCameraConfig(): Promise<
+  string | { facingMode: string | { ideal: string } }
+> {
+  const apple = isAppleMobile();
+
   try {
     const devices = await Html5Qrcode.getCameras();
-    if (devices.length === 0) return { facingMode: "user" };
 
-    const backCam = devices.find((d) =>
-      /back|rear|environment|belakang/i.test(d.label)
-    );
-    if (backCam) return backCam.id;
+    if (devices.length > 0) {
+      const backCam = devices.find((d) =>
+        /back|rear|environment|belakang|world/i.test(d.label || "")
+      );
+      if (backCam?.id) return backCam.id;
 
-    return devices[0].id;
+      // iOS: unlabeled devices — do NOT pick devices[0] (often selfie).
+      if (apple) {
+        return { facingMode: { ideal: "environment" } };
+      }
+
+      // Android / desktop: if only one cam or labels missing, try last device
+      // (rear is frequently last) then fall back to environment.
+      if (devices.length > 1) {
+        return devices[devices.length - 1].id;
+      }
+      return devices[0].id;
+    }
   } catch {
-    return { facingMode: "user" };
+    // permission / enumerate failed
   }
+
+  return { facingMode: { ideal: "environment" } };
 }
 
 type Options = {
@@ -38,7 +68,7 @@ export function useHtml5Scanner({
   autoStart = true,
   formats,
   prompt = "Arahkan kamera ke barcode/QR",
-  scanRegion = "square",
+  scanRegion = "full",
   onDetected,
 }: Options) {
   const reactId = useId();
@@ -78,7 +108,7 @@ export function useHtml5Scanner({
     if (!mountedRef.current || !active || detectedRef.current) return;
 
     setNeedsManualStart(false);
-    setMessage("Mencari kamera...");
+    setMessage("Starting camera...");
 
     await stopLocal();
     if (!mountedRef.current || !active) return;
@@ -86,48 +116,94 @@ export function useHtml5Scanner({
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const html5QrCode = new Html5Qrcode(containerId);
+    const html5QrCode = new Html5Qrcode(containerId, {
+      verbose: false,
+      experimentalFeatures: {
+        useBarCodeDetectorIfSupported: true,
+      },
+    } as ConstructorParameters<typeof Html5Qrcode>[1]);
     readerRef.current = html5QrCode;
 
-    try {
-      const cameraId = await resolveCameraId();
-      if (!mountedRef.current || readerRef.current !== html5QrCode) return;
-
+    const buildConfig = (simple = false) => {
       const config = {
-        fps: 12,
+        fps: isAppleMobile() ? 15 : 12,
         formatsToSupport: formatsRef.current,
-      } as any;
+        disableFlip: false,
+      } as Record<string, unknown>;
 
-      if (scanRegionRef.current !== "full") {
-        config.qrbox = (viewfinderWidth: number, viewfinderHeight: number) => {
-          if (scanRegionRef.current === "wide") {
-            return {
-              width: Math.floor(viewfinderWidth * 0.9),
-              height: Math.max(90, Math.floor(viewfinderHeight * 0.35)),
-            };
-          }
-
-          const size = Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.75);
-          return { width: Math.max(size, 200), height: Math.max(size, 200) };
+      if (!simple) {
+        config.aspectRatio = 1.777778;
+        config.videoConstraints = {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
         };
       }
 
+      // "full" = decode whole frame (best for iOS). Square qrbox often misses.
+      if (scanRegionRef.current !== "full") {
+        config.qrbox = (viewfinderWidth: number, viewfinderHeight: number) => {
+          if (scanRegionRef.current === "wide") {
+            const width = Math.floor(viewfinderWidth * 0.88);
+            const height = Math.max(
+              80,
+              Math.min(Math.floor(viewfinderHeight * 0.32), 160)
+            );
+            return { width, height };
+          }
+
+          const side = Math.floor(
+            Math.min(viewfinderWidth, viewfinderHeight) * 0.7
+          );
+          const size = Math.min(Math.max(side, 160), 280);
+          return { width: size, height: size };
+        };
+      }
+
+      return config;
+    };
+
+    const onScanSuccess = (decodedText: string) => {
+      if (detectedRef.current || readerRef.current !== html5QrCode) return;
+      detectedRef.current = true;
+      setMessage(`Detected: ${decodedText}`);
+      void (async () => {
+        await stopLocal();
+        onDetectedRef.current(decodedText);
+      })();
+    };
+
+    const tryStart = async (
+      cameraConfig: string | { facingMode: string | { ideal: string } },
+      simple = false
+    ) => {
       await html5QrCode.start(
-        cameraId,
-        config,
-        (decodedText) => {
-          if (detectedRef.current || readerRef.current !== html5QrCode) return;
-          detectedRef.current = true;
-          setMessage(`Detected: ${decodedText}`);
-          void (async () => {
-            await stopLocal();
-            onDetectedRef.current(decodedText);
-          })();
-        },
+        cameraConfig,
+        buildConfig(simple) as unknown as Parameters<Html5Qrcode["start"]>[1],
+        onScanSuccess,
         () => {
-          // per-frame decode miss
+          // per-frame miss
         }
       );
+    };
+
+    try {
+      const cameraConfig = await resolveCameraConfig();
+      if (!mountedRef.current || readerRef.current !== html5QrCode) return;
+
+      try {
+        await tryStart(cameraConfig, false);
+      } catch (firstError) {
+        // Retry with plain environment facingMode + simpler constraints (iOS).
+        console.warn("Scanner camera retry", firstError);
+        if (!mountedRef.current || readerRef.current !== html5QrCode) return;
+        try {
+          await html5QrCode.stop().catch(() => undefined);
+        } catch {
+          // ignore
+        }
+        await tryStart({ facingMode: "environment" }, true);
+      }
 
       if (!mountedRef.current || readerRef.current !== html5QrCode) {
         try {
@@ -148,7 +224,9 @@ export function useHtml5Scanner({
       clearContainer(containerId);
       if (mountedRef.current) {
         setNeedsManualStart(true);
-        setMessage("Failed to access the camera. Allow camera access, then click Start.");
+        setMessage(
+          "Failed to access the camera. Allow camera access, then tap Start."
+        );
       }
     }
   }, [active, containerId, stopLocal]);
@@ -166,8 +244,8 @@ export function useHtml5Scanner({
       }
     };
 
-    // Wait for the DOM before starting the camera.
-    const timer = window.setTimeout(boot, 100);
+    // iOS needs a slightly longer wait for the video element to be in DOM.
+    const timer = window.setTimeout(boot, isAppleMobile() ? 250 : 100);
 
     return () => {
       cancelled = true;

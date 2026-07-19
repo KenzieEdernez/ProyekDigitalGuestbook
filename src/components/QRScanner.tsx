@@ -11,23 +11,30 @@ type Props = {
   active?: boolean;
 };
 
-const QR_FORMATS = [Html5QrcodeSupportedFormats.QR_CODE];
+/** Invitation tickets use QR (and sometimes CODE128) — support both. */
+const CHECKIN_FORMATS = [
+  Html5QrcodeSupportedFormats.QR_CODE,
+  Html5QrcodeSupportedFormats.CODE_128,
+];
 
 export default function QRScanner({
   onDetected,
-  prompt = "Point the camera at the QR code",
+  prompt = "Point the camera at the invitation QR code",
   autoStart = true,
   active = true,
 }: Props) {
-  const formats = useMemo(() => QR_FORMATS, []);
+  const formats = useMemo(() => CHECKIN_FORMATS, []);
 
-  const { containerId, message, needsManualStart, startScanner } = useHtml5Scanner({
-    active,
-    autoStart,
-    formats,
-    prompt,
-    onDetected,
-  });
+  const { containerId, message, needsManualStart, startScanner } =
+    useHtml5Scanner({
+      active,
+      autoStart,
+      formats,
+      prompt,
+      // Full-frame decode — square qrbox is unreliable on iOS Safari.
+      scanRegion: "full",
+      onDetected,
+    });
 
   return (
     <div className="relative">
@@ -35,7 +42,11 @@ export default function QRScanner({
       <div className="mt-2 text-center text-sm text-stone-400">{message}</div>
       {needsManualStart && active && (
         <div className="mt-2 text-center">
-          <button type="button" onClick={() => void startScanner()} className="btn-gold text-sm">
+          <button
+            type="button"
+            onClick={() => void startScanner()}
+            className="btn-gold text-sm"
+          >
             Start Camera
           </button>
         </div>
