@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type BirdConfig = {
   delayMs: number;
@@ -12,9 +12,15 @@ type BirdConfig = {
   dir: 1 | -1;
   bob: number;
   playbackRate: number;
+  fps: number;
 };
 
 const MAX_BIRDS = 12;
+const FRAME_COUNT = 15;
+const FRAME_PATHS = Array.from(
+  { length: FRAME_COUNT },
+  (_, i) => `/invitation/dove/${String(i).padStart(2, "0")}.png`
+);
 
 function buildBirdConfigs(count: number): BirdConfig[] {
   const total = Math.min(MAX_BIRDS, Math.max(1, Math.round(count)));
@@ -26,7 +32,6 @@ function buildBirdConfigs(count: number): BirdConfig[] {
     configs.push({
       delayMs: i * 180,
       startOffset: 0.06 + (i % 5) * 0.04,
-      // Slightly faster crossings
       durationMs: 20000 + (i % 4) * 1500,
       size: 100 + (i % 3) * 12,
       yStart: 8 + t * 74,
@@ -34,6 +39,7 @@ function buildBirdConfigs(count: number): BirdConfig[] {
       dir,
       bob: 8 + (i % 3) * 2,
       playbackRate: 1,
+      fps: 12 + (i % 3),
     });
   }
 
@@ -53,48 +59,47 @@ function isVideoSrc(src: string) {
   );
 }
 
+/** WebM alpha is unreliable on iOS/Safari and many phones show a solid plate. */
+function needsPngBirdFallback() {
+  if (typeof navigator === "undefined" || typeof window === "undefined") {
+    return false;
+  }
+
+  const ua = navigator.userAgent;
+  const isiOS =
+    /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isSafari =
+    /Safari/i.test(ua) && !/Chrome|CriOS|Chromium|Android/i.test(ua);
+  const isTouchMobile =
+    /Android|Mobile/i.test(ua) ||
+    window.matchMedia("(pointer: coarse)").matches;
+
+  return isiOS || isSafari || isTouchMobile;
+}
+
 interface FlyingBirdsProps {
   birdImage?: string;
   birdCount?: number;
 }
 
-function BirdActor({
-  src,
-  delayMs,
-  startOffset,
-  durationMs,
-  size,
-  yStart,
-  yDrift,
-  dir,
-  bob,
-  playbackRate,
-}: BirdConfig & { src: string }) {
+type FlightConfig = Pick<
+  BirdConfig,
+  "delayMs" | "startOffset" | "durationMs" | "yStart" | "yDrift" | "dir" | "bob"
+>;
+
+function useFlight(config: FlightConfig) {
   const actorRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const startRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.muted = true;
-    video.defaultMuted = true;
-    video.playsInline = true;
-    video.playbackRate = playbackRate;
-
-    const play = () => {
-      void video.play().catch(() => undefined);
-    };
-
-    play();
-    video.addEventListener("loadeddata", play);
-    video.addEventListener("canplay", play);
-    return () => {
-      video.removeEventListener("loadeddata", play);
-      video.removeEventListener("canplay", play);
-    };
-  }, [playbackRate, src]);
+  const {
+    delayMs,
+    startOffset,
+    durationMs,
+    yStart,
+    yDrift,
+    dir,
+    bob,
+  } = config;
 
   useEffect(() => {
     let raf = 0;
@@ -144,6 +149,40 @@ function BirdActor({
     };
   }, [bob, delayMs, dir, durationMs, startOffset, yDrift, yStart]);
 
+  return actorRef;
+}
+
+function VideoBirdActor({
+  src,
+  size,
+  playbackRate,
+  ...config
+}: BirdConfig & { src: string }) {
+  const actorRef = useFlight(config);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.playbackRate = playbackRate;
+
+    const play = () => {
+      void video.play().catch(() => undefined);
+    };
+
+    play();
+    video.addEventListener("loadeddata", play);
+    video.addEventListener("canplay", play);
+    return () => {
+      video.removeEventListener("loadeddata", play);
+      video.removeEventListener("canplay", play);
+    };
+  }, [playbackRate, src]);
+
   return (
     <div
       ref={actorRef}
@@ -165,19 +204,123 @@ function BirdActor({
   );
 }
 
+function PngBirdActor({
+  size,
+  fps,
+  framesReady,
+  ...config
+}: BirdConfig & { framesReady: boolean }) {
+  const actorRef = useFlight(config);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const startRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!framesReady) return;
+    let raf = 0;
+    let active = true;
+
+    const tick = (now: number) => {
+      if (!active) return;
+      if (startRef.current == null) startRef.current = now + config.delayMs;
+      const img = imgRef.current;
+      if (img && now >= startRef.current) {
+        const elapsed = now - startRef.current;
+        const frame = Math.floor((elapsed / 1000) * fps) % FRAME_COUNT;
+        const next = FRAME_PATHS[frame];
+        if (img.getAttribute("src") !== next) {
+          img.src = next;
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => {
+      active = false;
+      cancelAnimationFrame(raf);
+    };
+  }, [config.delayMs, framesReady, fps]);
+
+  if (!framesReady) return null;
+
+  return (
+    <div
+      ref={actorRef}
+      className="flying-bird-actor"
+      style={{ width: size, height: size, opacity: 0 }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        ref={imgRef}
+        src={FRAME_PATHS[0]}
+        alt=""
+        className="flying-bird-frame"
+        draggable={false}
+      />
+    </div>
+  );
+}
+
 export default function FlyingBirds({
   birdImage,
   birdCount = 6,
 }: FlyingBirdsProps) {
   const src = birdImage?.trim() || "";
   const birds = useMemo(() => buildBirdConfigs(birdCount), [birdCount]);
+  const [usePngFallback, setUsePngFallback] = useState(false);
+  const [framesReady, setFramesReady] = useState(false);
 
+  useEffect(() => {
+    setUsePngFallback(needsPngBirdFallback());
+  }, []);
+
+  useEffect(() => {
+    if (!usePngFallback) return;
+    let cancelled = false;
+    Promise.all(
+      FRAME_PATHS.map(
+        (path) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            img.src = path;
+          })
+      )
+    ).then(() => {
+      if (!cancelled) setFramesReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [usePngFallback]);
+
+  // Mobile / Safari: PNG frames with real alpha (no black plate).
+  if (usePngFallback) {
+    return (
+      <div className="flying-birds" aria-hidden>
+        {birds.map((bird, index) => (
+          <PngBirdActor
+            key={`png-${birdCount}-${index}`}
+            {...bird}
+            framesReady={framesReady}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop: custom WebM with alpha.
   if (!src || !isVideoSrc(src)) return null;
 
   return (
     <div className="flying-birds" aria-hidden>
       {birds.map((bird, index) => (
-        <BirdActor key={`${src}-${birdCount}-${index}`} src={src} {...bird} />
+        <VideoBirdActor
+          key={`${src}-${birdCount}-${index}`}
+          src={src}
+          {...bird}
+        />
       ))}
     </div>
   );
