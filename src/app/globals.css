@@ -603,11 +603,9 @@
     mix-blend-mode: normal;
   }
 
-  /* Fallback if a touch device still plays WebM without alpha. */
-  @media (pointer: coarse) {
-    .flying-bird-video {
-      mix-blend-mode: screen;
-    }
+  /* Used only if canvas pixel keying is blocked (CORS). */
+  .flying-bird-video--screen {
+    mix-blend-mode: screen;
   }
 
   @media (prefers-reduced-motion: reduce) {
