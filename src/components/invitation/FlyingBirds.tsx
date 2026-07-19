@@ -115,28 +115,31 @@ function useFlight(config: FlightConfig) {
       }
 
       if (now < origin) {
-        if (delayMs === 0 || startOffset > 0) {
-          const p = easeInOutSine(startOffset);
-          const x = dir === 1 ? -12 + p * 124 : 112 - p * 124;
-          const y = yStart + p * yDrift;
-          el.style.opacity = "0.95";
-          el.style.transform = `translate3d(${x}vw, ${y}vh, 0) scaleX(${dir})`;
-        } else {
-          el.style.opacity = "0";
-        }
+        const p = easeInOutSine(Math.min(1, startOffset));
+        const x = dir === 1 ? -12 + p * 124 : 112 - p * 124;
+        const y = yStart + p * yDrift;
+        el.style.opacity = "0.95";
+        el.style.transform = `translate3d(${x}vw, ${y}vh, 0) scaleX(${dir})`;
         raf = requestAnimationFrame(tick);
         return;
       }
 
+      // Ping-pong: 0→1→0 so birds turn around at the edge immediately.
       const elapsed = now - origin;
-      const raw = (elapsed / durationMs + startOffset) % 1;
-      const p = easeInOutSine(raw);
+      const phase =
+        ((elapsed / durationMs + startOffset) % 2 + 2) % 2; // 0..2
+      const goingForward = phase <= 1;
+      const linear = goingForward ? phase : 2 - phase; // 0→1→0
+      const p = easeInOutSine(linear);
+      const face = (goingForward ? dir : -dir) as 1 | -1;
       const x = dir === 1 ? -12 + p * 124 : 112 - p * 124;
-      const y = yStart + p * yDrift + Math.sin(raw * Math.PI * 2) * (bob * 0.08);
-      const visible = raw > 0.01 && raw < 0.99;
+      const y =
+        yStart +
+        p * yDrift +
+        Math.sin(linear * Math.PI * 2) * (bob * 0.08);
 
-      el.style.opacity = visible ? "0.95" : "0";
-      el.style.transform = `translate3d(${x}vw, ${y}vh, 0) scaleX(${dir})`;
+      el.style.opacity = "0.95";
+      el.style.transform = `translate3d(${x}vw, ${y}vh, 0) scaleX(${face})`;
       raf = requestAnimationFrame(tick);
     };
 
