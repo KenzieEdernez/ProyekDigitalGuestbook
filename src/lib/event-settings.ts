@@ -282,7 +282,10 @@ export async function saveEventSettings(
   const birdFrames = settings.birdFrames
     .map((frame) => String(frame ?? "").trim())
     .filter(Boolean);
-  const { error } = await supabase.from("event_settings").upsert({
+
+  // Lottie lives in bird_image. Do not require bird_frames column —
+  // many projects never created it (schema cache errors otherwise).
+  const payload = {
     id: "default",
     name: settings.name,
     date: settings.date,
@@ -299,10 +302,26 @@ export async function saveEventSettings(
     logo_image: logoImage || null,
     bird_image: birdImage || null,
     bird_image_ios: birdImageIos || null,
-    bird_frames: birdFrames,
     bird_count: settings.birdCount,
     updated_at: new Date().toISOString(),
-  });
+  };
+
+  let { error } = await supabase.from("event_settings").upsert(payload);
+
+  // Optional legacy column — only write if the table has it.
+  if (!error && birdFrames.length > 0) {
+    const withFrames = await supabase.from("event_settings").upsert({
+      ...payload,
+      bird_frames: birdFrames,
+    });
+    // Ignore missing-column errors; Lottie path does not need bird_frames.
+    if (
+      withFrames.error &&
+      !/bird_frames|schema cache/i.test(withFrames.error.message)
+    ) {
+      error = withFrames.error;
+    }
+  }
 
   if (error) throw new Error(error.message);
   return {
