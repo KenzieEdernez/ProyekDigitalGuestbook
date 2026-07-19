@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import Lottie, { type LottieRefCurrentProps } from "lottie-react";
 
 type BirdConfig = {
   delayMs: number;
@@ -46,6 +52,15 @@ function buildBirdConfigs(count: number): BirdConfig[] {
 
 function easeInOutSine(t: number) {
   return 0.5 - Math.cos(Math.PI * t) / 2;
+}
+
+function isLottieSrc(src: string) {
+  const value = src.toLowerCase();
+  return (
+    value.includes(".json") ||
+    value.includes("application/json") ||
+    value.includes("bird-lottie")
+  );
 }
 
 interface FlyingBirdsProps {
@@ -125,6 +140,39 @@ function useFlight(config: FlightConfig) {
   return actorRef;
 }
 
+function LottieBirdActor({
+  animationData,
+  size,
+  ...config
+}: BirdConfig & { animationData: object }) {
+  const actorRef = useFlight(config);
+  const lottieRef = useRef<LottieRefCurrentProps>(null);
+
+  useEffect(() => {
+    lottieRef.current?.setSpeed(1);
+  }, [animationData]);
+
+  return (
+    <div
+      ref={actorRef}
+      className="flying-bird-actor"
+      style={{ width: size, height: size, opacity: 0 }}
+    >
+      <Lottie
+        lottieRef={lottieRef}
+        animationData={animationData}
+        loop
+        autoplay
+        className="flying-bird-frame"
+        style={{ width: "100%", height: "100%", background: "transparent" }}
+        rendererSettings={{
+          preserveAspectRatio: "xMidYMid meet",
+        }}
+      />
+    </div>
+  );
+}
+
 function FrameBirdActor({
   size,
   fps,
@@ -185,9 +233,11 @@ function FrameBirdActor({
 }
 
 export default function FlyingBirds({
+  birdImage,
   birdFrames,
   birdCount = 6,
 }: FlyingBirdsProps) {
+  const lottieUrl = birdImage?.trim() || "";
   const customFrames = useMemo(
     () =>
       (birdFrames || [])
@@ -195,11 +245,41 @@ export default function FlyingBirds({
         .filter(Boolean),
     [birdFrames]
   );
-  const framePaths = customFrames.length > 0 ? customFrames : DEFAULT_FRAME_PATHS;
   const birds = useMemo(() => buildBirdConfigs(birdCount), [birdCount]);
+  const [animationData, setAnimationData] = useState<object | null>(null);
   const [framesReady, setFramesReady] = useState(false);
 
   useEffect(() => {
+    if (!lottieUrl || !isLottieSrc(lottieUrl)) {
+      setAnimationData(null);
+      return;
+    }
+
+    let cancelled = false;
+    setAnimationData(null);
+
+    fetch(lottieUrl, { cache: "force-cache" })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load Lottie bird.");
+        return res.json();
+      })
+      .then((data: object) => {
+        if (!cancelled) setAnimationData(data);
+      })
+      .catch(() => {
+        if (!cancelled) setAnimationData(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lottieUrl]);
+
+  const framePaths =
+    customFrames.length > 0 ? customFrames : DEFAULT_FRAME_PATHS;
+
+  useEffect(() => {
+    if (animationData) return;
     let cancelled = false;
     setFramesReady(false);
     Promise.all(
@@ -218,13 +298,28 @@ export default function FlyingBirds({
     return () => {
       cancelled = true;
     };
-  }, [framePaths]);
+  }, [animationData, framePaths]);
+
+  // Prefer Lottie (true transparency on iOS). Fall back to PNG frames.
+  if (animationData) {
+    return (
+      <div className="flying-birds" aria-hidden>
+        {birds.map((bird, index) => (
+          <LottieBirdActor
+            key={`lottie-${lottieUrl}-${birdCount}-${index}`}
+            animationData={animationData}
+            {...bird}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="flying-birds" aria-hidden>
       {birds.map((bird, index) => (
         <FrameBirdActor
-          key={`${framePaths[0]}-${birdCount}-${index}`}
+          key={`png-${framePaths[0]}-${birdCount}-${index}`}
           {...bird}
           framePaths={framePaths}
           framesReady={framesReady}

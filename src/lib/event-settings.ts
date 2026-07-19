@@ -65,40 +65,43 @@ async function saveHeroImage(value: string) {
   return data.publicUrl;
 }
 
-const MAX_BIRD_VIDEO_BYTES = 25 * 1024 * 1024;
+const MAX_BIRD_LOTTIE_BYTES = 5 * 1024 * 1024;
 
 export type BirdVideoFormat = "main" | "ios";
 
-/** Upload a looping bird clip (MP4 greenscreen recommended) to public storage. */
-export async function uploadBirdVideoBuffer(
-  buffer: Buffer,
-  mimeType = "video/mp4",
-  format: BirdVideoFormat = "main"
-) {
-  if (buffer.length > MAX_BIRD_VIDEO_BYTES) {
-    throw new Error("Bird video must be under 25MB.");
+function assertValidLottieJson(buffer: Buffer) {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(buffer.toString("utf8"));
+  } catch {
+    throw new Error("Bird file must be valid Lottie JSON (.json).");
   }
+
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    !("layers" in (parsed as Record<string, unknown>))
+  ) {
+    throw new Error("Invalid Lottie file. Export a bird animation as .json.");
+  }
+
+  return parsed as Record<string, unknown>;
+}
+
+/** Upload a Lottie bird animation (.json) with transparent background. */
+export async function uploadBirdLottieBuffer(buffer: Buffer) {
+  if (buffer.length > MAX_BIRD_LOTTIE_BYTES) {
+    throw new Error("Lottie bird file must be under 5MB.");
+  }
+
+  assertValidLottieJson(buffer);
 
   const supabase = getSupabaseAdmin();
   const bucket = getPhotoBucket();
-  const mime = mimeType.toLowerCase();
-  const ext = mime.includes("webm")
-    ? "webm"
-    : mime.includes("quicktime") || mime.includes("mov")
-      ? "mov"
-      : mime.includes("m4v")
-        ? "m4v"
-        : "mp4";
-  const filename = `event/bird-${format}-${Date.now()}.${ext}`;
-  const contentType =
-    ext === "webm"
-      ? "video/webm"
-      : ext === "mov"
-        ? "video/quicktime"
-        : "video/mp4";
+  const filename = `event/bird-lottie-${Date.now()}.json`;
 
   const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
-    contentType,
+    contentType: "application/json",
     upsert: true,
   });
 
@@ -108,11 +111,13 @@ export async function uploadBirdVideoBuffer(
   return data.publicUrl;
 }
 
-async function saveBirdAsset(value: string, format: BirdVideoFormat = "main") {
+async function saveBirdAsset(value: string, _format: BirdVideoFormat = "main") {
   if (!value) return "";
   if (!value.startsWith("data:")) return value;
 
-  const matches = value.match(/^data:(video\/[\w.+-]+|image\/\w+);base64,(.+)$/);
+  const matches = value.match(
+    /^data:(application\/json|text\/plain|video\/[\w.+-]+|image\/\w+);base64,(.+)$/
+  );
   if (!matches) {
     throw new Error("Invalid bird media format.");
   }
@@ -120,8 +125,12 @@ async function saveBirdAsset(value: string, format: BirdVideoFormat = "main") {
   const mime = matches[1].toLowerCase();
   const buffer = Buffer.from(matches[2], "base64");
 
+  if (mime.includes("json") || mime.includes("text/plain")) {
+    return uploadBirdLottieBuffer(buffer);
+  }
+
   if (mime.startsWith("video/")) {
-    return uploadBirdVideoBuffer(buffer, mime, format);
+    throw new Error("Please upload a Lottie .json file (not video).");
   }
 
   return saveHeroImage(value);

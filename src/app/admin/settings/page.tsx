@@ -5,7 +5,6 @@ import { ImageIcon, Save } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
 import BirdGreenscreenPreview from "@/components/admin/BirdGreenscreenPreview";
 import WeddingContentSettings from "@/components/admin/WeddingContentSettings";
-import { extractKeyedBirdPngFrames } from "@/lib/extract-bird-frames";
 import { processDressCodeImageFile } from "@/lib/process-dress-code-image";
 import { processFittedPhotoFile } from "@/lib/trim-image-bars";
 import type { EventSettings } from "@/types/event";
@@ -192,20 +191,18 @@ export default function EventSettingsPage() {
 
     const name = file.name.toLowerCase();
     const type = (file.type || "").toLowerCase();
-    const isVideo =
-      type.startsWith("video/") ||
-      name.endsWith(".mp4") ||
-      name.endsWith(".m4v") ||
-      name.endsWith(".mov") ||
-      name.endsWith(".webm");
+    const isJson =
+      type.includes("json") ||
+      type.includes("text/plain") ||
+      name.endsWith(".json");
 
-    if (!isVideo) {
-      setError("Bird file must be an MP4 video (greenscreen OK).");
+    if (!isJson) {
+      setError("Bird file must be a Lottie animation (.json).");
       return;
     }
 
-    if (file.size > 25 * 1024 * 1024) {
-      setError("Bird video must be under 25MB.");
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Lottie bird file must be under 5MB.");
       return;
     }
 
@@ -214,20 +211,8 @@ export default function EventSettingsPage() {
     setMessage(null);
 
     try {
-      setMessage("Removing greenscreen and preparing transparent frames...");
-      const frameBlobs = await extractKeyedBirdPngFrames(file);
-
       const body = new FormData();
       body.append("file", file);
-      body.append("format", "main");
-      frameBlobs.forEach((blob, index) => {
-        body.append(
-          "frames",
-          blob,
-          `bird-frame-${String(index).padStart(2, "0")}.png`
-        );
-      });
-
       const res = await fetch("/api/event-settings/bird-upload", {
         method: "POST",
         body,
@@ -235,7 +220,7 @@ export default function EventSettingsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Failed to upload bird video.");
+        setError(data.error || "Failed to upload Lottie bird.");
         return;
       }
 
@@ -244,25 +229,21 @@ export default function EventSettingsPage() {
           ...data.settings,
           birdImage: data.settings.birdImage || data.url || "",
           birdImageIos: "",
-          birdFrames: data.settings.birdFrames || data.birdFrames || [],
+          birdFrames: [],
         });
       } else if (data.url) {
         setForm((current) => ({
           ...current,
           birdImage: data.url,
           birdImageIos: "",
-          birdFrames: data.birdFrames || [],
+          birdFrames: [],
         }));
       }
       setMessage(
-        "Bird uploaded. Greenscreen removed — transparent frames ready for iPhone and desktop."
+        "Lottie bird uploaded. Transparent on iPhone and desktop."
       );
-    } catch (uploadError) {
-      setError(
-        uploadError instanceof Error
-          ? uploadError.message
-          : "Failed to upload bird video."
-      );
+    } catch {
+      setError("Failed to upload Lottie bird.");
     } finally {
       setImageProcessing(null);
       event.target.value = "";
@@ -455,34 +436,34 @@ export default function EventSettingsPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Flying Bird Video (MP4 + Greenscreen)
+                  Flying Bird (Lottie .json)
                 </label>
                 <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] dark:border-stone-700">
-                  {form.birdFrames?.length || form.birdImage || form.birdImageIos ? (
+                  {form.birdImage || form.birdFrames?.length ? (
                     <BirdGreenscreenPreview
-                      src={form.birdImage || form.birdImageIos}
+                      src={form.birdImage}
                       frames={form.birdFrames}
                     />
                   ) : (
                     <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
                       <ImageIcon className="h-8 w-8" />
-                      <p className="mt-2 text-sm">No bird video yet</p>
+                      <p className="mt-2 text-sm">No Lottie bird yet</p>
                     </div>
                   )}
                 </div>
                 <input
                   type="file"
-                  accept="video/mp4,video/quicktime,video/webm,.mp4,.m4v,.mov,.webm"
+                  accept="application/json,.json"
                   onChange={handleBirdVideoChange}
                   disabled={saving || imageProcessing !== null}
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Upload MP4 with green background (max 25MB). On upload, green
-                  is removed and saved as transparent PNG frames — this is what
-                  iPhone uses (no black/green box).
+                  Upload a Lottie bird animation (.json, max 5MB). Transparent
+                  background — works on iPhone and desktop. Export from After
+                  Effects / LottieFiles.
                 </p>
-                {(form.birdImage || form.birdImageIos || form.birdFrames?.length) && (
+                {(form.birdImage || form.birdFrames?.length) && (
                   <button
                     type="button"
                     onClick={() =>
@@ -496,7 +477,7 @@ export default function EventSettingsPage() {
                     disabled={saving || imageProcessing !== null}
                     className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
                   >
-                    Remove bird video
+                    Remove bird animation
                   </button>
                 )}
 
@@ -577,7 +558,7 @@ export default function EventSettingsPage() {
           {saving
             ? "Saving..."
             : imageProcessing === "bird"
-              ? "Processing bird frames (removing greenscreen)..."
+              ? "Uploading Lottie bird..."
               : imageProcessing
               ? `Processing ${imageProcessing} image...`
               : "Save Settings"}
