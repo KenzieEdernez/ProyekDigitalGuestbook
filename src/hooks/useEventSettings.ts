@@ -21,6 +21,7 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   logoImage: "",
   birdImage: "",
   birdImageIos: "",
+  birdFrames: [],
   birdCount: 6,
 };
 

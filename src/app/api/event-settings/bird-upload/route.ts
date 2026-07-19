@@ -3,6 +3,7 @@ import { isAdminLoggedIn } from "@/lib/admin-auth";
 import {
   getEventSettings,
   saveEventSettings,
+  uploadBirdFrameBuffer,
   uploadBirdVideoBuffer,
   type BirdVideoFormat,
 } from "@/lib/event-settings";
@@ -10,6 +11,7 @@ import {
 export const dynamic = "force-dynamic";
 
 const MAX_BIRD_BYTES = 25 * 1024 * 1024;
+const MAX_FRAMES = 24;
 
 export async function POST(request: Request) {
   if (!(await isAdminLoggedIn())) {
@@ -23,8 +25,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const file = formData.get("file");
     const formatRaw = String(formData.get("format") || "main").toLowerCase();
-    const format: BirdVideoFormat =
-      formatRaw === "ios" ? "ios" : "main";
+    const format: BirdVideoFormat = formatRaw === "ios" ? "ios" : "main";
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
@@ -56,6 +57,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const frameFiles = formData
+      .getAll("frames")
+      .filter((item): item is File => item instanceof File)
+      .slice(0, MAX_FRAMES);
+
     const buffer = Buffer.from(await file.arrayBuffer());
     const url = await uploadBirdVideoBuffer(
       buffer,
@@ -63,13 +69,36 @@ export async function POST(request: Request) {
       format
     );
 
+    const birdFrames: string[] = [];
+    for (let i = 0; i < frameFiles.length; i += 1) {
+      const frame = frameFiles[i];
+      if (!frame.type.includes("png") && !frame.name.toLowerCase().endsWith(".png")) {
+        continue;
+      }
+      const frameBuffer = Buffer.from(await frame.arrayBuffer());
+      const frameUrl = await uploadBirdFrameBuffer(frameBuffer, i);
+      birdFrames.push(frameUrl);
+    }
+
     const current = await getEventSettings();
     const settings = await saveEventSettings({
       ...current,
-      ...(format === "ios" ? { birdImageIos: url } : { birdImage: url }),
+      birdImage: format === "ios" ? current?.birdImage || "" : url,
+      birdImageIos: format === "ios" ? url : "",
+      birdFrames:
+        birdFrames.length > 0
+          ? birdFrames
+          : format === "main"
+            ? []
+            : current?.birdFrames || [],
     });
 
-    return NextResponse.json({ url, settings, format });
+    return NextResponse.json({
+      url,
+      birdFrames: settings.birdFrames,
+      settings,
+      format,
+    });
   } catch (error) {
     return NextResponse.json(
       {

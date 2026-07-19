@@ -5,6 +5,7 @@ import { ImageIcon, Save } from "lucide-react";
 import AdminShell from "@/components/layout/AdminShell";
 import BirdGreenscreenPreview from "@/components/admin/BirdGreenscreenPreview";
 import WeddingContentSettings from "@/components/admin/WeddingContentSettings";
+import { extractKeyedBirdPngFrames } from "@/lib/extract-bird-frames";
 import { processDressCodeImageFile } from "@/lib/process-dress-code-image";
 import { processFittedPhotoFile } from "@/lib/trim-image-bars";
 import type { EventSettings } from "@/types/event";
@@ -26,6 +27,7 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   logoImage: "",
   birdImage: "",
   birdImageIos: "",
+  birdFrames: [],
   birdCount: 6,
 };
 
@@ -88,6 +90,7 @@ export default function EventSettingsPage() {
             ...data.settings,
             birdImage: bird,
             birdImageIos: "",
+            birdFrames: data.settings.birdFrames || [],
           });
         }
       } catch {
@@ -126,6 +129,7 @@ export default function EventSettingsPage() {
           ...data.settings,
           birdImage: bird,
           birdImageIos: "",
+          birdFrames: data.settings.birdFrames || [],
         });
       }
       setMessage("Page settings saved successfully.");
@@ -210,9 +214,20 @@ export default function EventSettingsPage() {
     setMessage(null);
 
     try {
+      setMessage("Removing greenscreen and preparing transparent frames...");
+      const frameBlobs = await extractKeyedBirdPngFrames(file);
+
       const body = new FormData();
       body.append("file", file);
       body.append("format", "main");
+      frameBlobs.forEach((blob, index) => {
+        body.append(
+          "frames",
+          blob,
+          `bird-frame-${String(index).padStart(2, "0")}.png`
+        );
+      });
+
       const res = await fetch("/api/event-settings/bird-upload", {
         method: "POST",
         body,
@@ -227,22 +242,27 @@ export default function EventSettingsPage() {
       if (data.settings) {
         setForm({
           ...data.settings,
-          // Prefer the new MP4; drop legacy iOS MOV so greenscreen isn't shown raw.
           birdImage: data.settings.birdImage || data.url || "",
           birdImageIos: "",
+          birdFrames: data.settings.birdFrames || data.birdFrames || [],
         });
       } else if (data.url) {
         setForm((current) => ({
           ...current,
           birdImage: data.url,
           birdImageIos: "",
+          birdFrames: data.birdFrames || [],
         }));
       }
       setMessage(
-        "Bird MP4 uploaded. Greenscreen is removed automatically in this preview and on the invitation."
+        "Bird uploaded. Greenscreen removed — transparent frames ready for iPhone and desktop."
       );
-    } catch {
-      setError("Failed to upload bird video.");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Failed to upload bird video."
+      );
     } finally {
       setImageProcessing(null);
       event.target.value = "";
@@ -438,9 +458,10 @@ export default function EventSettingsPage() {
                   Flying Bird Video (MP4 + Greenscreen)
                 </label>
                 <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] dark:border-stone-700">
-                  {form.birdImage || form.birdImageIos ? (
+                  {form.birdFrames?.length || form.birdImage || form.birdImageIos ? (
                     <BirdGreenscreenPreview
                       src={form.birdImage || form.birdImageIos}
+                      frames={form.birdFrames}
                     />
                   ) : (
                     <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
@@ -457,11 +478,11 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  Upload MP4 with green background (max 25MB). Preview below
-                  removes the greenscreen automatically — same as on iPhone /
-                  invitation.
+                  Upload MP4 with green background (max 25MB). On upload, green
+                  is removed and saved as transparent PNG frames — this is what
+                  iPhone uses (no black/green box).
                 </p>
-                {(form.birdImage || form.birdImageIos) && (
+                {(form.birdImage || form.birdImageIos || form.birdFrames?.length) && (
                   <button
                     type="button"
                     onClick={() =>
@@ -469,6 +490,7 @@ export default function EventSettingsPage() {
                         ...current,
                         birdImage: "",
                         birdImageIos: "",
+                        birdFrames: [],
                       }))
                     }
                     disabled={saving || imageProcessing !== null}
@@ -555,7 +577,7 @@ export default function EventSettingsPage() {
           {saving
             ? "Saving..."
             : imageProcessing === "bird"
-              ? "Uploading bird MP4..."
+              ? "Processing bird frames (removing greenscreen)..."
               : imageProcessing
               ? `Processing ${imageProcessing} image...`
               : "Save Settings"}

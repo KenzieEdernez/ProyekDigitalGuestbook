@@ -106,6 +106,9 @@ alter table public.event_settings
   add column if not exists bird_image_ios text;
 
 alter table public.event_settings
+  add column if not exists bird_frames jsonb default '[]'::jsonb;
+
+alter table public.event_settings
   add column if not exists dress_ladies text;
 
 alter table public.event_settings

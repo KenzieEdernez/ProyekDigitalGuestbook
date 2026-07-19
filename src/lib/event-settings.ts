@@ -127,6 +127,44 @@ async function saveBirdAsset(value: string, format: BirdVideoFormat = "main") {
   return saveHeroImage(value);
 }
 
+export async function uploadBirdFrameBuffer(buffer: Buffer, index: number) {
+  if (buffer.length > 2 * 1024 * 1024) {
+    throw new Error("Bird frame is too large.");
+  }
+
+  const supabase = getSupabaseAdmin();
+  const bucket = getPhotoBucket();
+  const filename = `event/bird-frame-${Date.now()}-${String(index).padStart(2, "0")}.png`;
+
+  const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
+    contentType: "image/png",
+    upsert: true,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
+  return data.publicUrl;
+}
+
+function parseBirdFrames(input: Partial<EventSettings> & Record<string, unknown>) {
+  const raw = input.birdFrames ?? input.bird_frames;
+  if (Array.isArray(raw)) {
+    return raw.map((item) => String(item ?? "").trim()).filter(Boolean);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item ?? "").trim()).filter(Boolean);
+      }
+    } catch {
+      return [raw.trim()];
+    }
+  }
+  return [];
+}
+
 function resolveTimeFields(input: Partial<EventSettings> & Record<string, unknown>) {
   const rawFrom = textValue(input.timeFrom ?? input.time_from);
   const legacyTime = textValue(input.time);
@@ -175,6 +213,7 @@ function buildSettings(input: Partial<EventSettings> & Record<string, unknown>):
     logoImage: textValue(input.logoImage ?? input.logo_image),
     birdImage: textValue(input.birdImage ?? input.bird_image),
     birdImageIos: textValue(input.birdImageIos ?? input.bird_image_ios),
+    birdFrames: parseBirdFrames(input),
     birdCount: clampBirdCount(input.birdCount ?? input.bird_count ?? 6),
   };
 }
@@ -231,6 +270,9 @@ export async function saveEventSettings(
   const logoImage = await saveHeroImage(settings.logoImage);
   const birdImage = await saveBirdAsset(settings.birdImage, "main");
   const birdImageIos = await saveBirdAsset(settings.birdImageIos, "ios");
+  const birdFrames = settings.birdFrames
+    .map((frame) => String(frame ?? "").trim())
+    .filter(Boolean);
   const { error } = await supabase.from("event_settings").upsert({
     id: "default",
     name: settings.name,
@@ -248,6 +290,7 @@ export async function saveEventSettings(
     logo_image: logoImage || null,
     bird_image: birdImage || null,
     bird_image_ios: birdImageIos || null,
+    bird_frames: birdFrames,
     bird_count: settings.birdCount,
     updated_at: new Date().toISOString(),
   });
@@ -262,6 +305,7 @@ export async function saveEventSettings(
     logoImage,
     birdImage,
     birdImageIos,
+    birdFrames,
     birdCount: settings.birdCount,
   };
 }

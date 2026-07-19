@@ -1,42 +1,49 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { startKeyedBirdDrawer } from "@/lib/keyed-bird-drawer";
+import { useEffect, useState } from "react";
 
-/** Admin preview: plays bird MP4 and strips greenscreen live. */
-export default function BirdGreenscreenPreview({ src }: { src: string }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+/** Admin preview for transparent PNG bird frames (no black/green plate). */
+export default function BirdGreenscreenPreview({
+  src,
+  frames = [],
+}: {
+  src?: string;
+  frames?: string[];
+}) {
+  const frameList = (frames || []).map((f) => f.trim()).filter(Boolean);
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    if (!src) return;
-    const target = canvasRef.current;
-    if (!target) return;
+    if (frameList.length <= 1) return;
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % frameList.length);
+    }, 70);
+    return () => window.clearInterval(timer);
+  }, [frameList.length]);
 
-    const drawer = startKeyedBirdDrawer({
-      src,
-      maxSize: 200,
-      onFrame: (sheet) => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        if (canvas.width !== sheet.width || canvas.height !== sheet.height) {
-          canvas.width = sheet.width;
-          canvas.height = sheet.height;
-        }
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(sheet, 0, 0);
-      },
-    });
+  if (frameList.length > 0) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={frameList[index] || frameList[0]}
+        alt=""
+        className="max-h-32 w-auto object-contain"
+        draggable={false}
+      />
+    );
+  }
 
-    return () => drawer.stop();
-  }, [src]);
+  if (!src) return null;
 
+  // Legacy fallback if frames not generated yet
   return (
-    <canvas
-      ref={canvasRef}
-      className="max-h-32 w-auto object-contain [background:transparent] supports-[-webkit-touch-callout:none]:mix-blend-screen"
-      aria-hidden
+    <video
+      src={src}
+      className="max-h-32 w-auto object-contain"
+      autoPlay
+      muted
+      loop
+      playsInline
     />
   );
 }

@@ -262,6 +262,7 @@ export default function InvitationApp() {
           <FlyingBirds
             birdImage={eventSettings.birdImage}
             birdImageIos={eventSettings.birdImageIos}
+            birdFrames={eventSettings.birdFrames}
             birdCount={eventSettings.birdCount}
           />
 

@@ -583,7 +583,7 @@
     left: 0;
     background: transparent !important;
     box-shadow: none;
-    will-change: transform, opacity;
+    will-change: transform;
     transition: opacity 0.35s ease;
   }
 
@@ -597,21 +597,6 @@
     filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.28));
     user-select: none;
     pointer-events: none;
-  }
-
-  .flying-bird-video {
-    mix-blend-mode: normal;
-  }
-
-  /*
-   * iOS/Safari sometimes paints keyed-out canvas pixels as opaque black.
-   * screen-blend makes that black plate disappear while keeping the white dove.
-   */
-  @supports (-webkit-touch-callout: none) {
-    .flying-bird-video {
-      mix-blend-mode: screen;
-      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
