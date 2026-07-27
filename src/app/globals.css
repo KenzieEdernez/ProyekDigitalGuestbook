@@ -794,7 +794,7 @@
     }
   }
 
-  /* Curtain transition */
+  /* Curtain transition (legacy fallback) */
   .curtain-panel {
     transition: transform 1.1s cubic-bezier(0.77, 0, 0.175, 1);
   }
@@ -805,6 +805,142 @@
 
   .curtain-open .curtain-right {
     transform: translateX(100%);
+  }
+
+  /* —— Invitation gate (persistent border + door open) —— */
+  .invitation-gate {
+    overflow: hidden;
+    /* Portal of source art (approx): x 118–290, y 210–500 */
+    --portal-left: 27.1%;
+    --portal-width: 39.5%;
+    --portal-top: 38.4%;
+    --portal-height: 53%;
+  }
+
+  .gate-stage {
+    position: relative;
+    width: min(100vw, calc(100dvh * 435 / 547));
+    height: min(100dvh, calc(100vw * 547 / 435));
+  }
+
+  .gate-backdrop {
+    position: absolute;
+    inset: 0;
+    /* Soft side wash on ultra-wide screens outside the gate art */
+    box-shadow: 0 0 0 100vmax rgba(249, 240, 237, 0.55);
+    clip-path: inset(0);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .gate-art {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    perspective: 1200px;
+  }
+
+  .gate-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    filter: drop-shadow(0 8px 28px rgba(40, 28, 18, 0.18));
+  }
+
+  .gate-shutter {
+    position: absolute;
+    left: var(--portal-left);
+    top: var(--portal-top);
+    width: var(--portal-width);
+    height: var(--portal-height);
+    background: linear-gradient(180deg, #f3ebe3 0%, #e8ddd2 100%);
+    opacity: 1;
+    transition: opacity 1.15s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+    z-index: 1;
+  }
+
+  .gate-shutter.is-open {
+    opacity: 0;
+  }
+
+  .gate-doors {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    transform-style: preserve-3d;
+  }
+
+  .gate-door {
+    position: absolute;
+    top: var(--portal-top);
+    height: var(--portal-height);
+    width: calc(var(--portal-width) / 2);
+    transform-style: preserve-3d;
+    transition:
+      transform 1.45s cubic-bezier(0.65, 0, 0.35, 1),
+      opacity 0.55s ease 0.85s;
+    will-change: transform, opacity;
+  }
+
+  .gate-door img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    user-select: none;
+    filter: drop-shadow(2px 4px 10px rgba(40, 28, 18, 0.35));
+  }
+
+  .gate-door-left {
+    left: var(--portal-left);
+    transform-origin: left center;
+  }
+
+  .gate-door-right {
+    left: calc(var(--portal-left) + var(--portal-width) / 2);
+    transform-origin: right center;
+  }
+
+  .gate-doors.is-open .gate-door-left {
+    transform: rotateY(-105deg);
+  }
+
+  .gate-doors.is-open .gate-door-right {
+    transform: rotateY(105deg);
+  }
+
+  /* After open, hide swing layers — baked-open doors in frame remain */
+  .invitation-gate.is-settled .gate-doors {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .invitation-gate.is-settled .gate-shutter {
+    visibility: hidden;
+  }
+
+  /* Keep copy clear of the door posts inside the portal */
+  .invitation-app-gated {
+    --gate-inset-x: clamp(0.75rem, 6vw, 3.5rem);
+    padding-left: var(--gate-inset-x);
+    padding-right: var(--gate-inset-x);
+  }
+
+  @media (min-width: 768px) {
+    .invitation-app-gated {
+      /* On tablet/desktop the gate is centered; pad toward portal width */
+      --gate-inset-x: max(1.25rem, calc((100vw - min(100vw, 100dvh * 435 / 547)) / 2 + 12%));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gate-door,
+    .gate-shutter {
+      transition-duration: 0.01ms !important;
+    }
   }
 
   /* Scroll reveal */

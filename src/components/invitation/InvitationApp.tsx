@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import FlyingBirds from "@/components/invitation/FlyingBirds";
 import InvitationCover from "@/components/invitation/InvitationCover";
+import InvitationGate from "@/components/invitation/InvitationGate";
 import InvitationNav from "@/components/invitation/InvitationNav";
 import ScrollProgress from "@/components/invitation/ScrollProgress";
 import WaveDivider from "@/components/invitation/WaveDivider";
@@ -160,7 +161,7 @@ export default function InvitationApp() {
       window.scrollTo({ top: 0, behavior: "auto" });
       setActiveSection("home");
       cleanUrl();
-    }, 1100);
+    }, 1600);
   };
 
   const toggleMusic = () => {
@@ -236,13 +237,6 @@ export default function InvitationApp() {
         />
       )}
 
-      {phase === "curtain" && (
-        <div className="curtain-open pointer-events-none fixed inset-0 z-[100] flex">
-          <div className="curtain-panel curtain-left h-full w-1/2 bg-navy-900" />
-          <div className="curtain-panel curtain-right h-full w-1/2 bg-navy-900" />
-        </div>
-      )}
-
       {phase === "cover" && (
         <InvitationCover
           guestName={guestName}
@@ -256,76 +250,84 @@ export default function InvitationApp() {
         />
       )}
 
-      {phase === "open" && (
-        <div className="invitation-app invitation-app-enter bg-champagne">
-          <ScrollProgress />
-          <FlyingBirds
-            birdImage={eventSettings.birdImage}
-            birdImageIos={eventSettings.birdImageIos}
-            birdFrames={eventSettings.birdFrames}
-            birdCount={eventSettings.birdCount}
-          />
-
-          <InvitationNav
-            active={activeSection}
-            coupleName={getCoupleDisplayName(wedding)}
-            onNavigate={navigateTo}
-            musicPlaying={musicPlaying}
-            musicAvailable={musicAvailable}
-            onToggleMusic={toggleMusic}
-          />
-
-          <main>
-            <HomeSection
-              event={eventSettings}
-              wedding={wedding}
-              copy={wedding.invitationCopy}
-              guestName={guestName}
-              weddingReady={weddingReady}
+      {(phase === "curtain" || phase === "open") && (
+        <>
+          <div
+            className={`invitation-app invitation-app-gated bg-champagne ${
+              phase === "curtain" ? "invitation-app-enter" : ""
+            }`}
+          >
+            <ScrollProgress />
+            <FlyingBirds
+              birdImage={eventSettings.birdImage}
+              birdImageIos={eventSettings.birdImageIos}
+              birdFrames={eventSettings.birdFrames}
+              birdCount={eventSettings.birdCount}
             />
 
-            <WaveDivider fill="#f9f0ed" />
-            <CoupleSection wedding={wedding} />
-            <WaveDivider fill="#1a2332" flip />
-            <EventSection event={eventSettings} ceremonies={wedding.ceremonies} />
-            <DressCodeSection event={eventSettings} copy={wedding.invitationCopy} />
-            <WaveDivider fill="#f3efe6" />
-            <GallerySection gallery={wedding.gallery} />
-            <WaveDivider fill="#f8f6f2" />
-            <RsvpSection
-              event={eventSettings}
-              wedding={wedding}
-              defaultName={guestName}
-              onNavigateWishes={() => navigateTo("wishes")}
+            <InvitationNav
+              active={activeSection}
+              coupleName={getCoupleDisplayName(wedding)}
+              onNavigate={navigateTo}
+              musicPlaying={musicPlaying}
+              musicAvailable={musicAvailable}
+              onToggleMusic={toggleMusic}
             />
-            <WaveDivider fill="#1a2332" />
-            <GiftSection gifts={wedding.gifts} copy={wedding.invitationCopy} />
-            <WaveDivider fill="#f5f0ea" />
-            <WishLettersSection onNavigateRsvp={() => navigateTo("rsvp")} />
-          </main>
 
-          <footer className="relative overflow-hidden border-t border-royal/10 bg-white px-6 py-16 text-center lg:py-20">
-            <div className="absolute inset-0 bg-radial-gold opacity-50" />
-            <Reveal direction="scale" className="relative">
-              <p className="font-display text-3xl font-light text-navy">
-                {getCoupleDisplayName(wedding)}
-              </p>
-              <div className="ornament-line mx-auto my-5 max-w-xs" />
-              <p className="text-sm text-stone-500">
-                Thank you for your blessings and presence
-              </p>
-              <p className="mt-8 text-[10px] uppercase tracking-[0.3em] text-stone-300">
-                {eventSettings.organizer}
-              </p>
-              <Link
-                href="/admin"
-                className="mt-4 inline-block text-[10px] uppercase tracking-widest text-stone-300 transition-colors duration-300 hover:text-royal"
-              >
-                Staff Login
-              </Link>
-            </Reveal>
-          </footer>
-        </div>
+            <main>
+              <HomeSection
+                event={eventSettings}
+                wedding={wedding}
+                copy={wedding.invitationCopy}
+                guestName={guestName}
+                weddingReady={weddingReady}
+              />
+
+              <WaveDivider fill="#f9f0ed" />
+              <CoupleSection wedding={wedding} />
+              <WaveDivider fill="#1a2332" flip />
+              <EventSection event={eventSettings} ceremonies={wedding.ceremonies} />
+              <DressCodeSection event={eventSettings} copy={wedding.invitationCopy} />
+              <WaveDivider fill="#f3efe6" />
+              <GallerySection gallery={wedding.gallery} />
+              <WaveDivider fill="#f8f6f2" />
+              <RsvpSection
+                event={eventSettings}
+                wedding={wedding}
+                defaultName={guestName}
+                onNavigateWishes={() => navigateTo("wishes")}
+              />
+              <WaveDivider fill="#1a2332" />
+              <GiftSection gifts={wedding.gifts} copy={wedding.invitationCopy} />
+              <WaveDivider fill="#f5f0ea" />
+              <WishLettersSection onNavigateRsvp={() => navigateTo("rsvp")} />
+            </main>
+
+            <footer className="relative overflow-hidden border-t border-royal/10 bg-white px-6 py-16 text-center lg:py-20">
+              <div className="absolute inset-0 bg-radial-gold opacity-50" />
+              <Reveal direction="scale" className="relative">
+                <p className="font-display text-3xl font-light text-navy">
+                  {getCoupleDisplayName(wedding)}
+                </p>
+                <div className="ornament-line mx-auto my-5 max-w-xs" />
+                <p className="text-sm text-stone-500">
+                  Thank you for your blessings and presence
+                </p>
+                <p className="mt-8 text-[10px] uppercase tracking-[0.3em] text-stone-300">
+                  {eventSettings.organizer}
+                </p>
+                <Link
+                  href="/admin"
+                  className="mt-4 inline-block text-[10px] uppercase tracking-widest text-stone-300 transition-colors duration-300 hover:text-royal"
+                >
+                  Staff Login
+                </Link>
+              </Reveal>
+            </footer>
+          </div>
+
+          <InvitationGate opening={phase === "curtain"} opened={phase === "open"} />
+        </>
       )}
     </>
   );
