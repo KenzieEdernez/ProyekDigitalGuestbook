@@ -807,132 +807,436 @@
     transform: translateX(100%);
   }
 
-  /* —— Invitation gate (persistent border + door open) —— */
+  /* --- CSS-painted invitation gate (persistent border) --- */
   .invitation-gate {
+    --gate-nav-offset: 4.35rem;
+    --gate-cream: #f4ede3;
+    --gate-cream-deep: #d9cbb6;
+    --gate-stone: #ebe2d4;
+    --gate-wood: #6b402c;
+    --gate-wood-deep: #3d2418;
+    --gate-wood-light: #8d5c3d;
+    --gate-roof: #343c48;
+    --gate-roof-deep: #1e242c;
+    --gate-gold: #c9a45b;
+    --gate-roof-h: clamp(3.4rem, 8.5vh, 4.75rem);
+    --gate-transom-h: clamp(1.85rem, 4.6vh, 2.65rem);
+    --gate-side-w: clamp(1.15rem, 3.2vw, 2.35rem);
+    --gate-door-rest: clamp(2.6rem, 14vw, 4.25rem);
+    --gate-bottom-h: clamp(0.65rem, 1.6vh, 1rem);
     overflow: hidden;
-    /* Portal of source art (approx): x 118–290, y 210–500 */
-    --portal-left: 27.1%;
-    --portal-width: 39.5%;
-    --portal-top: 38.4%;
-    --portal-height: 53%;
+    padding-top: var(--gate-nav-offset);
   }
 
-  .gate-stage {
+  .gate-shell {
     position: relative;
-    width: min(100vw, calc(100dvh * 435 / 547));
-    height: min(100dvh, calc(100vw * 547 / 435));
-  }
-
-  .gate-backdrop {
-    position: absolute;
-    inset: 0;
-    /* Soft side wash on ultra-wide screens outside the gate art */
-    box-shadow: 0 0 0 100vmax rgba(249, 240, 237, 0.55);
-    clip-path: inset(0);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .gate-art {
-    position: absolute;
-    inset: 0;
-    transform-style: preserve-3d;
-    perspective: 1200px;
-  }
-
-  .gate-frame {
-    position: absolute;
-    inset: 0;
     width: 100%;
+    height: calc(100% - var(--gate-nav-offset));
+  }
+
+  .gate-roof {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--gate-roof-h);
+    z-index: 5;
+    filter: drop-shadow(0 8px 16px rgba(30, 20, 12, 0.22));
+  }
+
+  .gate-roof-ridge {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    top: 0.2rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #5a6573, var(--gate-roof-deep));
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  .gate-roof-finial {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 0.85rem;
+    height: 0.85rem;
+    transform: translate(-50%, -15%) rotate(45deg);
+    background: linear-gradient(135deg, #f0d78a, var(--gate-gold) 55%, #8a6a28);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    z-index: 2;
+  }
+
+  .gate-roof-tiles {
+    position: absolute;
+    left: 3%;
+    right: 3%;
+    top: 0.45rem;
+    height: calc(100% - 1.2rem);
+    border-radius: 0.15rem 0.15rem 0 0;
+    background:
+      repeating-radial-gradient(
+        ellipse 14px 8px at 14px 78%,
+        #46515e 0 48%,
+        transparent 50%
+      ),
+      linear-gradient(180deg, #556070 0%, var(--gate-roof) 40%, var(--gate-roof-deep) 100%);
+    background-size: 28px 100%, 100% 100%;
+    clip-path: polygon(
+      0% 62%,
+      2% 30%,
+      6% 48%,
+      12% 22%,
+      50% 0%,
+      88% 22%,
+      94% 48%,
+      98% 30%,
+      100% 62%,
+      100% 100%,
+      0% 100%
+    );
+    box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.25);
+  }
+
+  .gate-roof-eave {
+    position: absolute;
+    top: 38%;
+    width: 12%;
+    height: 42%;
+    background: linear-gradient(180deg, #4a5563, var(--gate-roof-deep));
+    z-index: 1;
+  }
+
+  .gate-roof-eave-left {
+    left: 0;
+    border-radius: 0 0 0 1.5rem;
+    transform: skewY(8deg);
+    transform-origin: top right;
+  }
+
+  .gate-roof-eave-right {
+    right: 0;
+    border-radius: 0 0 1.5rem 0;
+    transform: skewY(-8deg);
+    transform-origin: top left;
+  }
+
+  .gate-roof-beam {
+    position: absolute;
+    left: 3%;
+    right: 3%;
+    bottom: 0;
+    height: 0.85rem;
+    background: linear-gradient(180deg, #f8f2e8, var(--gate-cream-deep));
+    border: 1px solid rgba(110, 85, 60, 0.25);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+
+  .gate-transom {
+    position: absolute;
+    top: calc(var(--gate-roof-h) - 0.15rem);
+    left: var(--gate-side-w);
+    right: var(--gate-side-w);
+    height: var(--gate-transom-h);
+    z-index: 4;
+    padding: 0.28rem;
+    background: linear-gradient(180deg, var(--gate-cream), var(--gate-stone));
+    border: 1px solid rgba(110, 85, 60, 0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 4px 14px rgba(40, 28, 18, 0.12);
+  }
+
+  .gate-transom-lattice {
     height: 100%;
-    object-fit: contain;
-    user-select: none;
-    filter: drop-shadow(0 8px 28px rgba(40, 28, 18, 0.18));
+  }
+
+  .gate-lattice {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    background:
+      linear-gradient(180deg, rgba(255, 248, 238, 0.28), transparent 42%),
+      #5a3826;
+  }
+
+  .gate-lattice-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent 0 8px,
+        rgba(24, 14, 8, 0.92) 8px 10px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 8px,
+        rgba(24, 14, 8, 0.92) 8px 10px
+      );
+  }
+
+  .gate-lattice-diamond {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(38%, 3.5rem);
+    height: min(70%, 2.4rem);
+    transform: translate(-50%, -50%) rotate(45deg);
+    border: 2px solid rgba(250, 236, 210, 0.32);
+    box-shadow: inset 0 0 0 1px rgba(30, 18, 10, 0.4);
+  }
+
+  .gate-lattice-emblem {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: clamp(1.25rem, 2.8vw, 1.85rem);
+    height: clamp(1.25rem, 2.8vw, 1.85rem);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f0d78a, var(--gate-gold) 55%, #8a6a28);
+    box-shadow:
+      0 0 0 2px rgba(40, 28, 18, 0.45),
+      inset 0 1px 2px rgba(255, 255, 255, 0.45);
+    z-index: 1;
+  }
+
+  .gate-lattice-emblem::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 40%;
+    height: 40%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    border: 1.5px solid rgba(70, 42, 18, 0.55);
+  }
+
+  .gate-pillar {
+    position: absolute;
+    top: calc(var(--gate-roof-h) - 0.35rem);
+    bottom: 0;
+    width: var(--gate-side-w);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gate-pillar-left { left: 0; }
+  .gate-pillar-right { right: 0; }
+
+  .gate-pillar-cap {
+    height: 0.95rem;
+    background: linear-gradient(180deg, #f8f1e6, var(--gate-cream-deep));
+    border: 1px solid rgba(110, 85, 60, 0.25);
+  }
+
+  .gate-pillar-body {
+    flex: 1;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(90, 65, 40, 0.16),
+        transparent 22%,
+        transparent 78%,
+        rgba(90, 65, 40, 0.14)
+      ),
+      linear-gradient(180deg, var(--gate-cream) 0%, var(--gate-stone) 100%);
+    box-shadow: inset 0 0 16px rgba(120, 90, 55, 0.08);
+  }
+
+  .gate-pillar-left .gate-pillar-body {
+    border-right: 1px solid rgba(110, 85, 60, 0.28);
+  }
+
+  .gate-pillar-right .gate-pillar-body {
+    border-left: 1px solid rgba(110, 85, 60, 0.28);
+  }
+
+  .gate-pillar-base {
+    height: calc(var(--gate-bottom-h) + 0.25rem);
+    background: linear-gradient(180deg, var(--gate-cream-deep), #cbb89d);
+    border-top: 1px solid rgba(110, 85, 60, 0.25);
+  }
+
+  .gate-threshold {
+    position: absolute;
+    left: var(--gate-side-w);
+    right: var(--gate-side-w);
+    bottom: 0;
+    height: var(--gate-bottom-h);
+    z-index: 3;
+    background: linear-gradient(180deg, #e7dccb, #cfc0a8);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .gate-portal {
+    position: absolute;
+    top: calc(var(--gate-roof-h) + var(--gate-transom-h) - 0.15rem);
+    bottom: var(--gate-bottom-h);
+    left: var(--gate-side-w);
+    right: var(--gate-side-w);
+    z-index: 6;
+    perspective: 1600px;
+    transform-style: preserve-3d;
   }
 
   .gate-shutter {
     position: absolute;
-    left: var(--portal-left);
-    top: var(--portal-top);
-    width: var(--portal-width);
-    height: var(--portal-height);
-    background: linear-gradient(180deg, #f3ebe3 0%, #e8ddd2 100%);
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 28%, #f7f0e6, #e5d9cb 72%, #d6c7b4);
     opacity: 1;
-    transition: opacity 1.15s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+    transition: opacity 0.95s ease 0.25s;
     z-index: 1;
   }
 
-  .gate-shutter.is-open {
-    opacity: 0;
-  }
+  .gate-shutter.is-open { opacity: 0; }
 
   .gate-doors {
     position: absolute;
     inset: 0;
     z-index: 2;
+    display: flex;
     transform-style: preserve-3d;
   }
 
   .gate-door {
-    position: absolute;
-    top: var(--portal-top);
-    height: var(--portal-height);
-    width: calc(var(--portal-width) / 2);
-    transform-style: preserve-3d;
-    transition:
-      transform 1.45s cubic-bezier(0.65, 0, 0.35, 1),
-      opacity 0.55s ease 0.85s;
-    will-change: transform, opacity;
-  }
-
-  .gate-door img {
-    width: 100%;
+    position: relative;
+    width: 50%;
     height: 100%;
-    object-fit: cover;
-    object-position: center;
-    user-select: none;
-    filter: drop-shadow(2px 4px 10px rgba(40, 28, 18, 0.35));
+    transform-style: preserve-3d;
+    transition: transform 1.55s cubic-bezier(0.62, 0.05, 0.28, 1);
+    will-change: transform;
   }
 
-  .gate-door-left {
-    left: var(--portal-left);
-    transform-origin: left center;
-  }
+  .gate-door-left { transform-origin: left center; }
+  .gate-door-right { transform-origin: right center; }
 
-  .gate-door-right {
-    left: calc(var(--portal-left) + var(--portal-width) / 2);
-    transform-origin: right center;
-  }
-
+  /* Park almost fully aside; leave a wood strip as the side border */
   .gate-doors.is-open .gate-door-left {
-    transform: rotateY(-105deg);
+    transform: translateX(calc(-100% + var(--gate-door-rest))) rotateY(-16deg);
   }
 
   .gate-doors.is-open .gate-door-right {
-    transform: rotateY(105deg);
+    transform: translateX(calc(100% - var(--gate-door-rest))) rotateY(16deg);
   }
 
-  /* After open, hide swing layers — baked-open doors in frame remain */
-  .invitation-gate.is-settled .gate-doors {
-    opacity: 0;
-    transition: opacity 0.4s ease;
+  .gate-door-face {
+    position: relative;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 0.5rem minmax(0, 1.35fr) 0.85rem minmax(0, 0.85fr) 0.5rem;
+    background: linear-gradient(
+      180deg,
+      var(--gate-wood-light),
+      var(--gate-wood) 42%,
+      var(--gate-wood-deep)
+    );
+    border: 1px solid rgba(30, 18, 10, 0.55);
+    backface-visibility: hidden;
+    box-shadow:
+      inset 0 0 0 2px rgba(250, 230, 200, 0.08),
+      6px 0 20px rgba(20, 12, 8, 0.3);
   }
 
-  .invitation-gate.is-settled .gate-shutter {
-    visibility: hidden;
+  .gate-door-right .gate-door-face {
+    box-shadow:
+      inset 0 0 0 2px rgba(250, 230, 200, 0.08),
+      -6px 0 20px rgba(20, 12, 8, 0.3);
   }
 
-  /* Keep copy clear of the door posts inside the portal */
+  .gate-door-edge {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.45rem;
+    background: linear-gradient(180deg, #2a1810, #5a3826 40%, #2a1810);
+  }
+
+  .gate-door-left .gate-door-edge { right: 0; }
+  .gate-door-right .gate-door-edge { left: 0; }
+
+  .gate-door-rail {
+    background: linear-gradient(180deg, #8a5e42, #4a2c1c);
+  }
+
+  .gate-door-upper {
+    margin: 0.3rem 0.4rem 0.15rem;
+    border: 1px solid rgba(20, 12, 8, 0.45);
+    overflow: hidden;
+  }
+
+  .gate-door-upper .gate-lattice { height: 100%; }
+
+  .gate-door-upper .gate-lattice-diamond {
+    width: 44%;
+    height: 44%;
+  }
+
+  .gate-door-mid {
+    display: grid;
+    place-items: center;
+  }
+
+  .gate-door-handle {
+    width: 0.28rem;
+    height: 68%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #e0c27a, #9a7428 55%, #6d5218);
+    box-shadow: 0 0 0 1px rgba(40, 28, 18, 0.35);
+  }
+
+  .gate-door-left .gate-door-handle {
+    justify-self: end;
+    margin-right: 16%;
+  }
+
+  .gate-door-right .gate-door-handle {
+    justify-self: start;
+    margin-left: 16%;
+  }
+
+  .gate-door-lower {
+    margin: 0.12rem 0.4rem 0.3rem;
+    display: grid;
+  }
+
+  .gate-door-panel {
+    border: 1px solid rgba(20, 12, 8, 0.5);
+    background:
+      linear-gradient(180deg, rgba(255, 220, 180, 0.08), transparent 35%),
+      linear-gradient(90deg, rgba(20, 12, 8, 0.18), transparent 18%, transparent 82%, rgba(20, 12, 8, 0.18)),
+      linear-gradient(180deg, #7a4a32, #4e2d1c);
+    box-shadow: inset 0 0 0 3px rgba(90, 55, 35, 0.35);
+  }
+
   .invitation-app-gated {
-    --gate-inset-x: clamp(0.75rem, 6vw, 3.5rem);
-    padding-left: var(--gate-inset-x);
-    padding-right: var(--gate-inset-x);
+    --gate-nav-offset: 4.35rem;
+    --gate-roof-h: clamp(3.4rem, 8.5vh, 4.75rem);
+    --gate-transom-h: clamp(1.85rem, 4.6vh, 2.65rem);
+    --gate-side-w: clamp(1.15rem, 3.2vw, 2.35rem);
+    --gate-door-rest: clamp(2.6rem, 14vw, 4.25rem);
+    --gate-bottom-h: clamp(0.65rem, 1.6vh, 1rem);
+    padding-left: calc(var(--gate-side-w) + var(--gate-door-rest) * 0.55);
+    padding-right: calc(var(--gate-side-w) + var(--gate-door-rest) * 0.55);
+    padding-bottom: calc(var(--gate-bottom-h) + 0.35rem);
+  }
+
+  .invitation-app-gated #home .invitation-hero-stage {
+    padding-top: calc(
+      var(--gate-nav-offset) + var(--gate-roof-h) + var(--gate-transom-h) + 0.35rem
+    );
+    padding-bottom: calc(var(--gate-bottom-h) + 1.25rem);
   }
 
   @media (min-width: 768px) {
+    .invitation-gate,
     .invitation-app-gated {
-      /* On tablet/desktop the gate is centered; pad toward portal width */
-      --gate-inset-x: max(1.25rem, calc((100vw - min(100vw, 100dvh * 435 / 547)) / 2 + 12%));
+      --gate-nav-offset: 4.75rem;
+      --gate-side-w: clamp(1.5rem, 2.8vw, 2.75rem);
+      --gate-door-rest: clamp(3rem, 5.5vw, 4.5rem);
+      --gate-roof-h: clamp(3.6rem, 8vh, 5rem);
     }
   }
 
