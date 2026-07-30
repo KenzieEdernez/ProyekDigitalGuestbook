@@ -9,7 +9,7 @@ type InvitationBorderVideoProps = {
 
 /**
  * Fixed Lottie overlay for the uploaded border/gate animation.
- * Transparent on iOS and desktop; loops as a viewport frame while content scrolls.
+ * Stretches to the full viewport so the frame matches every screen size.
  */
 export default function InvitationBorderVideo({
   src,
@@ -45,10 +45,11 @@ export default function InvitationBorderVideo({
 
   return (
     <div
-      className="invitation-border-video pointer-events-none fixed inset-0 z-[35]"
+      className="invitation-border-video pointer-events-none fixed inset-0 z-[35] h-[100dvh] w-screen overflow-hidden"
       aria-hidden
     >
       <Lottie
+        className="invitation-border-lottie"
         animationData={animationData}
         loop
         autoplay
@@ -58,7 +59,8 @@ export default function InvitationBorderVideo({
           background: "transparent",
         }}
         rendererSettings={{
-          preserveAspectRatio: "xMidYMid slice",
+          // Stretch to exact screen size so the border hugs every edge
+          preserveAspectRatio: "none",
         }}
       />
     </div>

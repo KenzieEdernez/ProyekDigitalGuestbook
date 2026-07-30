@@ -811,8 +811,11 @@
     overflow: hidden;
   }
 
-  .invitation-border-video video {
+  .invitation-border-video .invitation-border-lottie,
+  .invitation-border-video .invitation-border-lottie > svg {
     display: block;
+    width: 100% !important;
+    height: 100% !important;
   }
 
   /* Scroll reveal */
