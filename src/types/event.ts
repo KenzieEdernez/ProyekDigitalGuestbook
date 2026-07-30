@@ -21,4 +21,6 @@ export interface EventSettings {
   birdFrames: string[];
   /** How many flying birds to show on the invitation (1–12). */
   birdCount: number;
+  /** Fixed border animation video URL (WebM/MP4) over the open invitation. */
+  borderVideo: string;
 }

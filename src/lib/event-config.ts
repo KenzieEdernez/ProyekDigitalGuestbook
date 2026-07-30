@@ -40,6 +40,7 @@ export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   birdImageIos: "",
   birdFrames: [],
   birdCount: 6,
+  borderVideo: "",
 };
 
 export function mergeEventSettings(settings?: Partial<EventSettings>) {

@@ -28,6 +28,7 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   birdImageIos: "",
   birdFrames: [],
   birdCount: 6,
+  borderVideo: "",
 };
 
 function readFittedImage(file: File, maxSize = 1400, type: "image/jpeg" | "image/png" = "image/jpeg") {
@@ -72,7 +73,14 @@ export default function EventSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [imageProcessing, setImageProcessing] = useState<
-    "landscape" | "portrait" | "card" | "dresscode" | "logo" | "bird" | null
+    | "landscape"
+    | "portrait"
+    | "card"
+    | "dresscode"
+    | "logo"
+    | "bird"
+    | "borderVideo"
+    | null
   >(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -244,6 +252,70 @@ export default function EventSettingsPage() {
       );
     } catch {
       setError("Failed to upload Lottie bird.");
+    } finally {
+      setImageProcessing(null);
+      event.target.value = "";
+    }
+  };
+
+  const handleBorderVideoChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const name = file.name.toLowerCase();
+    const type = (file.type || "").toLowerCase();
+    const isVideo =
+      type.startsWith("video/") ||
+      name.endsWith(".webm") ||
+      name.endsWith(".mp4") ||
+      name.endsWith(".mov");
+
+    if (!isVideo) {
+      setError("Border file must be a video (.webm, .mp4, or .mov).");
+      return;
+    }
+
+    if (file.size > 40 * 1024 * 1024) {
+      setError("Border video must be under 40MB.");
+      return;
+    }
+
+    setImageProcessing("borderVideo");
+    setError(null);
+    setMessage(null);
+
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch("/api/event-settings/border-video-upload", {
+        method: "POST",
+        body,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Failed to upload border video.");
+        return;
+      }
+
+      if (data.settings) {
+        setForm({
+          ...data.settings,
+          borderVideo: data.settings.borderVideo || data.url || "",
+        });
+      } else if (data.url) {
+        setForm((current) => ({
+          ...current,
+          borderVideo: data.url,
+        }));
+      }
+      setMessage(
+        "Border animation video uploaded. It will frame the open invitation."
+      );
+    } catch {
+      setError("Failed to upload border video.");
     } finally {
       setImageProcessing(null);
       event.target.value = "";
@@ -506,6 +578,56 @@ export default function EventSettingsPage() {
                   after changing.
                 </p>
               </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Border Animation Video
+                </label>
+                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-stone-100 dark:border-stone-700 dark:bg-navy-800">
+                  {form.borderVideo ? (
+                    <video
+                      src={form.borderVideo}
+                      className="h-full w-full object-cover"
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
+                      <ImageIcon className="h-8 w-8" />
+                      <p className="mt-2 text-sm">No border video yet</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="video/*,.webm,.mp4,.mov"
+                  onChange={handleBorderVideoChange}
+                  disabled={saving || imageProcessing !== null}
+                  className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
+                />
+                <p className="mt-2 text-xs text-stone-400">
+                  Upload your gate/border animation video (.webm recommended for
+                  transparency, or .mp4/.mov, max 40MB). It plays as a fixed
+                  frame over the open invitation.
+                </p>
+                {form.borderVideo && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((current) => ({
+                        ...current,
+                        borderVideo: "",
+                      }))
+                    }
+                    disabled={saving || imageProcessing !== null}
+                    className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
+                  >
+                    Remove border video
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
@@ -559,6 +681,8 @@ export default function EventSettingsPage() {
             ? "Saving..."
             : imageProcessing === "bird"
               ? "Uploading Lottie bird..."
+              : imageProcessing === "borderVideo"
+                ? "Uploading border video..."
               : imageProcessing
               ? `Processing ${imageProcessing} image...`
               : "Save Settings"}

@@ -23,6 +23,7 @@ const EMPTY_EVENT_SETTINGS: EventSettings = {
   birdImageIos: "",
   birdFrames: [],
   birdCount: 6,
+  borderVideo: "",
 };
 
 export function useEventSettings() {

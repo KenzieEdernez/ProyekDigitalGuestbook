@@ -111,6 +111,43 @@ export async function uploadBirdLottieBuffer(buffer: Buffer) {
   return data.publicUrl;
 }
 
+const MAX_BORDER_VIDEO_BYTES = 40 * 1024 * 1024;
+
+function borderVideoExtension(mimeType: string) {
+  const mime = mimeType.toLowerCase();
+  if (mime.includes("webm")) return "webm";
+  if (mime.includes("quicktime") || mime.includes("mov")) return "mov";
+  return "mp4";
+}
+
+/** Upload a border animation video (WebM/MP4) used as a fixed invitation frame. */
+export async function uploadBorderVideoBuffer(buffer: Buffer, mimeType: string) {
+  if (buffer.length > MAX_BORDER_VIDEO_BYTES) {
+    throw new Error("Border video must be under 40MB.");
+  }
+
+  const supabase = getSupabaseAdmin();
+  const bucket = getPhotoBucket();
+  const ext = borderVideoExtension(mimeType);
+  const filename = `event/border-video-${Date.now()}.${ext}`;
+  const contentType =
+    mimeType && mimeType.startsWith("video/")
+      ? mimeType
+      : ext === "webm"
+        ? "video/webm"
+        : "video/mp4";
+
+  const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
+    contentType,
+    upsert: true,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
+  return data.publicUrl;
+}
+
 async function saveBirdAsset(value: string, _format: BirdVideoFormat = "main") {
   if (!value) return "";
   if (!value.startsWith("data:")) return value;
@@ -224,6 +261,7 @@ function buildSettings(input: Partial<EventSettings> & Record<string, unknown>):
     birdImageIos: textValue(input.birdImageIos ?? input.bird_image_ios),
     birdFrames: parseBirdFrames(input),
     birdCount: clampBirdCount(input.birdCount ?? input.bird_count ?? 6),
+    borderVideo: textValue(input.borderVideo ?? input.border_video),
   };
 }
 
@@ -282,6 +320,9 @@ export async function saveEventSettings(
   const birdFrames = settings.birdFrames
     .map((frame) => String(frame ?? "").trim())
     .filter(Boolean);
+  const borderVideo = settings.borderVideo.startsWith("data:")
+    ? ""
+    : settings.borderVideo.trim();
 
   // Lottie lives in bird_image. Do not require bird_frames column —
   // many projects never created it (schema cache errors otherwise).
@@ -303,13 +344,31 @@ export async function saveEventSettings(
     bird_image: birdImage || null,
     bird_image_ios: birdImageIos || null,
     bird_count: settings.birdCount,
+    border_video: borderVideo || null,
     updated_at: new Date().toISOString(),
   };
 
   let { error } = await supabase.from("event_settings").upsert(payload);
+  let saveErrorMessage = error?.message ?? "";
+
+  if (error && /border_video|schema cache/i.test(error.message)) {
+    const { border_video: _ignored, ...withoutBorder } = payload;
+    const retry = await supabase.from("event_settings").upsert(withoutBorder);
+    if (retry.error) {
+      error = retry.error;
+      saveErrorMessage = retry.error.message;
+    } else if (borderVideo) {
+      error = null;
+      saveErrorMessage =
+        "Missing DB column border_video. Run in Supabase SQL: alter table public.event_settings add column if not exists border_video text;";
+    } else {
+      error = null;
+      saveErrorMessage = "";
+    }
+  }
 
   // Optional legacy column — only write if the table has it.
-  if (!error && birdFrames.length > 0) {
+  if (!error && !saveErrorMessage && birdFrames.length > 0) {
     const withFrames = await supabase.from("event_settings").upsert({
       ...payload,
       bird_frames: birdFrames,
@@ -320,10 +379,11 @@ export async function saveEventSettings(
       !/bird_frames|schema cache/i.test(withFrames.error.message)
     ) {
       error = withFrames.error;
+      saveErrorMessage = withFrames.error.message;
     }
   }
 
-  if (error) throw new Error(error.message);
+  if (saveErrorMessage) throw new Error(saveErrorMessage);
   return {
     ...settings,
     heroImage,
@@ -335,5 +395,6 @@ export async function saveEventSettings(
     birdImageIos,
     birdFrames,
     birdCount: settings.birdCount,
+    borderVideo,
   };
 }

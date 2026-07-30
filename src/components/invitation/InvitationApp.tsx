@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import FlyingBirds from "@/components/invitation/FlyingBirds";
+import InvitationBorderVideo from "@/components/invitation/InvitationBorderVideo";
 import InvitationCover from "@/components/invitation/InvitationCover";
-import InvitationGate from "@/components/invitation/InvitationGate";
 import InvitationNav from "@/components/invitation/InvitationNav";
 import ScrollProgress from "@/components/invitation/ScrollProgress";
 import WaveDivider from "@/components/invitation/WaveDivider";
@@ -161,7 +161,7 @@ export default function InvitationApp() {
       window.scrollTo({ top: 0, behavior: "auto" });
       setActiveSection("home");
       cleanUrl();
-    }, 1600);
+    }, 900);
   };
 
   const toggleMusic = () => {
@@ -253,7 +253,7 @@ export default function InvitationApp() {
       {(phase === "curtain" || phase === "open") && (
         <>
           <div
-            className={`invitation-app invitation-app-gated bg-champagne ${
+            className={`invitation-app bg-champagne ${
               phase === "curtain" ? "invitation-app-enter" : ""
             }`}
           >
@@ -326,7 +326,7 @@ export default function InvitationApp() {
             </footer>
           </div>
 
-          <InvitationGate opening={phase === "curtain"} opened={phase === "open"} />
+          <InvitationBorderVideo src={eventSettings.borderVideo} />
         </>
       )}
     </>
