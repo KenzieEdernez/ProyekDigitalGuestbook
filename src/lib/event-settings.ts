@@ -74,7 +74,7 @@ function assertValidLottieJson(buffer: Buffer) {
   try {
     parsed = JSON.parse(buffer.toString("utf8"));
   } catch {
-    throw new Error("Bird file must be valid Lottie JSON (.json).");
+    throw new Error("File must be valid Lottie JSON (.json).");
   }
 
   if (
@@ -82,7 +82,7 @@ function assertValidLottieJson(buffer: Buffer) {
     typeof parsed !== "object" ||
     !("layers" in (parsed as Record<string, unknown>))
   ) {
-    throw new Error("Invalid Lottie file. Export a bird animation as .json.");
+    throw new Error("Invalid Lottie file. Export the animation as .json.");
   }
 
   return parsed as Record<string, unknown>;
@@ -111,34 +111,22 @@ export async function uploadBirdLottieBuffer(buffer: Buffer) {
   return data.publicUrl;
 }
 
-const MAX_BORDER_VIDEO_BYTES = 40 * 1024 * 1024;
+const MAX_BORDER_LOTTIE_BYTES = 15 * 1024 * 1024;
 
-function borderVideoExtension(mimeType: string) {
-  const mime = mimeType.toLowerCase();
-  if (mime.includes("webm")) return "webm";
-  if (mime.includes("quicktime") || mime.includes("mov")) return "mov";
-  return "mp4";
-}
-
-/** Upload a border animation video (WebM/MP4) used as a fixed invitation frame. */
-export async function uploadBorderVideoBuffer(buffer: Buffer, mimeType: string) {
-  if (buffer.length > MAX_BORDER_VIDEO_BYTES) {
-    throw new Error("Border video must be under 40MB.");
+/** Upload a border Lottie animation (.json) used as a fixed invitation frame. */
+export async function uploadBorderLottieBuffer(buffer: Buffer) {
+  if (buffer.length > MAX_BORDER_LOTTIE_BYTES) {
+    throw new Error("Border Lottie file must be under 15MB.");
   }
+
+  assertValidLottieJson(buffer);
 
   const supabase = getSupabaseAdmin();
   const bucket = getPhotoBucket();
-  const ext = borderVideoExtension(mimeType);
-  const filename = `event/border-video-${Date.now()}.${ext}`;
-  const contentType =
-    mimeType && mimeType.startsWith("video/")
-      ? mimeType
-      : ext === "webm"
-        ? "video/webm"
-        : "video/mp4";
+  const filename = `event/border-lottie-${Date.now()}.json`;
 
   const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
-    contentType,
+    contentType: "application/json",
     upsert: true,
   });
 

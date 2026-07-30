@@ -3,23 +3,12 @@ import { isAdminLoggedIn } from "@/lib/admin-auth";
 import {
   getEventSettings,
   saveEventSettings,
-  uploadBorderVideoBuffer,
+  uploadBorderLottieBuffer,
 } from "@/lib/event-settings";
 
 export const dynamic = "force-dynamic";
 
-const MAX_BORDER_VIDEO_BYTES = 40 * 1024 * 1024;
-
-function isBorderVideoFile(file: File) {
-  const name = file.name.toLowerCase();
-  const type = (file.type || "").toLowerCase();
-  return (
-    type.startsWith("video/") ||
-    name.endsWith(".webm") ||
-    name.endsWith(".mp4") ||
-    name.endsWith(".mov")
-  );
-}
+const MAX_BORDER_LOTTIE_BYTES = 15 * 1024 * 1024;
 
 export async function POST(request: Request) {
   if (!(await isAdminLoggedIn())) {
@@ -35,28 +24,34 @@ export async function POST(request: Request) {
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
-        { error: "No border video provided." },
+        { error: "No border Lottie file provided." },
         { status: 400 }
       );
     }
 
-    if (!isBorderVideoFile(file)) {
+    const name = file.name.toLowerCase();
+    const type = (file.type || "").toLowerCase();
+    const isJson =
+      type.includes("json") ||
+      type.includes("text/plain") ||
+      name.endsWith(".json");
+
+    if (!isJson) {
       return NextResponse.json(
-        { error: "Please upload a video file (.webm, .mp4, or .mov)." },
+        { error: "Please upload a Lottie animation (.json)." },
         { status: 400 }
       );
     }
 
-    if (file.size > MAX_BORDER_VIDEO_BYTES) {
+    if (file.size > MAX_BORDER_LOTTIE_BYTES) {
       return NextResponse.json(
-        { error: "Border video must be under 40MB." },
+        { error: "Border Lottie file must be under 15MB." },
         { status: 400 }
       );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const mimeType = file.type || "video/mp4";
-    const url = await uploadBorderVideoBuffer(buffer, mimeType);
+    const url = await uploadBorderLottieBuffer(buffer);
 
     const current = await getEventSettings();
     const settings = await saveEventSettings({
@@ -71,7 +66,7 @@ export async function POST(request: Request) {
         error:
           error instanceof Error
             ? error.message
-            : "Failed to upload border video.",
+            : "Failed to upload border Lottie.",
       },
       { status: 400 }
     );

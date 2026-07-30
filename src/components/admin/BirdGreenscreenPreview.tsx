@@ -17,7 +17,8 @@ export default function BirdGreenscreenPreview({
   const isLottie =
     !!src &&
     (src.toLowerCase().includes(".json") ||
-      src.toLowerCase().includes("bird-lottie"));
+      src.toLowerCase().includes("bird-lottie") ||
+      src.toLowerCase().includes("border-lottie"));
 
   useEffect(() => {
     if (!isLottie || !src) {
