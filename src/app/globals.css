@@ -404,7 +404,8 @@
 
   .couple-photo-oval {
     overflow: hidden;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 3 / 4;
+    width: 100%;
     border-radius: 999px;
     background: #efe6d8;
   }
@@ -413,7 +414,7 @@
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center center;
   }
 
