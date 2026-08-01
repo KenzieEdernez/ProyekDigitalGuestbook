@@ -7,7 +7,6 @@ import InvitationCover from "@/components/invitation/InvitationCover";
 import InvitationNav from "@/components/invitation/InvitationNav";
 import RsvpReminderToast from "@/components/invitation/RsvpReminderToast";
 import ScrollProgress from "@/components/invitation/ScrollProgress";
-import WaveDivider from "@/components/invitation/WaveDivider";
 import ClosingSection from "@/components/invitation/sections/ClosingSection";
 import DressCodeSection from "@/components/invitation/sections/DressCodeSection";
 import HomeSection from "@/components/invitation/sections/HomeSection";
@@ -292,13 +291,10 @@ export default function InvitationApp() {
               guestName={guestName}
               weddingReady={weddingReady}
             />
-
-            <WaveDivider fill="#f9f0ed" />
             <CoupleSection
               wedding={wedding}
               logoImage={eventSettings.logoImage}
             />
-            <WaveDivider fill="#1a2332" flip />
             <EventSection
               ceremonies={wedding.ceremonies}
               sectionTitle={wedding.invitationCopy.eventSectionTitle}
@@ -307,20 +303,15 @@ export default function InvitationApp() {
               event={eventSettings}
               copy={wedding.invitationCopy}
             />
-            <WaveDivider fill="#f3efe6" />
             <GallerySection gallery={wedding.gallery} />
-            <WaveDivider fill="#f8f6f2" />
             <RsvpSection
               event={eventSettings}
               wedding={wedding}
               defaultName={guestName}
               onNavigateWishes={() => navigateTo("wishes")}
             />
-            <WaveDivider fill="#1a2332" />
             <GiftSection gifts={wedding.gifts} copy={wedding.invitationCopy} />
-            <WaveDivider fill="#f5f0ea" />
             <WishLettersSection onNavigateRsvp={() => navigateTo("rsvp")} />
-            <WaveDivider fill="#1a2332" flip />
             <ClosingSection
               wedding={wedding}
               copy={wedding.invitationCopy}
