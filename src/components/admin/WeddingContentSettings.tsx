@@ -12,6 +12,7 @@ import {
   Quote,
   Music,
   Sparkles,
+  Heart,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import CeremonyDateInput from "@/components/admin/CeremonyDateInput";
@@ -19,7 +20,15 @@ import EventTimeInput from "@/components/admin/EventTimeInput";
 import { DEFAULT_WEDDING } from "@/lib/wedding-config";
 import type { WeddingSettings } from "@/types/wedding";
 
-type Tab = "invitation" | "couple" | "events" | "gallery" | "gifts" | "music" | "wishes";
+type Tab =
+  | "invitation"
+  | "couple"
+  | "events"
+  | "gallery"
+  | "closing"
+  | "gifts"
+  | "music"
+  | "wishes";
 
 const MAX_MUSIC_BYTES = 12 * 1024 * 1024;
 
@@ -31,6 +40,7 @@ function buildSavePayload(form: WeddingSettings): WeddingSettings {
   return {
     ...form,
     loveStory: [],
+    closingLogos: (form.closingLogos ?? []).filter(Boolean),
     musicUrl: isLocalPreviewUrl(form.musicUrl) ? "" : form.musicUrl,
   };
 }
@@ -91,6 +101,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "couple", label: "Couple & Quote", icon: Users },
   { id: "events", label: "Wedding Events", icon: Calendar },
   { id: "gallery", label: "Gallery", icon: ImageIcon },
+  { id: "closing", label: "Closing", icon: Heart },
   { id: "gifts", label: "Gifts", icon: Gift },
   { id: "music", label: "Music", icon: Music },
   { id: "wishes", label: "Wishes", icon: Quote },
@@ -139,7 +150,14 @@ export default function WeddingContentSettings() {
       try {
         const res = await fetch("/api/wedding-settings", { cache: "no-store" });
         const data = await res.json();
-        if (data.settings) setForm(data.settings);
+        if (data.settings) {
+          setForm({
+            ...data.settings,
+            closingLogos: Array.isArray(data.settings.closingLogos)
+              ? data.settings.closingLogos
+              : [],
+          });
+        }
       } catch {
         setError("Failed to load wedding content.");
       } finally {
@@ -249,6 +267,21 @@ export default function WeddingContentSettings() {
       setForm((f) => ({ ...f, gallery: [...f.gallery, ...items] }));
     } catch {
       setError("Failed to process gallery images.");
+    }
+  };
+
+  const handleClosingLogoUpload = async (files: FileList | null) => {
+    if (!files?.length) return;
+    try {
+      const urls = await Promise.all(
+        Array.from(files).map((file) => readCeremonyPngFile(file))
+      );
+      setForm((f) => ({
+        ...f,
+        closingLogos: [...(f.closingLogos ?? []), ...urls],
+      }));
+    } catch {
+      setError("Failed to process closing logos.");
     }
   };
 
@@ -740,6 +773,57 @@ export default function WeddingContentSettings() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {tab === "closing" && (
+          <div className="space-y-4">
+            <p className="text-sm text-stone-500">
+              Add one or more logos for the ending / closing slide. PNG with
+              transparent background recommended.
+            </p>
+            <input
+              type="file"
+              accept="image/png,image/*"
+              multiple
+              onChange={(e) => {
+                void handleClosingLogoUpload(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            {(form.closingLogos ?? []).length === 0 ? (
+              <p className="text-sm text-stone-400">No closing logos yet.</p>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {(form.closingLogos ?? []).map((src, index) => (
+                  <div
+                    key={`${src}-${index}`}
+                    className="flex flex-col items-center rounded-xl border border-stone-200 p-4 dark:border-stone-700"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt={`Closing logo ${index + 1}`}
+                      className="max-h-28 w-auto object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          closingLogos: (f.closingLogos ?? []).filter(
+                            (_, i) => i !== index
+                          ),
+                        }))
+                      }
+                      className="mt-3 text-xs text-red-500"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

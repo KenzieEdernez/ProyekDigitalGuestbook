@@ -78,6 +78,7 @@ export const DEFAULT_WEDDING: WeddingSettings = {
     phone: "+62 812-3456-7890",
   },
   musicUrl: "",
+  closingLogos: [],
 };
 
 /** @deprecated Use DEFAULT_WEDDING or merged settings from API */
@@ -139,5 +140,8 @@ export function mergeWeddingSettings(
       stored.musicUrl !== undefined
         ? stored.musicUrl.trim()
         : DEFAULT_WEDDING.musicUrl,
+    closingLogos: Array.isArray(stored.closingLogos)
+      ? stored.closingLogos.filter((url) => typeof url === "string" && url.trim())
+      : [],
   };
 }

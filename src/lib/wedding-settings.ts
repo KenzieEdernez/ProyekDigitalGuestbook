@@ -205,6 +205,9 @@ function sanitizeSettings(input: Partial<WeddingSettings>): WeddingSettings {
       phone: textValue(input.giftAddress?.phone) || DEFAULT_WEDDING.giftAddress.phone,
     },
     musicUrl: textValue(input.musicUrl) || DEFAULT_WEDDING.musicUrl,
+    closingLogos: Array.isArray(input.closingLogos)
+      ? input.closingLogos.map((url) => textValue(url)).filter(Boolean)
+      : [],
   };
 
   if (!settings.ceremonies.length) {
@@ -229,6 +232,9 @@ async function persistMedia(settings: WeddingSettings): Promise<WeddingSettings>
       image: item.image ? await saveImage(item.image, "ceremony") : "",
     }))
   );
+  const closingLogos = await Promise.all(
+    settings.closingLogos.map((url) => saveImage(url, "closing-logo"))
+  );
   const musicUrl = await saveMusic(settings.musicUrl);
 
   return {
@@ -237,6 +243,7 @@ async function persistMedia(settings: WeddingSettings): Promise<WeddingSettings>
     bride: { ...settings.bride, photo: bridePhoto },
     gallery,
     ceremonies,
+    closingLogos,
     musicUrl,
   };
 }

@@ -324,7 +324,6 @@ export default function InvitationApp() {
             <ClosingSection
               wedding={wedding}
               copy={wedding.invitationCopy}
-              logoImage={eventSettings.logoImage}
               organizer={eventSettings.organizer}
             />
           </main>

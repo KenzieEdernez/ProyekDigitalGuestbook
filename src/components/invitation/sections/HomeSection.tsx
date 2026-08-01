@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Calendar } from "lucide-react";
 import CountdownTimer from "@/components/invitation/CountdownTimer";
 import InvitationHeroBackground from "@/components/invitation/InvitationHeroBackground";
-import InvitationLogo from "@/components/invitation/InvitationLogo";
 import Reveal from "@/components/invitation/Reveal";
 import { addToCalendar } from "@/lib/calendar-event";
 import { resolveCeremonyEventDetails } from "@/lib/ceremony-event";
@@ -44,7 +43,6 @@ export default function HomeSection({
     [eventDetails]
   );
   const spacedDate = formatSpacedDisplayDate(copy.displayDate);
-  const fallbackInitials = `${wedding.groom.name?.[0] ?? "L"}${wedding.bride.name?.[0] ?? "A"}`;
 
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY);
@@ -68,36 +66,27 @@ export default function HomeSection({
 
       <div className="invitation-hero-stage relative z-10 min-h-[100dvh] px-6 text-center text-white sm:px-8">
         <div className="invitation-hero-cluster mx-auto flex w-full max-w-lg flex-col items-center">
-          <Reveal direction="blur" duration={900}>
-            <div className="invitation-hero-logo-wrap">
-              <InvitationLogo
-                src={event.logoImage}
-                fallbackInitials={fallbackInitials}
-              />
-            </div>
-          </Reveal>
-
           <div className="invitation-hero-copy w-full">
-            <Reveal direction="up" delay={160} duration={1000}>
-              <p className="mt-5 text-[9px] font-light uppercase tracking-[0.46em] text-white/80 sm:mt-6 sm:text-[10px]">
+            <Reveal direction="up" delay={120} duration={1000}>
+              <p className="mt-2 text-[9px] font-light uppercase tracking-[0.46em] text-white/80 sm:mt-4 sm:text-[10px]">
                 {copy.engagementTitle}
               </p>
             </Reveal>
 
-            <Reveal direction="up" delay={280} duration={1000}>
+            <Reveal direction="up" delay={240} duration={1000}>
               <h2 className="invitation-hero-names mt-3 font-display text-white sm:mt-4">
                 {getCoupleDisplayName(wedding)}
               </h2>
             </Reveal>
 
-            <Reveal direction="up" delay={400}>
+            <Reveal direction="up" delay={360}>
               <p className="mt-4 font-display text-[0.95rem] tracking-[0.38em] text-white/90 sm:mt-5 sm:text-base">
                 {spacedDate}
               </p>
             </Reveal>
 
             {guestName && (
-              <Reveal direction="up" delay={500}>
+              <Reveal direction="up" delay={460}>
                 <div className="invitation-home-guest mt-5 mx-auto w-full max-w-xs rounded-xl border border-white/20 bg-white/10 px-5 py-4 backdrop-blur-sm">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/55">
                     Dear,
@@ -109,7 +98,7 @@ export default function HomeSection({
               </Reveal>
             )}
 
-            <Reveal direction="up" delay={620}>
+            <Reveal direction="up" delay={580}>
               <div className="invitation-hero-actions mt-7 w-full sm:mt-8">
                 <p className="mb-2 text-[8px] font-semibold uppercase tracking-[0.3em] text-white/30">
                   Countdown to Our Big Day

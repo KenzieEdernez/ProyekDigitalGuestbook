@@ -74,4 +74,6 @@ export interface WeddingSettings {
   gifts: GiftAccount[];
   giftAddress: GiftAddress;
   musicUrl: string;
+  /** Logos shown on the closing / ending slide (any count). */
+  closingLogos: string[];
 }

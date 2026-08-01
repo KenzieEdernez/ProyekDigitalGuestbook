@@ -1,7 +1,6 @@
 "use client";
 
 import Reveal from "@/components/invitation/Reveal";
-import InvitationLogo from "@/components/invitation/InvitationLogo";
 import { formatSpacedDisplayDate } from "@/lib/invitation-format";
 import { getCoupleDisplayName } from "@/lib/wedding-config";
 import type { InvitationCopy, WeddingSettings } from "@/types/wedding";
@@ -9,19 +8,17 @@ import type { InvitationCopy, WeddingSettings } from "@/types/wedding";
 interface ClosingSectionProps {
   wedding: WeddingSettings;
   copy: InvitationCopy;
-  logoImage?: string;
   organizer?: string;
 }
 
 export default function ClosingSection({
   wedding,
   copy,
-  logoImage,
   organizer,
 }: ClosingSectionProps) {
   const coupleName = getCoupleDisplayName(wedding);
-  const initials = `${wedding.groom.name?.[0] ?? "L"}${wedding.bride.name?.[0] ?? "A"}`;
   const spacedDate = formatSpacedDisplayDate(copy.displayDate);
+  const logos = (wedding.closingLogos ?? []).filter(Boolean);
 
   return (
     <section
@@ -33,11 +30,22 @@ export default function ClosingSection({
       <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-royal/15 blur-3xl" />
 
       <div className="relative mx-auto max-w-lg">
-        <Reveal direction="blur" duration={800}>
-          <div className="mb-8 flex justify-center opacity-90">
-            <InvitationLogo src={logoImage} fallbackInitials={initials} />
-          </div>
-        </Reveal>
+        {logos.length > 0 && (
+          <Reveal direction="blur" duration={800}>
+            <div className="closing-logos mb-8 flex flex-wrap items-center justify-center gap-4 sm:gap-5">
+              {logos.map((src, index) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={`${src}-${index}`}
+                  src={src}
+                  alt=""
+                  aria-hidden
+                  className="h-14 w-auto max-w-[7.5rem] object-contain opacity-95 sm:h-16 sm:max-w-[9rem] md:h-[4.5rem] md:max-w-[10rem]"
+                />
+              ))}
+            </div>
+          </Reveal>
+        )}
 
         <Reveal direction="up" delay={120} duration={900}>
           <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-royal/80">

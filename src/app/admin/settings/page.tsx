@@ -438,8 +438,8 @@ export default function EventSettingsPage() {
                 />
                 <p className="mt-2 text-xs text-stone-400">
                   PNG recommended. Shown under &quot;The Couple&quot; (above Bride
-                  &amp; Groom), on the hero, and on the closing slide. Sized for
-                  mobile and desktop.
+                  &amp; Groom). Sized for mobile and desktop. Closing logos are
+                  managed separately in Wedding Invitation Content → Closing.
                 </p>
               </div>
 
