@@ -91,23 +91,37 @@ export default function InvitationNav({
         onNavigate={handleNav}
       />
 
-      {musicAvailable && (
+      <div
+        className={`fixed right-4 z-40 flex flex-col items-end gap-3 lg:right-8 ${
+          musicAvailable ? "bottom-6 lg:bottom-8" : "bottom-6 lg:bottom-8"
+        }`}
+      >
         <button
-          onClick={onToggleMusic}
-          className={`fixed bottom-6 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border shadow-card transition-all duration-500 ease-out-expo hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8 ${
-            musicPlaying
-              ? "border-royal/40 bg-royal/10"
-              : "border-stone-200 bg-white hover:border-royal/30"
-          }`}
-          aria-label={musicPlaying ? "Mute music" : "Play music"}
+          type="button"
+          onClick={() => handleNav("rsvp")}
+          className="rounded-full border border-royal/40 bg-royal px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white shadow-card transition-all duration-500 ease-out-expo hover:scale-105 hover:bg-royal/90 active:scale-95"
         >
-          {musicPlaying ? (
-            <Volume2 className="h-4 w-4 animate-pulse-soft text-royal" />
-          ) : (
-            <VolumeX className="h-4 w-4 text-stone-400" />
-          )}
+          RSVP
         </button>
-      )}
+
+        {musicAvailable && (
+          <button
+            onClick={onToggleMusic}
+            className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-card transition-all duration-500 ease-out-expo hover:scale-105 active:scale-95 ${
+              musicPlaying
+                ? "border-royal/40 bg-royal/10"
+                : "border-stone-200 bg-white hover:border-royal/30"
+            }`}
+            aria-label={musicPlaying ? "Mute music" : "Play music"}
+          >
+            {musicPlaying ? (
+              <Volume2 className="h-4 w-4 animate-pulse-soft text-royal" />
+            ) : (
+              <VolumeX className="h-4 w-4 text-stone-400" />
+            )}
+          </button>
+        )}
+      </div>
     </>
   );
 }

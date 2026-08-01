@@ -6,11 +6,12 @@ export const DEFAULT_INVITATION_COPY: InvitationCopy = {
     "With great joy, we invite you to attend and share your blessings on our special day.",
   openButtonLabel: "Open Invitation",
   displayDate: "06.09.2026",
+  eventSectionTitle: "Wedding Event",
   dressCodeTitle: "Dress Code",
   dressCodeDescription:
     "To support our wedding theme, we kindly request our guests to dress as follows on our special day:",
-  dressCodeTheme: "Elegant Formal",
-  dressCodeNote: "Think Batik / Kebaya",
+  dressCodeTheme: "",
+  dressCodeNote: "",
   giftTitle: "Gift",
   giftMessage:
     "Your love, kind wishes and prayer on our wedding day is the greatest gift of all. However, should you wish to send us blessings via online registry, you can conveniently transfer through our bank account.",
@@ -41,14 +42,7 @@ export const DEFAULT_WEDDING: WeddingSettings = {
     "And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquility with them.",
   quoteSource: "QS. Ar-Rum: 21",
   invitationCopy: DEFAULT_INVITATION_COPY,
-  loveStory: [
-    {
-      id: "story-1",
-      year: "2024",
-      title: "Our Beginning",
-      text: "Every love story is beautiful, but ours is our favorite. This is where our journey began.",
-    },
-  ],
+  loveStory: [],
   ceremonies: [
     {
       id: "ceremony-1",
@@ -58,6 +52,7 @@ export const DEFAULT_WEDDING: WeddingSettings = {
       location: "Grand Ballroom",
       address: "Jakarta, Indonesia",
       mapUrl: "https://maps.google.com",
+      image: "",
     },
   ],
   gallery: [
@@ -134,8 +129,7 @@ export function mergeWeddingSettings(
       ...DEFAULT_WEDDING.invitationCopy,
       ...stored.invitationCopy,
     },
-    loveStory:
-      stored.loveStory?.length ? stored.loveStory : DEFAULT_WEDDING.loveStory,
+    loveStory: Array.isArray(stored.loveStory) ? stored.loveStory : [],
     ceremonies:
       stored.ceremonies?.length ? stored.ceremonies : DEFAULT_WEDDING.ceremonies,
     gallery: stored.gallery ?? DEFAULT_WEDDING.gallery,

@@ -3,6 +3,7 @@ export interface InvitationCopy {
   coverMessage: string;
   openButtonLabel: string;
   displayDate: string;
+  eventSectionTitle: string;
   dressCodeTitle: string;
   dressCodeDescription: string;
   dressCodeTheme: string;
@@ -36,6 +37,8 @@ export interface CeremonyItem {
   location: string;
   address: string;
   mapUrl: string;
+  /** Transparent PNG (or other image) for the event card */
+  image?: string;
 }
 
 export interface GalleryImage {

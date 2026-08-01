@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import FlyingBirds from "@/components/invitation/FlyingBirds";
-import InvitationBorderVideo from "@/components/invitation/InvitationBorderVideo";
 import InvitationCover from "@/components/invitation/InvitationCover";
 import InvitationNav from "@/components/invitation/InvitationNav";
+import RsvpReminderToast from "@/components/invitation/RsvpReminderToast";
 import ScrollProgress from "@/components/invitation/ScrollProgress";
 import WaveDivider from "@/components/invitation/WaveDivider";
+import ClosingSection from "@/components/invitation/sections/ClosingSection";
 import DressCodeSection from "@/components/invitation/sections/DressCodeSection";
 import HomeSection from "@/components/invitation/sections/HomeSection";
 import CoupleSection from "@/components/invitation/sections/CoupleSection";
@@ -17,7 +17,6 @@ import GallerySection from "@/components/invitation/sections/GallerySection";
 import RsvpSection from "@/components/invitation/sections/RsvpSection";
 import GiftSection from "@/components/invitation/sections/GiftSection";
 import WishLettersSection from "@/components/invitation/sections/WishLettersSection";
-import Reveal from "@/components/invitation/Reveal";
 import { useEventSettings } from "@/hooks/useEventSettings";
 import { useWeddingSettings } from "@/hooks/useWeddingSettings";
 import { getCoupleDisplayName, parseGuestName, type InvitationSection } from "@/lib/wedding-config";
@@ -45,6 +44,7 @@ export default function InvitationApp() {
   const [activeSection, setActiveSection] = useState<InvitationSection>("home");
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showRsvpReminder, setShowRsvpReminder] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userPausedMusicRef = useRef(false);
@@ -158,6 +158,7 @@ export default function InvitationApp() {
     setPhase("curtain");
     setTimeout(() => {
       setPhase("open");
+      setShowRsvpReminder(true);
       window.scrollTo({ top: 0, behavior: "auto" });
       setActiveSection("home");
       cleanUrl();
@@ -251,83 +252,83 @@ export default function InvitationApp() {
       )}
 
       {(phase === "curtain" || phase === "open") && (
-        <>
-          <div
-            className={`invitation-app bg-champagne ${
-              phase === "curtain" ? "invitation-app-enter" : ""
-            }`}
-          >
-            <ScrollProgress />
-            <FlyingBirds
-              birdImage={eventSettings.birdImage}
-              birdImageIos={eventSettings.birdImageIos}
-              birdFrames={eventSettings.birdFrames}
-              birdCount={eventSettings.birdCount}
+        <div
+          className={`invitation-app bg-champagne ${
+            phase === "curtain" ? "invitation-app-enter" : ""
+          }`}
+        >
+          <ScrollProgress />
+          <FlyingBirds
+            birdImage={eventSettings.birdImage}
+            birdImageIos={eventSettings.birdImageIos}
+            birdFrames={eventSettings.birdFrames}
+            birdCount={eventSettings.birdCount}
+          />
+
+          <InvitationNav
+            active={activeSection}
+            coupleName={getCoupleDisplayName(wedding)}
+            onNavigate={navigateTo}
+            musicPlaying={musicPlaying}
+            musicAvailable={musicAvailable}
+            onToggleMusic={toggleMusic}
+          />
+
+          {phase === "open" && (
+            <RsvpReminderToast
+              visible={showRsvpReminder}
+              onRsvp={() => {
+                setShowRsvpReminder(false);
+                navigateTo("rsvp");
+              }}
+            />
+          )}
+
+          <main>
+            <HomeSection
+              event={eventSettings}
+              wedding={wedding}
+              copy={wedding.invitationCopy}
+              guestName={guestName}
+              weddingReady={weddingReady}
             />
 
-            <InvitationNav
-              active={activeSection}
-              coupleName={getCoupleDisplayName(wedding)}
-              onNavigate={navigateTo}
-              musicPlaying={musicPlaying}
-              musicAvailable={musicAvailable}
-              onToggleMusic={toggleMusic}
+            <WaveDivider fill="#f9f0ed" />
+            <CoupleSection
+              wedding={wedding}
+              logoImage={eventSettings.logoImage}
             />
-
-            <main>
-              <HomeSection
-                event={eventSettings}
-                wedding={wedding}
-                copy={wedding.invitationCopy}
-                guestName={guestName}
-                weddingReady={weddingReady}
-              />
-
-              <WaveDivider fill="#f9f0ed" />
-              <CoupleSection wedding={wedding} />
-              <WaveDivider fill="#1a2332" flip />
-              <EventSection event={eventSettings} ceremonies={wedding.ceremonies} />
-              <DressCodeSection event={eventSettings} copy={wedding.invitationCopy} />
-              <WaveDivider fill="#f3efe6" />
-              <GallerySection gallery={wedding.gallery} />
-              <WaveDivider fill="#f8f6f2" />
-              <RsvpSection
-                event={eventSettings}
-                wedding={wedding}
-                defaultName={guestName}
-                onNavigateWishes={() => navigateTo("wishes")}
-              />
-              <WaveDivider fill="#1a2332" />
-              <GiftSection gifts={wedding.gifts} copy={wedding.invitationCopy} />
-              <WaveDivider fill="#f5f0ea" />
-              <WishLettersSection onNavigateRsvp={() => navigateTo("rsvp")} />
-            </main>
-
-            <footer className="relative overflow-hidden border-t border-royal/10 bg-white px-6 py-16 text-center lg:py-20">
-              <div className="absolute inset-0 bg-radial-gold opacity-50" />
-              <Reveal direction="scale" className="relative">
-                <p className="font-display text-3xl font-light text-navy">
-                  {getCoupleDisplayName(wedding)}
-                </p>
-                <div className="ornament-line mx-auto my-5 max-w-xs" />
-                <p className="text-sm text-stone-500">
-                  Thank you for your blessings and presence
-                </p>
-                <p className="mt-8 text-[10px] uppercase tracking-[0.3em] text-stone-300">
-                  {eventSettings.organizer}
-                </p>
-                <Link
-                  href="/admin"
-                  className="mt-4 inline-block text-[10px] uppercase tracking-widest text-stone-300 transition-colors duration-300 hover:text-royal"
-                >
-                  Staff Login
-                </Link>
-              </Reveal>
-            </footer>
-          </div>
-
-          <InvitationBorderVideo src={eventSettings.borderVideo} />
-        </>
+            <WaveDivider fill="#1a2332" flip />
+            <EventSection
+              ceremonies={wedding.ceremonies}
+              sectionTitle={wedding.invitationCopy.eventSectionTitle}
+            />
+            <DressCodeSection
+              event={eventSettings}
+              copy={wedding.invitationCopy}
+            />
+            <WaveDivider fill="#f3efe6" />
+            <GallerySection gallery={wedding.gallery} />
+            <WaveDivider fill="#f8f6f2" />
+            <RsvpSection
+              event={eventSettings}
+              wedding={wedding}
+              defaultName={guestName}
+              onNavigateWishes={() => navigateTo("wishes")}
+            />
+            <WaveDivider fill="#1a2332" />
+            <GiftSection gifts={wedding.gifts} copy={wedding.invitationCopy} />
+            <WaveDivider fill="#f5f0ea" />
+            <WishLettersSection onNavigateRsvp={() => navigateTo("rsvp")} />
+            <WaveDivider fill="#1a2332" flip />
+            <ClosingSection
+              wedding={wedding}
+              copy={wedding.invitationCopy}
+              logoImage={eventSettings.logoImage}
+              organizer={eventSettings.organizer}
+            />
+          </main>
+        </div>
       )}
     </>
   );

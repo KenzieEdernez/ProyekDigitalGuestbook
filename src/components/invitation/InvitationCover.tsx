@@ -136,10 +136,10 @@ export default function InvitationCover({
             <div className="invitation-cover-rule" aria-hidden />
 
             {guestName && (
-              <p className="invitation-cover-guest font-display">
-                <span>Dear</span>
-                {guestName}
-              </p>
+              <div className="invitation-cover-guest font-display">
+                <span className="invitation-cover-guest-label">Dear,</span>
+                <p className="invitation-cover-guest-name">{guestName}</p>
+              </div>
             )}
 
             <p className="invitation-cover-message">{copy.coverMessage}</p>

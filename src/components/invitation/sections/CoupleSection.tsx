@@ -2,12 +2,13 @@
 
 import { Instagram } from "lucide-react";
 import CouplePhoto from "@/components/invitation/CouplePhoto";
+import InvitationLogo from "@/components/invitation/InvitationLogo";
 import Reveal from "@/components/invitation/Reveal";
-import LoveStoryTimeline from "@/components/invitation/LoveStoryTimeline";
 import type { WeddingSettings } from "@/types/wedding";
 
 interface CoupleSectionProps {
   wedding: WeddingSettings;
+  logoImage?: string;
 }
 
 function CouplePerson({
@@ -48,7 +49,9 @@ function CouplePerson({
   );
 }
 
-export default function CoupleSection({ wedding }: CoupleSectionProps) {
+export default function CoupleSection({ wedding, logoImage }: CoupleSectionProps) {
+  const initials = `${wedding.groom.name?.[0] ?? "L"}${wedding.bride.name?.[0] ?? "A"}`;
+
   return (
     <section
       id="couple"
@@ -62,6 +65,13 @@ export default function CoupleSection({ wedding }: CoupleSectionProps) {
         <Reveal direction="blur" duration={700}>
           <header className="couple-header">
             <p className="couple-kicker">The Couple</p>
+            <div className="couple-logo-wrap">
+              <InvitationLogo
+                src={logoImage}
+                fallbackInitials={initials}
+                size="couple"
+              />
+            </div>
             <h2 className="couple-title">Bride & Groom</h2>
             <p className="couple-subtitle">
               Two hearts united in love, ready to begin a new chapter together.
@@ -82,8 +92,6 @@ export default function CoupleSection({ wedding }: CoupleSectionProps) {
             <CouplePerson person={wedding.bride} role="bride" />
           </Reveal>
         </div>
-
-        <LoveStoryTimeline loveStory={wedding.loveStory} />
       </div>
     </section>
   );

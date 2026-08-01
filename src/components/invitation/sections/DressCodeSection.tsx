@@ -13,10 +13,8 @@ interface DressCodeSectionProps {
 }
 
 export default function DressCodeSection({ event, copy }: DressCodeSectionProps) {
-  const combinedLooks = [event.dressLadies, event.dressGentlemen]
-    .map((value) => value?.trim())
-    .filter(Boolean)
-    .join("  ·  ");
+  const ladies = event.dressLadies?.trim();
+  const gentlemen = event.dressGentlemen?.trim();
 
   return (
     <section
@@ -40,15 +38,19 @@ export default function DressCodeSection({ event, copy }: DressCodeSectionProps)
 
               <div className="mx-auto my-6 h-px w-16 bg-gradient-to-r from-transparent via-royal/50 to-transparent md:mx-0" />
 
-              <p className="font-display text-[1.45rem] uppercase tracking-[0.28em] text-navy md:text-2xl">
-                {copy.dressCodeTheme}
-              </p>
-
-              {combinedLooks && (
-                <p className="dresscode-looks-caption mt-3 font-display">
-                  {combinedLooks}
-                </p>
-              )}
+              <div className="space-y-2 text-center md:text-left">
+                {ladies ? (
+                  <p className="font-display text-[1.2rem] tracking-wide text-navy md:text-[1.35rem]">
+                    <span className="text-stone-400">Ladies:</span> {ladies}
+                  </p>
+                ) : null}
+                {gentlemen ? (
+                  <p className="font-display text-[1.2rem] tracking-wide text-navy md:text-[1.35rem]">
+                    <span className="text-stone-400">Gentlemen:</span>{" "}
+                    {gentlemen}
+                  </p>
+                ) : null}
+              </div>
             </div>
 
             <div className="dresscode-visual">

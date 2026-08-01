@@ -254,19 +254,36 @@
   }
 
   .invitation-cover-guest {
-    margin-bottom: 0.55rem;
-    font-size: 0.95rem;
-    color: rgba(26, 35, 50, 0.8);
+    margin-bottom: 0.7rem;
+    color: rgba(26, 35, 50, 0.85);
   }
 
-  .invitation-cover-guest span {
-    margin-right: 0.3rem;
+  .invitation-cover-guest-label {
+    display: block;
     font-family: inherit;
     font-size: 0.5rem;
     font-weight: 600;
     letter-spacing: 0.28em;
     text-transform: uppercase;
     color: #a8a29e;
+  }
+
+  .invitation-cover-guest-name {
+    margin-top: 0.2rem;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.35;
+    color: rgba(26, 35, 50, 0.88);
+  }
+
+  .couple-logo-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 1rem auto 0.35rem;
+  }
+
+  .invitation-logo-fallback-couple {
+    transform: scale(0.95);
   }
 
   .invitation-cover-message {

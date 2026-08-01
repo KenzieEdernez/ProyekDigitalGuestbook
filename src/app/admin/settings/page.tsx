@@ -79,7 +79,6 @@ export default function EventSettingsPage() {
     | "dresscode"
     | "logo"
     | "bird"
-    | "borderVideo"
     | null
   >(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -252,69 +251,6 @@ export default function EventSettingsPage() {
       );
     } catch {
       setError("Failed to upload Lottie bird.");
-    } finally {
-      setImageProcessing(null);
-      event.target.value = "";
-    }
-  };
-
-  const handleBorderVideoChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const name = file.name.toLowerCase();
-    const type = (file.type || "").toLowerCase();
-    const isJson =
-      type.includes("json") ||
-      type.includes("text/plain") ||
-      name.endsWith(".json");
-
-    if (!isJson) {
-      setError("Border file must be a Lottie animation (.json).");
-      return;
-    }
-
-    if (file.size > 15 * 1024 * 1024) {
-      setError("Border Lottie file must be under 15MB.");
-      return;
-    }
-
-    setImageProcessing("borderVideo");
-    setError(null);
-    setMessage(null);
-
-    try {
-      const body = new FormData();
-      body.append("file", file);
-      const res = await fetch("/api/event-settings/border-video-upload", {
-        method: "POST",
-        body,
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Failed to upload border Lottie.");
-        return;
-      }
-
-      if (data.settings) {
-        setForm({
-          ...data.settings,
-          borderVideo: data.settings.borderVideo || data.url || "",
-        });
-      } else if (data.url) {
-        setForm((current) => ({
-          ...current,
-          borderVideo: data.url,
-        }));
-      }
-      setMessage(
-        "Border Lottie uploaded. Transparent on iPhone and desktop."
-      );
-    } catch {
-      setError("Failed to upload border Lottie.");
     } finally {
       setImageProcessing(null);
       event.target.value = "";
@@ -501,7 +437,9 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  PNG recommended. Shown at the top of the open invitation hero.
+                  PNG recommended. Shown under &quot;The Couple&quot; (above Bride
+                  &amp; Groom), on the hero, and on the closing slide. Sized for
+                  mobile and desktop.
                 </p>
               </div>
 
@@ -578,48 +516,6 @@ export default function EventSettingsPage() {
                 </p>
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Border Animation (Lottie .json)
-                </label>
-                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] dark:border-stone-700">
-                  {form.borderVideo ? (
-                    <BirdGreenscreenPreview src={form.borderVideo} />
-                  ) : (
-                    <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
-                      <ImageIcon className="h-8 w-8" />
-                      <p className="mt-2 text-sm">No border Lottie yet</p>
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="application/json,.json"
-                  onChange={handleBorderVideoChange}
-                  disabled={saving || imageProcessing !== null}
-                  className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
-                />
-                <p className="mt-2 text-xs text-stone-400">
-                  Upload a Lottie border/gate animation (.json, max 15MB).
-                  Transparent background — works on iPhone and desktop. Export
-                  from After Effects / LottieFiles.
-                </p>
-                {form.borderVideo && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setForm((current) => ({
-                        ...current,
-                        borderVideo: "",
-                      }))
-                    }
-                    disabled={saving || imageProcessing !== null}
-                    className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
-                  >
-                    Remove border animation
-                  </button>
-                )}
-              </div>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
@@ -658,7 +554,7 @@ export default function EventSettingsPage() {
                 />
               </div>
               <p className="md:col-span-2 text-xs text-stone-400">
-                Shown under the dress code image as: Ladies · Gentlemen
+                Shown on the invitation as: Ladies: … and Gentlemen: …
               </p>
             </div>
           </div>
@@ -673,8 +569,6 @@ export default function EventSettingsPage() {
             ? "Saving..."
             : imageProcessing === "bird"
               ? "Uploading Lottie bird..."
-              : imageProcessing === "borderVideo"
-                ? "Uploading border Lottie..."
               : imageProcessing
               ? `Processing ${imageProcessing} image...`
               : "Save Settings"}

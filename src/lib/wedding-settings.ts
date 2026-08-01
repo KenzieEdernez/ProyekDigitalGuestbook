@@ -109,7 +109,7 @@ function sanitizeCouple(input: Partial<CoupleProfile>, fallback: CoupleProfile):
 }
 
 function sanitizeLoveStory(items: LoveStoryItem[] | undefined): LoveStoryItem[] {
-  if (!items?.length) return DEFAULT_WEDDING.loveStory;
+  if (!items?.length) return [];
   return items
     .map((item) => ({
       id: textValue(item.id) || uuidv4(),
@@ -133,6 +133,7 @@ function sanitizeCeremonies(items: CeremonyItem[] | undefined): CeremonyItem[] {
       location: textValue(item.location),
       address: textValue(item.address),
       mapUrl: textValue(item.mapUrl) || "https://maps.google.com",
+      image: textValue(item.image),
     }))
     .filter((item) => item.title);
 }
@@ -173,6 +174,8 @@ function sanitizeInvitationCopy(
     coverMessage: textValue(input?.coverMessage) || fallback.coverMessage,
     openButtonLabel: textValue(input?.openButtonLabel) || fallback.openButtonLabel,
     displayDate: textValue(input?.displayDate) || fallback.displayDate,
+    eventSectionTitle:
+      textValue(input?.eventSectionTitle) || fallback.eventSectionTitle,
     dressCodeTitle: textValue(input?.dressCodeTitle) || fallback.dressCodeTitle,
     dressCodeDescription:
       textValue(input?.dressCodeDescription) || fallback.dressCodeDescription,
@@ -204,9 +207,6 @@ function sanitizeSettings(input: Partial<WeddingSettings>): WeddingSettings {
     musicUrl: textValue(input.musicUrl) || DEFAULT_WEDDING.musicUrl,
   };
 
-  if (!settings.loveStory.length) {
-    throw new Error("At least one love story item is required.");
-  }
   if (!settings.ceremonies.length) {
     throw new Error("At least one wedding event is required.");
   }
@@ -223,6 +223,12 @@ async function persistMedia(settings: WeddingSettings): Promise<WeddingSettings>
       src: await saveImage(item.src, "gallery"),
     }))
   );
+  const ceremonies = await Promise.all(
+    settings.ceremonies.map(async (item) => ({
+      ...item,
+      image: item.image ? await saveImage(item.image, "ceremony") : "",
+    }))
+  );
   const musicUrl = await saveMusic(settings.musicUrl);
 
   return {
@@ -230,6 +236,7 @@ async function persistMedia(settings: WeddingSettings): Promise<WeddingSettings>
     groom: { ...settings.groom, photo: groomPhoto },
     bride: { ...settings.bride, photo: bridePhoto },
     gallery,
+    ceremonies,
     musicUrl,
   };
 }

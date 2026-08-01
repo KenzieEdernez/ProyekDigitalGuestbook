@@ -98,10 +98,14 @@ export default function HomeSection({
 
             {guestName && (
               <Reveal direction="up" delay={500}>
-                <p className="mt-4 text-xs font-light text-white/55">
-                  For{" "}
-                  <span className="font-display text-lg text-white">{guestName}</span>
-                </p>
+                <div className="invitation-home-guest mt-5 mx-auto w-full max-w-xs rounded-xl border border-white/20 bg-white/10 px-5 py-4 backdrop-blur-sm">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/55">
+                    Dear,
+                  </p>
+                  <p className="mt-1.5 font-display text-xl font-light text-white sm:text-2xl">
+                    {guestName}
+                  </p>
+                </div>
               </Reveal>
             )}
 

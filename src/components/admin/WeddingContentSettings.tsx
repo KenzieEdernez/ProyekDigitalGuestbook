@@ -6,7 +6,6 @@ import {
   Plus,
   Save,
   Trash2,
-  Heart,
   Calendar,
   Gift,
   Users,
@@ -20,7 +19,7 @@ import EventTimeInput from "@/components/admin/EventTimeInput";
 import { DEFAULT_WEDDING } from "@/lib/wedding-config";
 import type { WeddingSettings } from "@/types/wedding";
 
-type Tab = "invitation" | "couple" | "story" | "events" | "gallery" | "gifts" | "music" | "wishes";
+type Tab = "invitation" | "couple" | "events" | "gallery" | "gifts" | "music" | "wishes";
 
 const MAX_MUSIC_BYTES = 12 * 1024 * 1024;
 
@@ -31,6 +30,7 @@ function isLocalPreviewUrl(url: string) {
 function buildSavePayload(form: WeddingSettings): WeddingSettings {
   return {
     ...form,
+    loveStory: [],
     musicUrl: isLocalPreviewUrl(form.musicUrl) ? "" : form.musicUrl,
   };
 }
@@ -89,13 +89,40 @@ async function readCouplePhotoFile(file: File) {
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "invitation", label: "Invitation Copy", icon: Sparkles },
   { id: "couple", label: "Couple & Quote", icon: Users },
-  { id: "story", label: "Love Story", icon: Heart },
   { id: "events", label: "Wedding Events", icon: Calendar },
   { id: "gallery", label: "Gallery", icon: ImageIcon },
   { id: "gifts", label: "Gifts", icon: Gift },
   { id: "music", label: "Music", icon: Music },
   { id: "wishes", label: "Wishes", icon: Quote },
 ];
+
+function readCeremonyPngFile(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        const max = 1200;
+        const scale = Math.min(1, max / Math.max(image.width, image.height));
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas not supported."));
+          return;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      image.onerror = () => reject(new Error("Failed to read image."));
+      image.src = String(reader.result);
+    };
+    reader.onerror = () => reject(new Error("Failed to read file."));
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function WeddingContentSettings() {
   const [form, setForm] = useState<WeddingSettings>(DEFAULT_WEDDING);
@@ -324,8 +351,8 @@ export default function WeddingContentSettings() {
                 ["engagementTitle", "Engagement Title", "The Sangjit Engagement of"],
                 ["displayDate", "Display Date", "06.09.2026"],
                 ["openButtonLabel", "Open Button Label", "Open Invitation"],
+                ["eventSectionTitle", "Event Section Title", "Wedding Event"],
                 ["dressCodeTitle", "Dress Code Title", "Dress Code"],
-                ["dressCodeTheme", "Dress Code Theme", "Elegant Formal"],
                 ["giftTitle", "Gift Title", "Gift"],
               ] as const
             ).map(([field, label, placeholder]) => (
@@ -364,8 +391,8 @@ export default function WeddingContentSettings() {
               />
             </div>
             <p className="md:col-span-2 text-xs text-stone-400">
-              Outfit looks under the dress code image come from Ladies / Gentlemen in
-              Page Settings (for example: Modern Kebaya · Formal Batik).
+              Dress looks are edited in Page Settings as Ladies / Gentlemen (shown as
+              &quot;Ladies: …&quot; and &quot;Gentlemen: …&quot; on the invitation).
             </p>
             <div className="md:col-span-2">
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
@@ -461,98 +488,6 @@ export default function WeddingContentSettings() {
           </div>
         )}
 
-        {tab === "story" && (
-          <div className="space-y-4">
-            {form.loveStory.map((item, index) => (
-              <div
-                key={item.id}
-                className="rounded-xl border border-stone-200 p-5 dark:border-stone-700"
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-navy dark:text-stone-100">
-                    Story {index + 1}
-                  </p>
-                  {form.loveStory.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm((f) => ({
-                          ...f,
-                          loveStory: f.loveStory.filter((s) => s.id !== item.id),
-                        }))
-                      }
-                      className="text-xs text-red-500"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-                <div className="grid gap-3 md:grid-cols-2">
-                  <input
-                    className="input-field"
-                    placeholder="Year"
-                    value={item.year}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        loveStory: f.loveStory.map((s) =>
-                          s.id === item.id ? { ...s, year: e.target.value } : s
-                        ),
-                      }))
-                    }
-                  />
-                  <input
-                    className="input-field"
-                    placeholder="Title"
-                    value={item.title}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        loveStory: f.loveStory.map((s) =>
-                          s.id === item.id ? { ...s, title: e.target.value } : s
-                        ),
-                      }))
-                    }
-                  />
-                </div>
-                <textarea
-                  className="input-field mt-3 min-h-[90px]"
-                  placeholder="Story text"
-                  value={item.text}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      loveStory: f.loveStory.map((s) =>
-                        s.id === item.id ? { ...s, text: e.target.value } : s
-                      ),
-                    }))
-                  }
-                />
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() =>
-                setForm((f) => ({
-                  ...f,
-                  loveStory: [
-                    ...f.loveStory,
-                    {
-                      id: uuidv4(),
-                      year: "",
-                      title: "",
-                      text: "",
-                    },
-                  ],
-                }))
-              }
-              className="inline-flex items-center gap-2 text-sm font-semibold text-royal"
-            >
-              <Plus className="h-4 w-4" /> Add Story
-            </button>
-          </div>
-        )}
-
         {tab === "events" && (
           <div className="space-y-4">
             {form.ceremonies.map((item, index) => (
@@ -624,33 +559,116 @@ export default function WeddingContentSettings() {
                   }
                   disabled={saving}
                 />
-                {(
-                  [
-                    ["location", "Location"],
-                    ["address", "Address"],
-                    ["mapUrl", "Maps URL"],
-                  ] as const
-                ).map(([field, label]) => (
-                  <div key={field} className="mb-3">
-                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                      {label}
-                    </label>
-                    <input
-                      className="input-field"
-                      value={item[field]}
-                      onChange={(e) =>
+                <div className="mb-3">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    Location
+                  </label>
+                  <textarea
+                    className="input-field min-h-[72px]"
+                    value={item.location}
+                    placeholder={"Line breaks are kept on the invitation"}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        ceremonies: f.ceremonies.map((c) =>
+                          c.id === item.id
+                            ? { ...c, location: e.target.value }
+                            : c
+                        ),
+                      }))
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    Address
+                  </label>
+                  <textarea
+                    className="input-field min-h-[72px]"
+                    value={item.address}
+                    placeholder={"Line breaks are kept on the invitation"}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        ceremonies: f.ceremonies.map((c) =>
+                          c.id === item.id
+                            ? { ...c, address: e.target.value }
+                            : c
+                        ),
+                      }))
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    Maps URL
+                  </label>
+                  <input
+                    className="input-field"
+                    value={item.mapUrl}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        ceremonies: f.ceremonies.map((c) =>
+                          c.id === item.id
+                            ? { ...c, mapUrl: e.target.value }
+                            : c
+                        ),
+                      }))
+                    }
+                  />
+                </div>
+                <div className="mb-1">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    Event Photo (PNG, transparent)
+                  </label>
+                  {item.image ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={item.image}
+                      alt=""
+                      className="mb-2 max-h-32 w-auto object-contain"
+                    />
+                  ) : null}
+                  <input
+                    type="file"
+                    accept="image/png,image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      void readCeremonyPngFile(file)
+                        .then((dataUrl) =>
+                          setForm((f) => ({
+                            ...f,
+                            ceremonies: f.ceremonies.map((c) =>
+                              c.id === item.id ? { ...c, image: dataUrl } : c
+                            ),
+                          }))
+                        )
+                        .catch(() => setError("Failed to process event photo."));
+                      e.target.value = "";
+                    }}
+                  />
+                  {item.image ? (
+                    <button
+                      type="button"
+                      onClick={() =>
                         setForm((f) => ({
                           ...f,
                           ceremonies: f.ceremonies.map((c) =>
-                            c.id === item.id
-                              ? { ...c, [field]: e.target.value }
-                              : c
+                            c.id === item.id ? { ...c, image: "" } : c
                           ),
                         }))
                       }
-                    />
-                  </div>
-                ))}
+                      className="mt-2 text-xs text-red-500"
+                    >
+                      Remove photo
+                    </button>
+                  ) : null}
+                  <p className="mt-2 text-xs text-stone-400">
+                    Transparent PNG recommended. Sized for mobile and desktop.
+                  </p>
+                </div>
               </div>
             ))}
             <button
@@ -668,6 +686,7 @@ export default function WeddingContentSettings() {
                       location: "",
                       address: "",
                       mapUrl: "https://maps.google.com",
+                      image: "",
                     },
                   ],
                 }))
