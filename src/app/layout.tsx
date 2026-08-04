@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import {
   Cormorant_Garamond,
   Great_Vibes,
@@ -29,6 +30,12 @@ const greatVibes = Great_Vibes({
   variable: "--font-great-vibes",
 });
 
+const sloopScript = localFont({
+  src: "../fonts/Sloop-ScriptThree.ttf",
+  variable: "--font-sloop",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Wedding Invitation | EdernDigital",
   description:
@@ -50,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${playfair.variable} ${cormorant.variable} ${greatVibes.variable} min-h-screen`}
+        className={`${inter.variable} ${playfair.variable} ${cormorant.variable} ${greatVibes.variable} ${sloopScript.variable} min-h-screen`}
       >
         {children}
       </body>

@@ -31,7 +31,7 @@ function CouplePerson({
       <CouplePhoto src={person.photo} alt={person.fullName} />
 
       <p className="couple-role">{isGroom ? "The Groom" : "The Bride"}</p>
-      <h3 className="couple-name">{person.fullName}</h3>
+      <h3 className="couple-name font-sloop">{person.fullName}</h3>
 
       <div className="couple-divider" aria-hidden />
 

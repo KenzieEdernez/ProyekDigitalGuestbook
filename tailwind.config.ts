@@ -45,6 +45,7 @@ const config: Config = {
         serif: ["var(--font-playfair)", "Georgia", "serif"],
         display: ["var(--font-cormorant)", "Georgia", "serif"],
         script: ["var(--font-great-vibes)", "cursive"],
+        sloop: ["var(--font-sloop)", "cursive"],
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       boxShadow: {
