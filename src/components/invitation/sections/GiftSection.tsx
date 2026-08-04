@@ -32,16 +32,15 @@ export default function GiftSection({
 
   return (
     <section id="gift" className="gift-section invitation-section relative">
-      <div className="gift-section-inner relative mx-auto flex min-h-[100dvh] w-full max-w-md flex-col items-center justify-center px-5 py-16 sm:max-w-lg sm:px-8 sm:py-20">
+      <div className="gift-section-inner relative mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col items-center justify-center px-4 py-16 sm:px-6 sm:py-20">
         <Reveal direction="up" className="w-full">
           <div className={`gift-registry ${revealed ? "is-revealed" : ""}`}>
             <div className="gift-registry-stage">
-              {/* Envelope only — nothing else behind it */}
               <div className="gift-registry-envelope">
                 <GiftEnvelopeArt />
               </div>
 
-              {/* One tall rectangular letter so all copy fits */}
+              {/* Landscape gift card — wide rectangle */}
               <div
                 className="gift-registry-card"
                 style={
