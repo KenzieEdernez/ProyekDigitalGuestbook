@@ -287,7 +287,9 @@ export default function InvitationApp() {
           heroImageCard={eventSettings.heroImageCard}
           coupleName={getCoupleDisplayName(wedding)}
           copy={wedding.invitationCopy}
-          heroLogoImage={wedding.heroLogoImage}
+          heroLogoImage={
+            wedding.heroLogoImageDark || wedding.heroLogoImage || undefined
+          }
           onOpen={handleOpen}
           onPrimeMusic={primeMusic}
         />

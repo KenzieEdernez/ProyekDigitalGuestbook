@@ -81,10 +81,12 @@ export default function EventSettingsPage() {
     | "dresscode"
     | "logo"
     | "heroLogo"
+    | "heroLogoDark"
     | "bird"
     | null
   >(null);
   const [heroLogoImage, setHeroLogoImage] = useState("");
+  const [heroLogoImageDark, setHeroLogoImageDark] = useState("");
   const [weddingSnapshot, setWeddingSnapshot] = useState<WeddingSettings | null>(
     null
   );
@@ -114,6 +116,7 @@ export default function EventSettingsPage() {
         if (weddingData.settings) {
           setWeddingSnapshot(weddingData.settings);
           setHeroLogoImage(weddingData.settings.heroLogoImage || "");
+          setHeroLogoImageDark(weddingData.settings.heroLogoImageDark || "");
         }
       } catch {
         setError("Failed to load event settings.");
@@ -168,6 +171,7 @@ export default function EventSettingsPage() {
             body: JSON.stringify({
               ...baseWedding,
               heroLogoImage,
+              heroLogoImageDark,
             }),
           });
           const weddingData = await weddingRes.json();
@@ -181,6 +185,7 @@ export default function EventSettingsPage() {
           if (weddingData.settings) {
             setWeddingSnapshot(weddingData.settings);
             setHeroLogoImage(weddingData.settings.heroLogoImage || "");
+            setHeroLogoImageDark(weddingData.settings.heroLogoImageDark || "");
           }
         }
       }
@@ -492,20 +497,20 @@ export default function EventSettingsPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Hero Initial Logo
+                  Hero Logo White
                 </label>
-                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] dark:border-stone-700">
+                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-700 bg-navy-900">
                   {heroLogoImage ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={heroLogoImage}
-                      alt="Hero initial logo preview"
+                      alt="Hero logo white preview"
                       className="max-h-28 w-auto object-contain"
                     />
                   ) : (
                     <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
                       <ImageIcon className="h-8 w-8" />
-                      <p className="mt-2 text-sm">No hero logo yet</p>
+                      <p className="mt-2 text-sm">No white logo yet</p>
                     </div>
                   )}
                 </div>
@@ -525,7 +530,7 @@ export default function EventSettingsPage() {
                       const processed = await readTransparentPngFile(file, 900);
                       setHeroLogoImage(processed);
                     } catch {
-                      setError("Failed to process hero logo.");
+                      setError("Failed to process white hero logo.");
                     } finally {
                       setImageProcessing(null);
                       event.target.value = "";
@@ -541,12 +546,71 @@ export default function EventSettingsPage() {
                     disabled={saving || imageProcessing !== null}
                     className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
                   >
-                    Remove hero logo
+                    Remove white logo
                   </button>
                 ) : null}
                 <p className="mt-2 text-xs text-stone-400">
-                  Separate transparent PNG. Shown above &quot;The Sangjit…&quot;
-                  on the cover and open hero. Click Save Settings after upload.
+                  Transparent PNG for the open hero (dark photo). Save after upload.
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Hero Logo Black
+                </label>
+                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] dark:border-stone-700">
+                  {heroLogoImageDark ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={heroLogoImageDark}
+                      alt="Hero logo black preview"
+                      className="max-h-28 w-auto object-contain"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
+                      <ImageIcon className="h-8 w-8" />
+                      <p className="mt-2 text-sm">No black logo yet</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/png,image/*"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    if (!file.type.startsWith("image/")) {
+                      setError("Hero logo must be an image (PNG preferred).");
+                      return;
+                    }
+                    setImageProcessing("heroLogoDark");
+                    setError(null);
+                    try {
+                      const processed = await readTransparentPngFile(file, 900);
+                      setHeroLogoImageDark(processed);
+                    } catch {
+                      setError("Failed to process black hero logo.");
+                    } finally {
+                      setImageProcessing(null);
+                      event.target.value = "";
+                    }
+                  }}
+                  disabled={saving || imageProcessing !== null || !weddingSnapshot}
+                  className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
+                />
+                {heroLogoImageDark ? (
+                  <button
+                    type="button"
+                    onClick={() => setHeroLogoImageDark("")}
+                    disabled={saving || imageProcessing !== null}
+                    className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
+                  >
+                    Remove black logo
+                  </button>
+                ) : null}
+                <p className="mt-2 text-xs text-stone-400">
+                  Transparent PNG for the cover card (light background). Save after
+                  upload.
                 </p>
               </div>
 

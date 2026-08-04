@@ -78,8 +78,16 @@ export interface WeddingSettings {
   musicUrl: string;
   /** Logos shown on the closing / ending slide (any count). */
   closingLogos: string[];
-  /** Logo above the engagement title on the hero (separate from couple logo). */
+  /**
+   * White/light hero logo for dark backgrounds (open invitation hero).
+   * Separate from couple logo.
+   */
   heroLogoImage: string;
+  /**
+   * Black/dark hero logo for light backgrounds (cover card).
+   * Falls back to heroLogoImage if empty.
+   */
+  heroLogoImageDark: string;
   /** Who appears on the left in the couple section. */
   coupleOrder: CoupleOrder;
 }

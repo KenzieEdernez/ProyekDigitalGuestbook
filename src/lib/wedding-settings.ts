@@ -219,6 +219,7 @@ function sanitizeSettings(input: Partial<WeddingSettings>): WeddingSettings {
       ? input.closingLogos.map((url) => textValue(url)).filter(Boolean)
       : [],
     heroLogoImage: textValue(input.heroLogoImage),
+    heroLogoImageDark: textValue(input.heroLogoImageDark),
     coupleOrder:
       input.coupleOrder === "bride-first" ? "bride-first" : "groom-first",
   };
@@ -251,6 +252,9 @@ async function persistMedia(settings: WeddingSettings): Promise<WeddingSettings>
   const heroLogoImage = settings.heroLogoImage
     ? await saveImage(settings.heroLogoImage, "hero-logo")
     : "";
+  const heroLogoImageDark = settings.heroLogoImageDark
+    ? await saveImage(settings.heroLogoImageDark, "hero-logo-dark")
+    : "";
   const musicUrl = await saveMusic(settings.musicUrl);
 
   return {
@@ -261,6 +265,7 @@ async function persistMedia(settings: WeddingSettings): Promise<WeddingSettings>
     ceremonies,
     closingLogos,
     heroLogoImage,
+    heroLogoImageDark,
     musicUrl,
   };
 }

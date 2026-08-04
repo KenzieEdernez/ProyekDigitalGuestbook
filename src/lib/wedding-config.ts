@@ -79,6 +79,7 @@ export const DEFAULT_WEDDING: WeddingSettings = {
   musicUrl: "",
   closingLogos: [],
   heroLogoImage: "",
+  heroLogoImageDark: "",
   coupleOrder: "groom-first",
 };
 
@@ -155,6 +156,10 @@ export function mergeWeddingSettings(
       typeof stored.heroLogoImage === "string"
         ? stored.heroLogoImage.trim()
         : DEFAULT_WEDDING.heroLogoImage,
+    heroLogoImageDark:
+      typeof stored.heroLogoImageDark === "string"
+        ? stored.heroLogoImageDark.trim()
+        : DEFAULT_WEDDING.heroLogoImageDark,
     coupleOrder:
       stored.coupleOrder === "bride-first" ? "bride-first" : "groom-first",
   };

@@ -43,6 +43,7 @@ function buildSavePayload(form: WeddingSettings): WeddingSettings {
     loveStory: [],
     closingLogos: (form.closingLogos ?? []).filter(Boolean),
     heroLogoImage: form.heroLogoImage || "",
+    heroLogoImageDark: form.heroLogoImageDark || "",
     coupleOrder:
       form.coupleOrder === "bride-first" ? "bride-first" : "groom-first",
     musicUrl: isLocalPreviewUrl(form.musicUrl) ? "" : form.musicUrl,
@@ -161,6 +162,7 @@ export default function WeddingContentSettings() {
               ? data.settings.closingLogos
               : [],
             heroLogoImage: data.settings.heroLogoImage || "",
+            heroLogoImageDark: data.settings.heroLogoImageDark || "",
             coupleOrder:
               data.settings.coupleOrder === "bride-first"
                 ? "bride-first"
@@ -409,50 +411,95 @@ export default function WeddingContentSettings() {
                 />
               </div>
             ))}
-            <div className="md:col-span-2">
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                Hero Initial Logo (transparent PNG)
-              </label>
-              <div className="mb-2 flex h-28 items-center justify-center rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0]">
+            <div className="md:col-span-2 grid gap-5 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  Hero Logo White (dark background)
+                </label>
+                <div className="mb-2 flex h-28 items-center justify-center rounded-xl border border-stone-700 bg-navy-900">
+                  {form.heroLogoImage ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={form.heroLogoImage}
+                      alt="Hero logo white"
+                      className="max-h-24 w-auto object-contain"
+                    />
+                  ) : (
+                    <p className="text-xs text-stone-400">No white logo yet</p>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/png,image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    void readTransparentPngFile(file, 900)
+                      .then((dataUrl) =>
+                        setForm((f) => ({ ...f, heroLogoImage: dataUrl }))
+                      )
+                      .catch(() => setError("Failed to process white hero logo."));
+                    e.target.value = "";
+                  }}
+                />
                 {form.heroLogoImage ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={form.heroLogoImage}
-                    alt="Hero logo"
-                    className="max-h-24 w-auto object-contain"
-                  />
-                ) : (
-                  <p className="text-xs text-stone-400">No hero logo yet</p>
-                )}
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, heroLogoImage: "" }))}
+                    className="mt-2 text-xs text-red-500"
+                  >
+                    Remove
+                  </button>
+                ) : null}
+                <p className="mt-2 text-xs text-stone-400">
+                  Transparent PNG. Used on the open hero (dark photo).
+                </p>
               </div>
-              <input
-                type="file"
-                accept="image/png,image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  void readTransparentPngFile(file, 900)
-                    .then((dataUrl) =>
-                      setForm((f) => ({ ...f, heroLogoImage: dataUrl }))
-                    )
-                    .catch(() => setError("Failed to process hero logo."));
-                  e.target.value = "";
-                }}
-              />
-              {form.heroLogoImage ? (
-                <button
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, heroLogoImage: "" }))}
-                  className="mt-2 text-xs text-red-500"
-                >
-                  Remove hero logo
-                </button>
-              ) : null}
-              <p className="mt-2 text-xs text-stone-400">
-                Different from Couple Logo. Transparent PNG, no background. Shown
-                above &quot;The Sangjit…&quot; on cover and hero. You can also
-                upload this from Page Settings → Hero Initial Logo.
-              </p>
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  Hero Logo Black (light background)
+                </label>
+                <div className="mb-2 flex h-28 items-center justify-center rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0]">
+                  {form.heroLogoImageDark ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={form.heroLogoImageDark}
+                      alt="Hero logo black"
+                      className="max-h-24 w-auto object-contain"
+                    />
+                  ) : (
+                    <p className="text-xs text-stone-400">No black logo yet</p>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/png,image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    void readTransparentPngFile(file, 900)
+                      .then((dataUrl) =>
+                        setForm((f) => ({ ...f, heroLogoImageDark: dataUrl }))
+                      )
+                      .catch(() => setError("Failed to process black hero logo."));
+                    e.target.value = "";
+                  }}
+                />
+                {form.heroLogoImageDark ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({ ...f, heroLogoImageDark: "" }))
+                    }
+                    className="mt-2 text-xs text-red-500"
+                  >
+                    Remove
+                  </button>
+                ) : null}
+                <p className="mt-2 text-xs text-stone-400">
+                  Transparent PNG. Used on the cover card (light background).
+                </p>
+              </div>
             </div>
             <div className="md:col-span-2">
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
