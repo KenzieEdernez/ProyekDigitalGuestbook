@@ -8,13 +8,6 @@ import RsvpFabIcon from "@/components/invitation/RsvpFabIcon";
 import RsvpReminderToast from "@/components/invitation/RsvpReminderToast";
 import type { InvitationSection } from "@/lib/wedding-config";
 
-const DARK_SECTION_IDS = new Set([
-  "home",
-  "event",
-  "gift",
-  "closing",
-]);
-
 interface InvitationNavProps {
   active: InvitationSection;
   coupleName: string;
@@ -28,28 +21,6 @@ interface InvitationNavProps {
   rsvpReminderEyebrow?: string;
   rsvpReminderTitle?: string;
   rsvpReminderMessage?: string;
-}
-
-function sectionUnderFabIsDark(): boolean {
-  if (typeof document === "undefined") return true;
-
-  const probeY = window.innerHeight - 96;
-  const sections = document.querySelectorAll<HTMLElement>(
-    ".invitation-section, #closing"
-  );
-
-  for (const section of sections) {
-    const rect = section.getBoundingClientRect();
-    if (rect.top <= probeY && rect.bottom >= probeY) {
-      const id = section.id;
-      if (DARK_SECTION_IDS.has(id)) return true;
-      if (section.classList.contains("location-section")) return true;
-      if (section.classList.contains("bg-navy")) return true;
-      return false;
-    }
-  }
-
-  return true;
 }
 
 export default function InvitationNav({
@@ -68,7 +39,6 @@ export default function InvitationNav({
 }: InvitationNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [fabOnDark, setFabOnDark] = useState(true);
 
   useEffect(() => {
     let ticking = false;
@@ -77,22 +47,13 @@ export default function InvitationNav({
       ticking = true;
       requestAnimationFrame(() => {
         setScrolled(window.scrollY > 16);
-        setFabOnDark(sectionUnderFabIsDark());
         ticking = false;
       });
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    setFabOnDark(sectionUnderFabIsDark());
-  }, [active]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -144,11 +105,7 @@ export default function InvitationNav({
         onNavigate={handleNav}
       />
 
-      <div
-        className={`invitation-fab-stack fixed bottom-6 right-4 z-40 flex flex-col items-end gap-3 lg:bottom-8 lg:right-8 ${
-          fabOnDark ? "is-on-dark" : "is-on-light"
-        }`}
-      >
+      <div className="invitation-fab-stack fixed bottom-6 right-4 z-40 flex flex-col items-end gap-3 lg:bottom-8 lg:right-8">
         {showRsvpReminder && (
           <RsvpReminderToast
             visible={showRsvpReminder}

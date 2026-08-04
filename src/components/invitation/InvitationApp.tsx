@@ -347,7 +347,13 @@ export default function InvitationApp() {
               defaultName={guestName}
               onNavigateWishes={() => navigateTo("wishes")}
             />
-            <GiftSection gifts={wedding.gifts} copy={wedding.invitationCopy} />
+            <GiftSection
+              gifts={wedding.gifts}
+              copy={wedding.invitationCopy}
+              cardImage={
+                eventSettings.heroImagePortrait || eventSettings.heroImage
+              }
+            />
             <WishLettersSection onNavigateRsvp={() => navigateTo("rsvp")} />
             <ClosingSection
               wedding={wedding}

@@ -1,155 +1,120 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Gift } from "lucide-react";
 import Reveal from "@/components/invitation/Reveal";
 import type { GiftAccount, InvitationCopy } from "@/types/wedding";
 
 interface GiftSectionProps {
   gifts: GiftAccount[];
   copy: InvitationCopy;
+  cardImage?: string;
 }
 
-function GiftEnvelope({
-  account,
-  index,
-}: {
-  account: GiftAccount;
-  index: number;
-}) {
-  const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
+export default function GiftSection({
+  gifts,
+  copy,
+  cardImage,
+}: GiftSectionProps) {
+  const [revealed, setRevealed] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const copyToClipboard = async () => {
+  const copyNumber = async (account: GiftAccount) => {
     try {
       await navigator.clipboard.writeText(account.accountNumber);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedId(account.id);
+      setTimeout(() => setCopiedId(null), 2000);
     } catch {
       // ignored
     }
   };
 
   return (
-    <Reveal direction="up" delay={index * 120 + 200}>
-      <div className={`gift-envelope ${open ? "is-open" : ""}`}>
-        <div className="gift-envelope-stage">
-          <div className="gift-envelope-back" aria-hidden />
-
-          <div
-            id={`gift-letter-${account.id}`}
-            className="gift-letter"
-            role="region"
-            aria-label={`${account.bank} account details`}
-            aria-hidden={!open}
-          >
-            <div className="gift-letter-inner">
-              <p className="gift-letter-bank">{account.bank}</p>
-              <p className="gift-letter-label">Account Name</p>
-              <p className="gift-letter-name">{account.accountName}</p>
-              <p className="gift-letter-number">{account.accountNumber}</p>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  void copyToClipboard();
-                }}
-                className="gift-letter-copy"
-                tabIndex={open ? 0 : -1}
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-3.5 w-3.5" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3.5 w-3.5" />
-                    Copy Number
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div className="gift-envelope-pocket" aria-hidden />
-
-          <div className="gift-envelope-flap" aria-hidden>
-            <span className="gift-envelope-flap-face gift-envelope-flap-front">
-              <span className="gift-envelope-hint">
-                {open ? "Tap to close" : "Tap to open"}
-              </span>
-            </span>
-            <span className="gift-envelope-flap-face gift-envelope-flap-back" />
-          </div>
-
-          <div className="gift-envelope-seal" aria-hidden>
-            <span className="gift-envelope-seal-mark">
-              {account.bank.slice(0, 1).toUpperCase()}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            className="gift-envelope-hit"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-controls={`gift-letter-${account.id}`}
-          >
-            <span className="sr-only">
-              {open
-                ? `Close ${account.bank} gift details`
-                : `Open envelope for ${account.bank}`}
-            </span>
-          </button>
-        </div>
-
-        {!open && (
-          <p className="gift-envelope-caption" aria-hidden>
-            {account.bank}
-          </p>
-        )}
-      </div>
-    </Reveal>
-  );
-}
-
-export default function GiftSection({ gifts, copy }: GiftSectionProps) {
-  return (
     <section
       id="gift"
-      className="invitation-section invitation-section-pad relative overflow-hidden bg-navy text-white"
+      className="gift-section invitation-section relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-radial-gold opacity-30" />
-      <div className="pointer-events-none absolute -left-10 top-16 h-40 w-40 rounded-full bg-royal/10 blur-3xl" />
-      <div className="pointer-events-none absolute -right-8 bottom-10 h-44 w-44 rounded-full bg-royal/10 blur-3xl" />
+      <div className="gift-section-texture pointer-events-none absolute inset-0" />
 
-      <div className="relative mx-auto max-w-2xl px-4 text-center">
-        <Reveal direction="blur">
-          <h2 className="font-display text-5xl font-light italic text-white sm:text-6xl">
-            {copy.giftTitle}
-          </h2>
+      <div className="relative mx-auto flex min-h-[100dvh] max-w-lg flex-col items-center justify-center px-5 py-20 sm:px-8 sm:py-24">
+        <Reveal direction="up" className="w-full">
+          <div className={`gift-registry ${revealed ? "is-revealed" : ""}`}>
+            <div className="gift-registry-envelope">
+              {/* Side / back paper of open envelope */}
+              <div className="gift-registry-back" aria-hidden />
+              <div className="gift-registry-side gift-registry-side-left" aria-hidden />
+              <div className="gift-registry-side gift-registry-side-right" aria-hidden />
+
+              {/* Dark gift message card */}
+              <div
+                className="gift-registry-card"
+                style={
+                  cardImage
+                    ? { backgroundImage: `url('${cardImage}')` }
+                    : undefined
+                }
+              >
+                <div className="gift-registry-card-shade" />
+                <div className="gift-registry-card-content">
+                  <h2 className="gift-registry-title">
+                    {copy.giftTitle || "Gift"}
+                  </h2>
+                  <p className="gift-registry-message">{copy.giftMessage}</p>
+                  {gifts.length > 0 ? (
+                    <button
+                      type="button"
+                      className="gift-registry-send"
+                      onClick={() => setRevealed((v) => !v)}
+                      aria-expanded={revealed}
+                      aria-controls="gift-bank-slips"
+                    >
+                      <Gift className="h-3.5 w-3.5" strokeWidth={1.75} />
+                      {revealed ? "Hide Details" : "Send Gift"}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* Bank slips — hidden until Send Gift */}
+              <div
+                id="gift-bank-slips"
+                className="gift-registry-slips"
+                aria-hidden={!revealed}
+              >
+                {gifts.map((account, index) => (
+                  <div
+                    key={account.id || `${account.bank}-${index}`}
+                    className="gift-bank-slip"
+                    style={{ transitionDelay: revealed ? `${index * 80}ms` : "0ms" }}
+                  >
+                    <span className="gift-bank-pin" aria-hidden />
+                    <p className="gift-bank-logo">{account.bank}</p>
+                    <p className="gift-bank-number">{account.accountNumber}</p>
+                    <p className="gift-bank-name">{account.accountName}</p>
+                    <button
+                      type="button"
+                      className="gift-bank-copy"
+                      tabIndex={revealed ? 0 : -1}
+                      onClick={() => void copyNumber(account)}
+                    >
+                      {copiedId === account.id ? (
+                        <>
+                          <Check className="h-3 w-3" />
+                          Copied
+                        </>
+                      ) : (
+                        "Copy"
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Front V-fold of envelope (covers slips when hidden) */}
+              <div className="gift-registry-front" aria-hidden />
+            </div>
+          </div>
         </Reveal>
-
-        <Reveal direction="up" delay={100}>
-          <div className="mx-auto my-6 h-px w-14 bg-gradient-to-r from-transparent via-royal/60 to-transparent" />
-        </Reveal>
-
-        <Reveal direction="up" delay={140}>
-          <p className="mx-auto max-w-xl text-[11px] font-light uppercase leading-[1.95] tracking-[0.16em] text-white/65 sm:text-xs">
-            {copy.giftMessage}
-          </p>
-        </Reveal>
-
-        <div className="gift-envelope-list mt-12 space-y-14 sm:space-y-16">
-          {gifts.map((account, i) => (
-            <GiftEnvelope
-              key={account.id || `${account.bank}-${account.accountNumber}-${i}`}
-              account={account}
-              index={i}
-            />
-          ))}
-        </div>
       </div>
     </section>
   );
