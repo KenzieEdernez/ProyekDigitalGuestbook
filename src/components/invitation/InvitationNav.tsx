@@ -120,7 +120,7 @@ export default function InvitationNav({
           className="invitation-fab-rsvp"
           aria-label="RSVP"
         >
-          <RsvpFabIcon className="h-7 w-7 text-white" />
+          <RsvpFabIcon className="h-8 w-8 text-white" />
         </button>
 
         {musicAvailable && (

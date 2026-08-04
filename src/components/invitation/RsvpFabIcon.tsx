@@ -1,35 +1,85 @@
-/** White envelope + RSVP card icon for the circular RSVP FAB. */
+/** Open envelope with RSVP card — matches the invitation FAB artwork. */
 export default function RsvpFabIcon({ className = "" }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 48 48"
+      viewBox="0 0 64 64"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-hidden
     >
-      <path
-        d="M8 18.5L24 28.5L40 18.5V36.5C40 37.6 39.1 38.5 38 38.5H10C8.9 38.5 8 37.6 8 36.5V18.5Z"
+      {/* Card / letter rising from envelope */}
+      <rect
+        x="20"
+        y="10"
+        width="24"
+        height="28"
+        rx="2"
         fill="currentColor"
-        opacity="0.95"
       />
-      <path
-        d="M8 18.5L24 10.5L40 18.5L24 28.5L8 18.5Z"
-        fill="currentColor"
-      />
-      <rect x="14" y="14" width="20" height="14" rx="1.5" fill="#5c2430" />
       <text
-        x="24"
-        y="23.5"
+        x="32"
+        y="23"
         textAnchor="middle"
-        fill="currentColor"
-        fontSize="6.2"
+        fill="#5c2430"
+        fontSize="7.5"
         fontWeight="700"
-        fontFamily="system-ui, sans-serif"
-        letterSpacing="0.6"
+        fontFamily="ui-sans-serif, system-ui, sans-serif"
+        letterSpacing="1.1"
       >
         RSVP
       </text>
+      <line
+        x1="25"
+        y1="28"
+        x2="39"
+        y2="28"
+        stroke="#5c2430"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+      <line
+        x1="25"
+        y1="32.5"
+        x2="39"
+        y2="32.5"
+        stroke="#5c2430"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        opacity="0.4"
+      />
+
+      {/* Envelope body */}
+      <path
+        d="M12 28h40c1.7 0 3 1.3 3 3v22c0 1.7-1.3 3-3 3H12c-1.7 0-3-1.3-3-3V31c0-1.7 1.3-3 3-3Z"
+        fill="currentColor"
+      />
+      {/* Envelope inner shadow band */}
+      <path
+        d="M9 31l23 14 23-14"
+        stroke="#5c2430"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+        opacity="0.22"
+      />
+      {/* Envelope flap (open / folded back look) */}
+      <path
+        d="M9 31L32 45L55 31"
+        stroke="#5c2430"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.18"
+      />
+      {/* Front pocket fold highlight */}
+      <path
+        d="M12 53.5h40"
+        stroke="#5c2430"
+        strokeWidth="1.2"
+        opacity="0.12"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
