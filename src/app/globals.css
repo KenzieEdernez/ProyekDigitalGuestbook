@@ -562,6 +562,11 @@
     padding-bottom: 0;
   }
 
+  .invitation-hero-meta {
+    width: 100%;
+    flex-shrink: 0;
+  }
+
   .invitation-hero-names {
     font-size: clamp(2.5rem, 10vw, 4.25rem);
     font-weight: 300;
@@ -569,6 +574,11 @@
     line-height: 1.05;
     letter-spacing: 0.01em;
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .invitation-hero-date {
+    margin-top: 1.1rem;
+    font-size: 0.95rem;
   }
 
   .invitation-home-guest-wrap {
@@ -582,22 +592,45 @@
     height: 0;
   }
 
-  /* Mobile: keep titles in the upper half so faces stay visible */
+  /* Mobile: logo/kicker high; name + date lower on their guide bands */
   @media (max-width: 767px) {
     .invitation-hero-stage {
-      justify-content: space-between;
+      position: relative;
+      justify-content: flex-start;
       padding-top: clamp(4.15rem, 8.5dvh, 5.25rem);
       padding-bottom: max(1.1rem, calc(env(safe-area-inset-bottom, 0px) + 1.1rem));
     }
 
     .invitation-hero-cluster {
-      /* Sit higher in the upper band so faces stay clear */
       margin-top: 0;
       transform: translateY(-0.65rem);
     }
 
+    .invitation-hero-meta {
+      position: absolute;
+      left: 1.5rem;
+      right: 1.5rem;
+      top: 34%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .invitation-hero-names {
       font-size: clamp(2.15rem, 9.5vw, 2.85rem);
+    }
+
+    .invitation-hero-date {
+      margin-top: clamp(1.75rem, 5.5dvh, 2.75rem);
+      font-size: 0.95rem;
+    }
+
+    .invitation-home-guest-wrap {
+      position: absolute;
+      left: 1.5rem;
+      right: 1.5rem;
+      bottom: max(1.1rem, calc(env(safe-area-inset-bottom, 0px) + 1.1rem));
+      margin-top: 0;
     }
 
     .invitation-home-guest {
@@ -613,6 +646,15 @@
 
     .invitation-hero-cluster {
       margin-top: clamp(1rem, 6vh, 3.5rem);
+    }
+
+    .invitation-hero-meta {
+      margin-top: 1.25rem;
+    }
+
+    .invitation-hero-date {
+      margin-top: 1.25rem;
+      font-size: 1rem;
     }
   }
 
