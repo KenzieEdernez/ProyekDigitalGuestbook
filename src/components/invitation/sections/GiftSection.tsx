@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Gift } from "lucide-react";
+import GiftEnvelopeArt from "@/components/invitation/GiftEnvelopeArt";
 import Reveal from "@/components/invitation/Reveal";
 import type { GiftAccount, InvitationCopy } from "@/types/wedding";
 
@@ -35,17 +36,15 @@ export default function GiftSection({
       className="gift-section invitation-section relative overflow-hidden"
     >
       <div className="gift-section-texture pointer-events-none absolute inset-0" />
+      <div className="gift-section-glow pointer-events-none absolute inset-0" />
 
-      <div className="relative mx-auto flex min-h-[100dvh] max-w-lg flex-col items-center justify-center px-5 py-20 sm:px-8 sm:py-24">
+      <div className="relative mx-auto flex min-h-[100dvh] max-w-lg flex-col items-center justify-center px-4 py-20 sm:px-8 sm:py-24">
         <Reveal direction="up" className="w-full">
           <div className={`gift-registry ${revealed ? "is-revealed" : ""}`}>
             <div className="gift-registry-envelope">
-              {/* Side / back paper of open envelope */}
-              <div className="gift-registry-back" aria-hidden />
-              <div className="gift-registry-side gift-registry-side-left" aria-hidden />
-              <div className="gift-registry-side gift-registry-side-right" aria-hidden />
+              <GiftEnvelopeArt />
 
-              {/* Dark gift message card */}
+              {/* Dark gift message card nestled in the envelope opening */}
               <div
                 className="gift-registry-card"
                 style={
@@ -55,6 +54,7 @@ export default function GiftSection({
                 }
               >
                 <div className="gift-registry-card-shade" />
+                <div className="gift-registry-card-frame" aria-hidden />
                 <div className="gift-registry-card-content">
                   <h2 className="gift-registry-title">
                     {copy.giftTitle || "Gift"}
@@ -75,7 +75,7 @@ export default function GiftSection({
                 </div>
               </div>
 
-              {/* Bank slips — hidden until Send Gift */}
+              {/* Bank slips rise from behind the soft front fold */}
               <div
                 id="gift-bank-slips"
                 className="gift-registry-slips"
@@ -85,7 +85,9 @@ export default function GiftSection({
                   <div
                     key={account.id || `${account.bank}-${index}`}
                     className="gift-bank-slip"
-                    style={{ transitionDelay: revealed ? `${index * 80}ms` : "0ms" }}
+                    style={{
+                      transitionDelay: revealed ? `${index * 90}ms` : "0ms",
+                    }}
                   >
                     <span className="gift-bank-pin" aria-hidden />
                     <p className="gift-bank-logo">{account.bank}</p>
@@ -109,9 +111,6 @@ export default function GiftSection({
                   </div>
                 ))}
               </div>
-
-              {/* Front V-fold of envelope (covers slips when hidden) */}
-              <div className="gift-registry-front" aria-hidden />
             </div>
           </div>
         </Reveal>
