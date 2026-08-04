@@ -8,6 +8,18 @@ interface EventSectionProps {
   ceremonies: CeremonyItem[];
 }
 
+function formatLocationTime(raw: string) {
+  const value = raw.trim();
+  const match = value.match(/^(.+?)\s*(AM|PM)$/i);
+  if (!match) {
+    return { clock: value, meridian: "" };
+  }
+  return {
+    clock: match[1].trim(),
+    meridian: match[2].toUpperCase(),
+  };
+}
+
 export default function EventSection({ ceremonies }: EventSectionProps) {
   return (
     <section
@@ -26,6 +38,9 @@ export default function EventSection({ ceremonies }: EventSectionProps) {
         <div className="mt-8 space-y-14 sm:mt-10 sm:space-y-16">
           {ceremonies.map((ceremony, i) => {
             const venueName = (ceremony.location || ceremony.title || "").trim();
+            const timeLabel = ceremony.time?.trim()
+              ? formatLocationTime(ceremony.time)
+              : null;
 
             return (
               <Reveal key={ceremony.id} direction="up" delay={i * 100}>
@@ -47,8 +62,17 @@ export default function EventSection({ ceremonies }: EventSectionProps) {
                     </h3>
                   ) : null}
 
-                  {ceremony.time?.trim() ? (
-                    <p className="location-card-time">{ceremony.time.trim()}</p>
+                  {timeLabel ? (
+                    <p className="location-card-time">
+                      <span className="location-card-time-clock">
+                        {timeLabel.clock}
+                      </span>
+                      {timeLabel.meridian ? (
+                        <span className="location-card-time-meridian">
+                          {timeLabel.meridian}
+                        </span>
+                      ) : null}
+                    </p>
                   ) : null}
 
                   {ceremony.address?.trim() ? (
