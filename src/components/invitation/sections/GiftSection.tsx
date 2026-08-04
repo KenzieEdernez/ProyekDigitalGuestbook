@@ -31,20 +31,13 @@ export default function GiftSection({
   };
 
   return (
-    <section
-      id="gift"
-      className="gift-section invitation-section relative overflow-hidden"
-    >
-      <div className="gift-section-texture pointer-events-none absolute inset-0" />
-      <div className="gift-section-glow pointer-events-none absolute inset-0" />
-
-      <div className="relative mx-auto flex min-h-[100dvh] max-w-lg flex-col items-center justify-center px-4 py-20 sm:px-8 sm:py-24">
+    <section id="gift" className="gift-section invitation-section relative">
+      <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-md flex-col items-center justify-center px-5 py-16 sm:max-w-lg sm:px-6 sm:py-20">
         <Reveal direction="up" className="w-full">
           <div className={`gift-registry ${revealed ? "is-revealed" : ""}`}>
             <div className="gift-registry-envelope">
               <GiftEnvelopeArt />
 
-              {/* Dark gift message card nestled in the envelope opening */}
               <div
                 className="gift-registry-card"
                 style={
@@ -54,7 +47,6 @@ export default function GiftSection({
                 }
               >
                 <div className="gift-registry-card-shade" />
-                <div className="gift-registry-card-frame" aria-hidden />
                 <div className="gift-registry-card-content">
                   <h2 className="gift-registry-title">
                     {copy.giftTitle || "Gift"}
@@ -75,7 +67,6 @@ export default function GiftSection({
                 </div>
               </div>
 
-              {/* Bank slips rise from behind the soft front fold */}
               <div
                 id="gift-bank-slips"
                 className="gift-registry-slips"
