@@ -59,7 +59,7 @@ export default function HomeSection({
           </Reveal>
 
           <Reveal direction="up" delay={240} duration={1000} className="invitation-hero-names-wrap w-full">
-            <h2 className="invitation-hero-names w-full text-center font-display text-white">
+            <h2 className="invitation-hero-names w-full text-center font-sloop text-white">
               {getCoupleDisplayName(wedding)}
             </h2>
           </Reveal>

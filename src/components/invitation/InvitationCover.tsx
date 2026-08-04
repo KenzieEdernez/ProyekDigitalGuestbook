@@ -146,7 +146,7 @@ export default function InvitationCover({
 
             <p className="invitation-cover-kicker">{copy.engagementTitle}</p>
 
-            <h1 className="invitation-cover-names font-display">{coupleName}</h1>
+            <h1 className="invitation-cover-names font-sloop">{coupleName}</h1>
 
             <div className="invitation-cover-rule" aria-hidden />
 

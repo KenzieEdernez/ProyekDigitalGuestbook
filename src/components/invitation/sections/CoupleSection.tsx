@@ -107,7 +107,7 @@ export default function CoupleSection({
               />
             </div>
             {wedding.invitationCopy.coupleSectionTitle?.trim() ? (
-              <h2 className="couple-title whitespace-pre-line">
+              <h2 className="couple-title font-sloop whitespace-pre-line">
                 {wedding.invitationCopy.coupleSectionTitle}
               </h2>
             ) : null}
@@ -124,7 +124,7 @@ export default function CoupleSection({
             <CouplePerson person={left.person} role={left.role} />
           </Reveal>
 
-          <div className="couple-ampersand" aria-hidden>
+          <div className="couple-ampersand font-sloop" aria-hidden>
             <span>&</span>
           </div>
 
