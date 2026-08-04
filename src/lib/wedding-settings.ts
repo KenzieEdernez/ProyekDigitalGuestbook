@@ -185,6 +185,9 @@ function sanitizeInvitationCopy(
     displayDate: textValue(input?.displayDate) || fallback.displayDate,
     eventSectionTitle:
       textValue(input?.eventSectionTitle) || fallback.eventSectionTitle,
+    coupleSectionTitle:
+      multilineValue(input?.coupleSectionTitle) || fallback.coupleSectionTitle,
+    coupleSectionSubtitle: multilineValue(input?.coupleSectionSubtitle),
     dressCodeTitle: textValue(input?.dressCodeTitle) || fallback.dressCodeTitle,
     dressCodeDescription:
       multilineValue(input?.dressCodeDescription) ||

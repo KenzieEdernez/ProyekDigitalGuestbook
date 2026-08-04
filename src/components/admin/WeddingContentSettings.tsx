@@ -411,6 +411,38 @@ export default function WeddingContentSettings() {
                 />
               </div>
             ))}
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Couple Section Title
+              </label>
+              <textarea
+                className="input-field min-h-[72px]"
+                value={form.invitationCopy.coupleSectionTitle ?? ""}
+                placeholder="Bride & Groom"
+                onChange={(e) =>
+                  updateInvitationCopy("coupleSectionTitle", e.target.value)
+                }
+              />
+              <p className="mt-1 text-xs text-stone-400">
+                Shown under the couple logo. Enter = new line; casing as typed.
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Couple Section Subtitle
+              </label>
+              <textarea
+                className="input-field min-h-[90px]"
+                value={form.invitationCopy.coupleSectionSubtitle ?? ""}
+                placeholder="Two hearts united in love..."
+                onChange={(e) =>
+                  updateInvitationCopy("coupleSectionSubtitle", e.target.value)
+                }
+              />
+              <p className="mt-1 text-xs text-stone-400">
+                Optional. Line breaks and capitalization match what you type.
+              </p>
+            </div>
             <div className="md:col-span-2 grid gap-5 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">

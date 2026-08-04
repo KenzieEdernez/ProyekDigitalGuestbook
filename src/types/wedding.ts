@@ -4,6 +4,8 @@ export interface InvitationCopy {
   openButtonLabel: string;
   displayDate: string;
   eventSectionTitle: string;
+  coupleSectionTitle: string;
+  coupleSectionSubtitle: string;
   dressCodeTitle: string;
   dressCodeDescription: string;
   dressCodeTheme: string;

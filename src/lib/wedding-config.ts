@@ -7,6 +7,9 @@ export const DEFAULT_INVITATION_COPY: InvitationCopy = {
   openButtonLabel: "Open Invitation",
   displayDate: "06.09.2026",
   eventSectionTitle: "Wedding Event",
+  coupleSectionTitle: "Bride & Groom",
+  coupleSectionSubtitle:
+    "Two hearts united in love, ready to begin a new chapter together.",
   dressCodeTitle: "Dress Code",
   dressCodeDescription:
     "To support our wedding theme, we kindly request our guests to dress as follows on our special day:",

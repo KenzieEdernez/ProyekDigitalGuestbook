@@ -106,10 +106,16 @@ export default function CoupleSection({
                 size="couple"
               />
             </div>
-            <h2 className="couple-title">Bride & Groom</h2>
-            <p className="couple-subtitle">
-              Two hearts united in love, ready to begin a new chapter together.
-            </p>
+            {wedding.invitationCopy.coupleSectionTitle?.trim() ? (
+              <h2 className="couple-title whitespace-pre-line">
+                {wedding.invitationCopy.coupleSectionTitle}
+              </h2>
+            ) : null}
+            {wedding.invitationCopy.coupleSectionSubtitle?.trim() ? (
+              <p className="couple-subtitle whitespace-pre-line">
+                {wedding.invitationCopy.coupleSectionSubtitle}
+              </p>
+            ) : null}
           </header>
         </Reveal>
 
