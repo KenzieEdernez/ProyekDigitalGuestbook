@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import FlyingBirds from "@/components/invitation/FlyingBirds";
 import InvitationCover from "@/components/invitation/InvitationCover";
 import InvitationNav from "@/components/invitation/InvitationNav";
-import RsvpReminderToast from "@/components/invitation/RsvpReminderToast";
 import ScrollProgress from "@/components/invitation/ScrollProgress";
 import ClosingSection from "@/components/invitation/sections/ClosingSection";
 import DressCodeSection from "@/components/invitation/sections/DressCodeSection";
@@ -316,17 +315,10 @@ export default function InvitationApp() {
             musicPlaying={musicPlaying}
             musicAvailable={musicAvailable}
             onToggleMusic={toggleMusic}
+            showRsvpReminder={phase === "open" && showRsvpReminder}
+            onRsvpReminder={() => setShowRsvpReminder(false)}
+            onRsvpReminderDismiss={() => setShowRsvpReminder(false)}
           />
-
-          {phase === "open" && (
-            <RsvpReminderToast
-              visible={showRsvpReminder}
-              onRsvp={() => {
-                setShowRsvpReminder(false);
-                navigateTo("rsvp");
-              }}
-            />
-          )}
 
           <main>
             <HomeSection

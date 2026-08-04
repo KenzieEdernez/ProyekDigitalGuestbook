@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import HamburgerButton from "@/components/invitation/HamburgerButton";
 import MenuOverlay from "@/components/invitation/MenuOverlay";
+import RsvpFabIcon from "@/components/invitation/RsvpFabIcon";
+import RsvpReminderToast from "@/components/invitation/RsvpReminderToast";
 import type { InvitationSection } from "@/lib/wedding-config";
 
 interface InvitationNavProps {
@@ -13,6 +15,9 @@ interface InvitationNavProps {
   musicPlaying: boolean;
   musicAvailable?: boolean;
   onToggleMusic: () => void;
+  showRsvpReminder?: boolean;
+  onRsvpReminder?: () => void;
+  onRsvpReminderDismiss?: () => void;
 }
 
 export default function InvitationNav({
@@ -22,6 +27,9 @@ export default function InvitationNav({
   musicPlaying,
   musicAvailable = false,
   onToggleMusic,
+  showRsvpReminder = false,
+  onRsvpReminder,
+  onRsvpReminderDismiss,
 }: InvitationNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -91,33 +99,41 @@ export default function InvitationNav({
         onNavigate={handleNav}
       />
 
-      <div
-        className={`fixed right-4 z-40 flex flex-col items-end gap-3 lg:right-8 ${
-          musicAvailable ? "bottom-6 lg:bottom-8" : "bottom-6 lg:bottom-8"
-        }`}
-      >
+      <div className="invitation-fab-stack fixed bottom-6 right-4 z-40 flex flex-col items-end gap-3 lg:bottom-8 lg:right-8">
+        {showRsvpReminder && (
+          <RsvpReminderToast
+            visible={showRsvpReminder}
+            onRsvp={() => {
+              onRsvpReminder?.();
+              handleNav("rsvp");
+            }}
+            onDismiss={onRsvpReminderDismiss}
+          />
+        )}
+
         <button
           type="button"
-          onClick={() => handleNav("rsvp")}
-          className="rounded-full border border-royal/40 bg-royal px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white shadow-card transition-all duration-500 ease-out-expo hover:scale-105 hover:bg-royal/90 active:scale-95"
+          onClick={() => {
+            onRsvpReminderDismiss?.();
+            handleNav("rsvp");
+          }}
+          className="invitation-fab-rsvp"
+          aria-label="RSVP"
         >
-          RSVP
+          <RsvpFabIcon className="h-7 w-7 text-white" />
         </button>
 
         {musicAvailable && (
           <button
+            type="button"
             onClick={onToggleMusic}
-            className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-card transition-all duration-500 ease-out-expo hover:scale-105 active:scale-95 ${
-              musicPlaying
-                ? "border-royal/40 bg-royal/10"
-                : "border-stone-200 bg-white hover:border-royal/30"
-            }`}
-            aria-label={musicPlaying ? "Mute music" : "Play music"}
+            className="invitation-fab-music"
+            aria-label={musicPlaying ? "Pause music" : "Play music"}
           >
             {musicPlaying ? (
-              <Volume2 className="h-4 w-4 animate-pulse-soft text-royal" />
+              <Pause className="h-5 w-5 fill-current text-navy" />
             ) : (
-              <VolumeX className="h-4 w-4 text-stone-400" />
+              <Play className="h-5 w-5 fill-current text-navy translate-x-0.5" />
             )}
           </button>
         )}

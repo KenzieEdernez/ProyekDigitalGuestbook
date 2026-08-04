@@ -922,6 +922,65 @@
     transform: scale(0.97);
   }
 
+  .invitation-fab-rsvp {
+    display: flex;
+    height: 3.35rem;
+    width: 3.35rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #5c2430;
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(92, 36, 48, 0.35);
+    transition: transform 0.25s ease, background-color 0.25s ease;
+  }
+
+  .invitation-fab-rsvp:hover {
+    background: #4a1c26;
+    transform: scale(1.05);
+  }
+
+  .invitation-fab-rsvp:active {
+    transform: scale(0.96);
+  }
+
+  .invitation-fab-music {
+    display: flex;
+    height: 3.35rem;
+    width: 3.35rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #fff;
+    color: #1a2332;
+    box-shadow: 0 10px 24px rgba(26, 35, 50, 0.16);
+    transition: transform 0.25s ease;
+  }
+
+  .invitation-fab-music:hover {
+    transform: scale(1.05);
+  }
+
+  .invitation-fab-music:active {
+    transform: scale(0.96);
+  }
+
+  .rsvp-chat-bubble {
+    align-self: flex-end;
+    margin-right: 0.15rem;
+  }
+
+  .rsvp-chat-tail {
+    position: absolute;
+    right: 1.05rem;
+    bottom: -0.45rem;
+    width: 0.85rem;
+    height: 0.85rem;
+    background: #fff;
+    transform: rotate(45deg);
+    box-shadow: 2px 2px 4px rgba(26, 35, 50, 0.06);
+  }
+
   @media (max-width: 767px) {
     .gallery-item:hover {
       transform: none;

@@ -5,11 +5,14 @@ import { useEffect, useState } from "react";
 interface RsvpReminderToastProps {
   visible: boolean;
   onRsvp: () => void;
+  onDismiss?: () => void;
 }
 
+/** Chat-bubble reminder that points down toward the RSVP FAB. */
 export default function RsvpReminderToast({
   visible,
   onRsvp,
+  onDismiss,
 }: RsvpReminderToastProps) {
   const [show, setShow] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
@@ -25,42 +28,43 @@ export default function RsvpReminderToast({
     setFadeOut(false);
 
     const fadeTimer = setTimeout(() => setFadeOut(true), 4500);
-    const hideTimer = setTimeout(() => setShow(false), 5500);
+    const hideTimer = setTimeout(() => {
+      setShow(false);
+      onDismiss?.();
+    }, 5500);
 
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
     };
-  }, [visible]);
+  }, [visible, onDismiss]);
 
   if (!show) return null;
 
   return (
     <div
-      className={`fixed left-1/2 top-20 z-[60] w-[min(92vw,22rem)] -translate-x-1/2 transition-opacity duration-700 ease-out lg:top-24 ${
-        fadeOut ? "opacity-0" : "opacity-100"
+      className={`rsvp-chat-bubble relative mb-1 w-[min(72vw,13.5rem)] transition-all duration-700 ease-out ${
+        fadeOut ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
       }`}
       role="status"
     >
-      <div className="rounded-2xl border border-royal/25 bg-white/95 px-5 py-4 text-center shadow-card-lg backdrop-blur-md">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-royal">
+      <button
+        type="button"
+        onClick={onRsvp}
+        className="block w-full rounded-2xl bg-white px-3.5 py-3 text-left shadow-[0_10px_28px_rgba(26,35,50,0.18)] ring-1 ring-black/5"
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#5c2430]">
           Reminder
         </p>
-        <p className="mt-2 font-display text-lg font-light text-navy">
+        <p className="mt-1 font-display text-[1.05rem] font-light leading-snug text-navy">
           Please RSVP
         </p>
-        <p className="mt-1.5 text-xs font-light leading-relaxed text-stone-500">
-          Kindly reserve your seat so we can welcome you warmly on our special
-          day.
+        <p className="mt-1 text-[11px] font-light leading-relaxed text-stone-500">
+          Tap here to reserve your seat.
         </p>
-        <button
-          type="button"
-          onClick={onRsvp}
-          className="mt-3 inline-flex rounded-full bg-navy px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition hover:bg-navy/90 active:scale-95"
-        >
-          RSVP Now
-        </button>
-      </div>
+      </button>
+      {/* Tail pointing down-right toward the RSVP button */}
+      <span className="rsvp-chat-tail" aria-hidden />
     </div>
   );
 }
