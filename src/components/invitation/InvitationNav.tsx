@@ -82,7 +82,7 @@ export default function InvitationNav({
             className="group min-w-0 text-left"
           >
             <p className="text-[9px] font-bold uppercase tracking-[0.38em] text-royal/75 transition-all duration-500 group-hover:tracking-[0.42em] group-hover:text-royal">
-              The Wedding of
+              The Sangjit of
             </p>
             <p className="truncate font-display text-base font-light text-white transition-all duration-500 group-hover:text-royal/90 lg:text-lg">
               {coupleName}
