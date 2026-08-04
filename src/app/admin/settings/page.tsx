@@ -6,8 +6,10 @@ import AdminShell from "@/components/layout/AdminShell";
 import BirdGreenscreenPreview from "@/components/admin/BirdGreenscreenPreview";
 import WeddingContentSettings from "@/components/admin/WeddingContentSettings";
 import { processDressCodeImageFile } from "@/lib/process-dress-code-image";
+import { readTransparentPngFile } from "@/lib/read-transparent-png";
 import { processFittedPhotoFile } from "@/lib/trim-image-bars";
 import type { EventSettings } from "@/types/event";
+import type { WeddingSettings } from "@/types/wedding";
 
 const EMPTY_EVENT_SETTINGS: EventSettings = {
   name: "",
@@ -78,17 +80,27 @@ export default function EventSettingsPage() {
     | "card"
     | "dresscode"
     | "logo"
+    | "heroLogo"
     | "bird"
     | null
   >(null);
+  const [heroLogoImage, setHeroLogoImage] = useState("");
+  const [weddingSnapshot, setWeddingSnapshot] = useState<WeddingSettings | null>(
+    null
+  );
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadSettings() {
       try {
-        const res = await fetch("/api/event-settings", { cache: "no-store" });
-        const data = await res.json();
+        const [eventRes, weddingRes] = await Promise.all([
+          fetch("/api/event-settings", { cache: "no-store" }),
+          fetch("/api/wedding-settings", { cache: "no-store" }),
+        ]);
+        const data = await eventRes.json();
+        const weddingData = await weddingRes.json();
+
         if (data.settings) {
           const bird =
             data.settings.birdImage || data.settings.birdImageIos || "";
@@ -98,6 +110,10 @@ export default function EventSettingsPage() {
             birdImageIos: "",
             birdFrames: data.settings.birdFrames || [],
           });
+        }
+        if (weddingData.settings) {
+          setWeddingSnapshot(weddingData.settings);
+          setHeroLogoImage(weddingData.settings.heroLogoImage || "");
         }
       } catch {
         setError("Failed to load event settings.");
@@ -138,6 +154,37 @@ export default function EventSettingsPage() {
           birdFrames: data.settings.birdFrames || [],
         });
       }
+
+      {
+        const freshWeddingRes = await fetch("/api/wedding-settings", {
+          cache: "no-store",
+        });
+        const freshWeddingData = await freshWeddingRes.json();
+        const baseWedding = freshWeddingData.settings || weddingSnapshot;
+        if (baseWedding) {
+          const weddingRes = await fetch("/api/wedding-settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...baseWedding,
+              heroLogoImage,
+            }),
+          });
+          const weddingData = await weddingRes.json();
+          if (!weddingRes.ok) {
+            setError(
+              weddingData.error ||
+                "Page settings saved, but hero logo failed to save."
+            );
+            return;
+          }
+          if (weddingData.settings) {
+            setWeddingSnapshot(weddingData.settings);
+            setHeroLogoImage(weddingData.settings.heroLogoImage || "");
+          }
+        }
+      }
+
       setMessage("Page settings saved successfully.");
     } catch {
       setError("Failed to connect to the server.");
@@ -168,6 +215,8 @@ export default function EventSettingsPage() {
         processed = await processFittedPhotoFile(file, 1400);
       } else if (variant === "dresscode") {
         processed = await processDressCodeImageFile(file, 1400);
+      } else if (variant === "logo") {
+        processed = await readTransparentPngFile(file, 900);
       } else {
         processed = await readPngAsset(file, 500);
       }
@@ -412,34 +461,92 @@ export default function EventSettingsPage() {
             <div className="grid gap-6 md:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Logo / Initial Image
+                  Couple Logo
                 </label>
-                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-navy-900">
+                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] dark:border-stone-700">
                   {form.logoImage ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={form.logoImage}
-                      alt="Logo preview"
+                      alt="Couple logo preview"
                       className="max-h-28 w-auto object-contain"
                     />
                   ) : (
                     <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
                       <ImageIcon className="h-8 w-8" />
-                      <p className="mt-2 text-sm">No logo yet</p>
+                      <p className="mt-2 text-sm">No couple logo yet</p>
                     </div>
                   )}
                 </div>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/png,image/*"
                   onChange={(event) => handleHeroImageChange(event, "logo")}
                   disabled={saving || imageProcessing !== null}
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  PNG recommended. Shown above Bride &amp; Groom. Hero logo
-                  (above engagement title) and closing logos are in Wedding
-                  Invitation Content.
+                  Transparent PNG recommended. Shown above Bride &amp; Groom.
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Hero Initial Logo
+                </label>
+                <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] dark:border-stone-700">
+                  {heroLogoImage ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={heroLogoImage}
+                      alt="Hero initial logo preview"
+                      className="max-h-28 w-auto object-contain"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-stone-400 dark:text-stone-500">
+                      <ImageIcon className="h-8 w-8" />
+                      <p className="mt-2 text-sm">No hero logo yet</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/png,image/*"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    if (!file.type.startsWith("image/")) {
+                      setError("Hero logo must be an image (PNG preferred).");
+                      return;
+                    }
+                    setImageProcessing("heroLogo");
+                    setError(null);
+                    try {
+                      const processed = await readTransparentPngFile(file, 900);
+                      setHeroLogoImage(processed);
+                    } catch {
+                      setError("Failed to process hero logo.");
+                    } finally {
+                      setImageProcessing(null);
+                      event.target.value = "";
+                    }
+                  }}
+                  disabled={saving || imageProcessing !== null || !weddingSnapshot}
+                  className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
+                />
+                {heroLogoImage ? (
+                  <button
+                    type="button"
+                    onClick={() => setHeroLogoImage("")}
+                    disabled={saving || imageProcessing !== null}
+                    className="mt-2 text-xs font-medium text-stone-500 underline hover:text-navy"
+                  >
+                    Remove hero logo
+                  </button>
+                ) : null}
+                <p className="mt-2 text-xs text-stone-400">
+                  Separate transparent PNG. Shown above &quot;The Sangjit…&quot;
+                  on the cover and open hero. Click Save Settings after upload.
                 </p>
               </div>
 

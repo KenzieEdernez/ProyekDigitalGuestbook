@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import InvitationLogo from "@/components/invitation/InvitationLogo";
 import { resolveHeroImages } from "@/lib/hero-images";
 import type { InvitationCopy } from "@/types/wedding";
 
@@ -12,6 +13,7 @@ interface InvitationCoverProps {
   heroImageCard: string;
   coupleName: string;
   copy: InvitationCopy;
+  heroLogoImage?: string;
   onOpen: () => void;
   onPrimeMusic?: () => void;
   isExiting?: boolean;
@@ -24,6 +26,7 @@ export default function InvitationCover({
   heroImageCard,
   coupleName,
   copy,
+  heroLogoImage,
   onOpen,
   onPrimeMusic,
   isExiting = false,
@@ -69,7 +72,13 @@ export default function InvitationCover({
       observer.disconnect();
       window.removeEventListener("resize", fit);
     };
-  }, [heroes.card, guestName, copy.coverMessage, copy.engagementTitle]);
+  }, [
+    heroes.card,
+    guestName,
+    copy.coverMessage,
+    copy.engagementTitle,
+    heroLogoImage,
+  ]);
 
   const handleOpen = () => {
     setBtnPressed(true);
@@ -129,6 +138,12 @@ export default function InvitationCover({
           </div>
 
           <div className="invitation-cover-card-body">
+            {heroLogoImage ? (
+              <div className="invitation-cover-logo mb-2 flex justify-center">
+                <InvitationLogo src={heroLogoImage} size="hero" />
+              </div>
+            ) : null}
+
             <p className="invitation-cover-kicker">{copy.engagementTitle}</p>
 
             <h1 className="invitation-cover-names font-display">{coupleName}</h1>

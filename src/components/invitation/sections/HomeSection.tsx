@@ -47,8 +47,8 @@ export default function HomeSection({
           <div className="invitation-hero-copy w-full">
             {wedding.heroLogoImage ? (
               <Reveal direction="blur" duration={900}>
-                <div className="invitation-hero-logo-wrap mb-2 flex justify-center sm:mb-3">
-                  <InvitationLogo src={wedding.heroLogoImage} />
+                <div className="invitation-hero-logo-wrap mb-3 flex justify-center bg-transparent sm:mb-4">
+                  <InvitationLogo src={wedding.heroLogoImage} size="hero" />
                 </div>
               </Reveal>
             ) : null}

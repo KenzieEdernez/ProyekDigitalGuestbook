@@ -17,6 +17,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import CeremonyDateInput from "@/components/admin/CeremonyDateInput";
 import EventTimeInput from "@/components/admin/EventTimeInput";
+import { readTransparentPngFile } from "@/lib/read-transparent-png";
 import { DEFAULT_WEDDING } from "@/lib/wedding-config";
 import type { WeddingSettings } from "@/types/wedding";
 
@@ -410,23 +411,27 @@ export default function WeddingContentSettings() {
             ))}
             <div className="md:col-span-2">
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                Hero Logo (above engagement title)
+                Hero Initial Logo (transparent PNG)
               </label>
-              {form.heroLogoImage ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={form.heroLogoImage}
-                  alt="Hero logo"
-                  className="mb-2 max-h-24 w-auto object-contain"
-                />
-              ) : null}
+              <div className="mb-2 flex h-28 items-center justify-center rounded-xl border border-stone-200 bg-[linear-gradient(45deg,#e7e5e4_25%,transparent_25%),linear-gradient(-45deg,#e7e5e4_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e7e5e4_75%),linear-gradient(-45deg,transparent_75%,#e7e5e4_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0]">
+                {form.heroLogoImage ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={form.heroLogoImage}
+                    alt="Hero logo"
+                    className="max-h-24 w-auto object-contain"
+                  />
+                ) : (
+                  <p className="text-xs text-stone-400">No hero logo yet</p>
+                )}
+              </div>
               <input
                 type="file"
                 accept="image/png,image/*"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  void readCeremonyPngFile(file)
+                  void readTransparentPngFile(file, 900)
                     .then((dataUrl) =>
                       setForm((f) => ({ ...f, heroLogoImage: dataUrl }))
                     )
@@ -444,8 +449,9 @@ export default function WeddingContentSettings() {
                 </button>
               ) : null}
               <p className="mt-2 text-xs text-stone-400">
-                Separate from the couple logo. Shown above &quot;The Sangjit…&quot;
-                on the first screen.
+                Different from Couple Logo. Transparent PNG, no background. Shown
+                above &quot;The Sangjit…&quot; on cover and hero. You can also
+                upload this from Page Settings → Hero Initial Logo.
               </p>
             </div>
             <div className="md:col-span-2">

@@ -3,7 +3,7 @@
 interface InvitationLogoProps {
   src?: string;
   fallbackInitials?: string;
-  size?: "default" | "couple";
+  size?: "default" | "couple" | "hero";
 }
 
 export default function InvitationLogo({
@@ -14,7 +14,9 @@ export default function InvitationLogo({
   const sizeClass =
     size === "couple"
       ? "h-[5.25rem] w-auto max-w-[11.5rem] object-contain object-center sm:h-[6.25rem] sm:max-w-[13.5rem] md:h-[7rem] md:max-w-[15rem]"
-      : "h-[5.75rem] w-auto max-w-[12.5rem] object-contain object-center sm:h-[6.75rem] sm:max-w-[15rem] md:h-28 md:max-w-[16rem]";
+      : size === "hero"
+        ? "h-[4.75rem] w-auto max-w-[10.5rem] object-contain object-center sm:h-[5.75rem] sm:max-w-[12.5rem] md:h-[6.5rem] md:max-w-[14rem]"
+        : "h-[5.75rem] w-auto max-w-[12.5rem] object-contain object-center sm:h-[6.75rem] sm:max-w-[15rem] md:h-28 md:max-w-[16rem]";
 
   if (src) {
     return (
@@ -23,7 +25,7 @@ export default function InvitationLogo({
         src={src}
         alt=""
         aria-hidden
-        className={`invitation-logo-image ${sizeClass}`}
+        className={`invitation-logo-image bg-transparent ${sizeClass}`}
       />
     );
   }

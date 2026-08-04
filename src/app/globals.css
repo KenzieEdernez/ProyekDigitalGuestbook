@@ -564,7 +564,12 @@
   }
 
   .invitation-logo-image {
+    background: transparent;
     filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.28));
+  }
+
+  .invitation-cover-logo .invitation-logo-image {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.12));
   }
 
   .invitation-logo-fallback {
