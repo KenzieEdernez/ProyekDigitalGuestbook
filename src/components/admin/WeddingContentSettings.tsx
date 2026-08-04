@@ -675,12 +675,12 @@ export default function WeddingContentSettings() {
                 />
                 <div className="mb-3">
                   <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                    Location
+                    Venue Name
                   </label>
                   <textarea
                     className="input-field min-h-[72px]"
                     value={item.location}
-                    placeholder={"Line breaks are kept on the invitation"}
+                    placeholder={"e.g. PARK HYATT JAKARTA"}
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
@@ -692,6 +692,9 @@ export default function WeddingContentSettings() {
                       }))
                     }
                   />
+                  <p className="mt-1 text-xs text-stone-400">
+                    Shown large under the venue illustration.
+                  </p>
                 </div>
                 <div className="mb-3">
                   <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">

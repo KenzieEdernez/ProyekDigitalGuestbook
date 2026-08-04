@@ -789,6 +789,102 @@
     @apply px-5 py-16 sm:px-6 sm:py-24 lg:py-28;
   }
 
+  .location-section {
+    --location-ink: #4a2328;
+    --location-ink-soft: rgba(74, 35, 40, 0.72);
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(74, 35, 40, 0.05), transparent 52%),
+      linear-gradient(180deg, #e8e4db 0%, #dcd9d0 48%, #d6d2c8 100%);
+    color: var(--location-ink);
+  }
+
+  .location-section-title {
+    font-family: var(--font-great-vibes), cursive;
+    font-size: clamp(3.25rem, 12vw, 4.5rem);
+    font-weight: 400;
+    line-height: 1;
+    color: var(--location-ink);
+  }
+
+  .location-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .location-card-media {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1.75rem;
+  }
+
+  .location-card-image {
+    display: block;
+    width: auto;
+    max-width: min(100%, 18rem);
+    max-height: 14rem;
+    height: auto;
+    object-fit: contain;
+    filter: sepia(0.18) contrast(1.05);
+  }
+
+  @media (min-width: 640px) {
+    .location-card-image {
+      max-width: min(100%, 22rem);
+      max-height: 17rem;
+    }
+  }
+
+  .location-card-venue {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-size: clamp(1.15rem, 3.8vw, 1.45rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    color: var(--location-ink);
+  }
+
+  .location-card-address {
+    margin-top: 0.85rem;
+    max-width: 18rem;
+    font-family: var(--font-playfair), Georgia, serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--location-ink-soft);
+  }
+
+  .location-card-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: 1.75rem;
+    min-width: 14.5rem;
+    border-radius: 999px;
+    background: var(--location-ink);
+    padding: 0.85rem 1.6rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #f7f3ec;
+    transition:
+      transform 0.25s ease,
+      background-color 0.25s ease,
+      opacity 0.25s ease;
+  }
+
+  .location-card-cta:hover {
+    background: #3a1b20;
+  }
+
+  .location-card-cta:active {
+    transform: scale(0.97);
+  }
+
   @media (max-width: 767px) {
     .gallery-item:hover {
       transform: none;

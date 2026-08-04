@@ -1,5 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter, Playfair_Display } from "next/font/google";
+import {
+  Cormorant_Garamond,
+  Great_Vibes,
+  Inter,
+  Playfair_Display,
+} from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -16,6 +21,12 @@ const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-cormorant",
+});
+
+const greatVibes = Great_Vibes({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-great-vibes",
 });
 
 export const metadata: Metadata = {
@@ -39,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${playfair.variable} ${cormorant.variable} min-h-screen`}
+        className={`${inter.variable} ${playfair.variable} ${cormorant.variable} ${greatVibes.variable} min-h-screen`}
       >
         {children}
       </body>
