@@ -961,8 +961,26 @@
     color: var(--location-ink);
   }
 
+  .location-card-time {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.95rem;
+    border-radius: 999px;
+    border: 1px solid rgba(197, 160, 89, 0.28);
+    background: rgba(8, 12, 18, 0.72);
+    padding: 0.42rem 1.05rem;
+    font-family: var(--font-playfair), Georgia, serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    color: #f3ebe0;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+  }
+
   .location-card-address {
-    margin-top: 0.85rem;
+    margin-top: 0.95rem;
     max-width: 20rem;
     font-family: var(--font-playfair), Georgia, serif;
     font-size: 0.95rem;

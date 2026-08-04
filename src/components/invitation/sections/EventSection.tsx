@@ -47,6 +47,10 @@ export default function EventSection({ ceremonies }: EventSectionProps) {
                     </h3>
                   ) : null}
 
+                  {ceremony.time?.trim() ? (
+                    <p className="location-card-time">{ceremony.time.trim()}</p>
+                  ) : null}
+
                   {ceremony.address?.trim() ? (
                     <p className="location-card-address whitespace-pre-line">
                       {ceremony.address}
