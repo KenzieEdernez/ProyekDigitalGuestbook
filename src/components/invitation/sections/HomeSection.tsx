@@ -43,41 +43,34 @@ export default function HomeSection({
       <div className="invitation-hero-vignette absolute inset-0" />
 
       <div className="invitation-hero-stage relative z-10 min-h-[100dvh] px-6 text-center text-white sm:px-8">
-        {/* Logo + engagement line stay high */}
         <div className="invitation-hero-cluster mx-auto flex w-full max-w-lg flex-col items-center">
-          <div className="invitation-hero-copy w-full">
-            {wedding.heroLogoImage ? (
-              <Reveal direction="blur" duration={900}>
-                <div className="invitation-hero-logo-wrap mb-2 flex justify-center bg-transparent sm:mb-4">
-                  <InvitationLogo src={wedding.heroLogoImage} size="hero" />
-                </div>
-              </Reveal>
-            ) : null}
-
-            <Reveal direction="up" delay={120} duration={1000}>
-              <p className="invitation-hero-kicker mt-1 whitespace-pre-line text-[10px] font-light tracking-[0.28em] text-white/80 sm:mt-4 sm:text-[11px]">
-                {copy.engagementTitle}
-              </p>
+          {wedding.heroLogoImage ? (
+            <Reveal direction="blur" duration={900}>
+              <div className="invitation-hero-logo-wrap mb-2 flex justify-center bg-transparent sm:mb-4">
+                <InvitationLogo src={wedding.heroLogoImage} size="hero" />
+              </div>
             </Reveal>
-          </div>
-        </div>
+          ) : null}
 
-        {/* Name + date sit lower on their own band */}
-        <div className="invitation-hero-meta mx-auto w-full max-w-lg">
-          <Reveal direction="up" delay={240} duration={1000}>
-            <h2 className="invitation-hero-names font-display text-white">
+          <Reveal direction="up" delay={120} duration={1000}>
+            <p className="invitation-hero-kicker mt-1 w-full whitespace-pre-line text-center text-[10px] font-light tracking-[0.28em] text-white/80 sm:mt-4 sm:text-[11px]">
+              {copy.engagementTitle}
+            </p>
+          </Reveal>
+
+          <Reveal direction="up" delay={240} duration={1000} className="invitation-hero-names-wrap w-full">
+            <h2 className="invitation-hero-names w-full text-center font-display text-white">
               {getCoupleDisplayName(wedding)}
             </h2>
           </Reveal>
 
-          <Reveal direction="up" delay={360}>
-            <p className="invitation-hero-date font-display tracking-[0.38em] text-white/90">
+          <Reveal direction="up" delay={360} className="invitation-hero-date-wrap w-full">
+            <p className="invitation-hero-date w-full text-center font-display tracking-[0.38em] text-white/90">
               {spacedDate}
             </p>
           </Reveal>
         </div>
 
-        {/* Dear box pinned to the bottom of the first slide */}
         {guestName ? (
           <Reveal direction="up" delay={460} className="invitation-home-guest-wrap">
             <div className="invitation-home-guest mx-auto w-full max-w-xs rounded-xl border border-white/20 bg-white/10 px-5 py-4 backdrop-blur-sm">
