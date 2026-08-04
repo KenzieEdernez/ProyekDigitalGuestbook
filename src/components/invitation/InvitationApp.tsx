@@ -289,16 +289,13 @@ export default function InvitationApp() {
               wedding={wedding}
               copy={wedding.invitationCopy}
               guestName={guestName}
-              weddingReady={weddingReady}
             />
             <CoupleSection
               wedding={wedding}
               logoImage={eventSettings.logoImage}
+              weddingReady={weddingReady}
             />
-            <EventSection
-              ceremonies={wedding.ceremonies}
-              sectionTitle={wedding.invitationCopy.eventSectionTitle}
-            />
+            <EventSection ceremonies={wedding.ceremonies} />
             <DressCodeSection
               event={eventSettings}
               copy={wedding.invitationCopy}

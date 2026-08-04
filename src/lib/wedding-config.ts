@@ -79,6 +79,8 @@ export const DEFAULT_WEDDING: WeddingSettings = {
   },
   musicUrl: "",
   closingLogos: [],
+  heroLogoImage: "",
+  coupleOrder: "groom-first",
 };
 
 /** @deprecated Use DEFAULT_WEDDING or merged settings from API */
@@ -106,6 +108,9 @@ export const NAV_ITEMS: { id: InvitationSection; label: string }[] = [
 ];
 
 export function getCoupleDisplayName(wedding: WeddingSettings = DEFAULT_WEDDING) {
+  if (wedding.coupleOrder === "bride-first") {
+    return `${wedding.bride.name} & ${wedding.groom.name}`;
+  }
   return `${wedding.groom.name} & ${wedding.bride.name}`;
 }
 
@@ -143,5 +148,11 @@ export function mergeWeddingSettings(
     closingLogos: Array.isArray(stored.closingLogos)
       ? stored.closingLogos.filter((url) => typeof url === "string" && url.trim())
       : [],
+    heroLogoImage:
+      typeof stored.heroLogoImage === "string"
+        ? stored.heroLogoImage.trim()
+        : DEFAULT_WEDDING.heroLogoImage,
+    coupleOrder:
+      stored.coupleOrder === "bride-first" ? "bride-first" : "groom-first",
   };
 }

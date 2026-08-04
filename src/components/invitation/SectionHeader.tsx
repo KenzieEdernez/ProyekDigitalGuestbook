@@ -4,7 +4,7 @@ import Reveal from "./Reveal";
 
 interface SectionHeaderProps {
   label: string;
-  title: string;
+  title?: string;
   subtitle?: string;
   light?: boolean;
   align?: "center" | "left";
@@ -19,6 +19,7 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
   const alignClass = align === "center" ? "text-center mx-auto" : "text-left mx-0";
   const ornamentAlign = align === "center" ? "justify-center" : "justify-start";
+  const hasTitle = Boolean(title?.trim());
 
   return (
     <header className={`mb-10 max-w-2xl sm:mb-14 lg:mb-16 ${alignClass}`}>
@@ -46,18 +47,20 @@ export default function SectionHeader({
         </div>
       </Reveal>
 
-      <Reveal direction="up" delay={120} duration={900}>
-        <h2
-          className={`mt-5 font-display text-3xl font-light leading-tight sm:text-4xl md:text-5xl ${
-            light ? "text-white" : "text-navy"
-          }`}
-        >
-          {title}
-        </h2>
-      </Reveal>
+      {hasTitle && (
+        <Reveal direction="up" delay={120} duration={900}>
+          <h2
+            className={`mt-5 font-display text-3xl font-light leading-tight sm:text-4xl md:text-5xl ${
+              light ? "text-white" : "text-navy"
+            }`}
+          >
+            {title}
+          </h2>
+        </Reveal>
+      )}
 
       {subtitle && (
-        <Reveal direction="up" delay={240} duration={800}>
+        <Reveal direction="up" delay={hasTitle ? 240 : 120} duration={800}>
           <p
             className={`mt-5 text-sm leading-relaxed ${
               light ? "text-white/60" : "text-stone-500"

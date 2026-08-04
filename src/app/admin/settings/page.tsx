@@ -437,9 +437,9 @@ export default function EventSettingsPage() {
                   className="mt-3 block w-full text-sm text-stone-500 file:mr-4 file:rounded-lg file:border-0 file:bg-navy file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-white hover:file:bg-navy/90 dark:text-stone-400 dark:file:bg-navy-700 dark:hover:file:bg-navy-600"
                 />
                 <p className="mt-2 text-xs text-stone-400">
-                  PNG recommended. Shown under &quot;The Couple&quot; (above Bride
-                  &amp; Groom). Sized for mobile and desktop. Closing logos are
-                  managed separately in Wedding Invitation Content → Closing.
+                  PNG recommended. Shown above Bride &amp; Groom. Hero logo
+                  (above engagement title) and closing logos are in Wedding
+                  Invitation Content.
                 </p>
               </div>
 

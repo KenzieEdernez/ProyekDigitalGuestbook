@@ -7,13 +7,9 @@ import type { CeremonyItem } from "@/types/wedding";
 
 interface EventSectionProps {
   ceremonies: CeremonyItem[];
-  sectionTitle?: string;
 }
 
-export default function EventSection({
-  ceremonies,
-  sectionTitle = "Wedding Event",
-}: EventSectionProps) {
+export default function EventSection({ ceremonies }: EventSectionProps) {
   return (
     <section
       id="event"
@@ -23,7 +19,7 @@ export default function EventSection({
       <div className="grain-overlay absolute inset-0" />
 
       <div className="relative mx-auto max-w-5xl lg:max-w-6xl">
-        <SectionHeader label="Wedding Events" title={sectionTitle} light />
+        <SectionHeader label="Location" light />
 
         <div className="space-y-6">
           {ceremonies.map((ceremony, i) => (
@@ -102,7 +98,7 @@ export default function EventSection({
                     className="mt-7 inline-flex items-center gap-2 rounded-full border border-royal/30 px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-royal transition-all duration-300 hover:bg-royal/15 active:scale-95"
                   >
                     <ExternalLink className="h-3 w-3" />
-                    Open in Maps
+                    Navigate to Location
                   </a>
                 )}
               </div>

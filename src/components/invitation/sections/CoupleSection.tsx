@@ -1,14 +1,20 @@
 "use client";
 
-import { Instagram } from "lucide-react";
+import { useMemo } from "react";
+import { Calendar, Instagram } from "lucide-react";
 import CouplePhoto from "@/components/invitation/CouplePhoto";
+import CountdownTimer from "@/components/invitation/CountdownTimer";
 import InvitationLogo from "@/components/invitation/InvitationLogo";
 import Reveal from "@/components/invitation/Reveal";
+import { addToCalendar } from "@/lib/calendar-event";
+import { resolveCeremonyEventDetails } from "@/lib/ceremony-event";
+import { parseEventDateTime } from "@/lib/event-datetime";
 import type { WeddingSettings } from "@/types/wedding";
 
 interface CoupleSectionProps {
   wedding: WeddingSettings;
   logoImage?: string;
+  weddingReady?: boolean;
 }
 
 function CouplePerson({
@@ -49,8 +55,37 @@ function CouplePerson({
   );
 }
 
-export default function CoupleSection({ wedding, logoImage }: CoupleSectionProps) {
+export default function CoupleSection({
+  wedding,
+  logoImage,
+  weddingReady = true,
+}: CoupleSectionProps) {
   const initials = `${wedding.groom.name?.[0] ?? "L"}${wedding.bride.name?.[0] ?? "A"}`;
+  const brideFirst = wedding.coupleOrder === "bride-first";
+  const left = brideFirst
+    ? { person: wedding.bride, role: "bride" as const }
+    : { person: wedding.groom, role: "groom" as const };
+  const right = brideFirst
+    ? { person: wedding.groom, role: "groom" as const }
+    : { person: wedding.bride, role: "bride" as const };
+
+  const eventDetails = useMemo(() => {
+    if (!weddingReady) return null;
+    return resolveCeremonyEventDetails(wedding);
+  }, [weddingReady, wedding]);
+
+  const countdownTarget = useMemo(
+    () =>
+      eventDetails
+        ? parseEventDateTime(eventDetails.date, eventDetails.time)
+        : null,
+    [eventDetails]
+  );
+
+  const handleAddToCalendar = () => {
+    if (!eventDetails) return;
+    addToCalendar(eventDetails);
+  };
 
   return (
     <section
@@ -64,7 +99,6 @@ export default function CoupleSection({ wedding, logoImage }: CoupleSectionProps
       <div className="relative mx-auto w-full max-w-4xl px-5 sm:px-8">
         <Reveal direction="blur" duration={700}>
           <header className="couple-header">
-            <p className="couple-kicker">The Couple</p>
             <div className="couple-logo-wrap">
               <InvitationLogo
                 src={logoImage}
@@ -81,7 +115,7 @@ export default function CoupleSection({ wedding, logoImage }: CoupleSectionProps
 
         <div className="couple-stage">
           <Reveal direction="up" duration={900}>
-            <CouplePerson person={wedding.groom} role="groom" />
+            <CouplePerson person={left.person} role={left.role} />
           </Reveal>
 
           <div className="couple-ampersand" aria-hidden>
@@ -89,9 +123,51 @@ export default function CoupleSection({ wedding, logoImage }: CoupleSectionProps
           </div>
 
           <Reveal direction="up" delay={140} duration={900}>
-            <CouplePerson person={wedding.bride} role="bride" />
+            <CouplePerson person={right.person} role={right.role} />
           </Reveal>
         </div>
+
+        <Reveal direction="up" delay={200} duration={900}>
+          <div className="couple-countdown mt-12 sm:mt-14">
+            {wedding.quote?.trim() ? (
+              <div className="mx-auto mb-8 max-w-xl text-center">
+                <p className="font-display text-lg font-light leading-relaxed text-navy sm:text-xl">
+                  “{wedding.quote.trim()}”
+                </p>
+                {wedding.quoteSource?.trim() ? (
+                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-royal/80">
+                    {wedding.quoteSource.trim()}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
+            <p className="mb-2 text-center text-[8px] font-semibold uppercase tracking-[0.3em] text-stone-400">
+              Countdown to Our Big Day
+            </p>
+            {eventDetails && (
+              <p className="mb-3 text-center text-[11px] text-stone-400">
+                {eventDetails.dateLabel} · {eventDetails.time}
+              </p>
+            )}
+            <CountdownTimer
+              target={countdownTarget}
+              settingsReady={weddingReady}
+              variant="light"
+            />
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={handleAddToCalendar}
+                disabled={!eventDetails}
+                className="btn-invite-ghost inline-flex w-full max-w-[14rem] items-center justify-center gap-2 border-navy/20 px-6 py-2.5 text-[10px] text-navy disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              >
+                <Calendar className="h-3.5 w-3.5" />
+                Add to Calendar
+              </button>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

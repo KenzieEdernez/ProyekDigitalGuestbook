@@ -62,6 +62,8 @@ export interface GiftAddress {
   phone: string;
 }
 
+export type CoupleOrder = "groom-first" | "bride-first";
+
 export interface WeddingSettings {
   groom: CoupleProfile;
   bride: CoupleProfile;
@@ -76,4 +78,8 @@ export interface WeddingSettings {
   musicUrl: string;
   /** Logos shown on the closing / ending slide (any count). */
   closingLogos: string[];
+  /** Logo above the engagement title on the hero (separate from couple logo). */
+  heroLogoImage: string;
+  /** Who appears on the left in the couple section. */
+  coupleOrder: CoupleOrder;
 }

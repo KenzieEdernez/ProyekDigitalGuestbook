@@ -41,6 +41,9 @@ function buildSavePayload(form: WeddingSettings): WeddingSettings {
     ...form,
     loveStory: [],
     closingLogos: (form.closingLogos ?? []).filter(Boolean),
+    heroLogoImage: form.heroLogoImage || "",
+    coupleOrder:
+      form.coupleOrder === "bride-first" ? "bride-first" : "groom-first",
     musicUrl: isLocalPreviewUrl(form.musicUrl) ? "" : form.musicUrl,
   };
 }
@@ -156,6 +159,11 @@ export default function WeddingContentSettings() {
             closingLogos: Array.isArray(data.settings.closingLogos)
               ? data.settings.closingLogos
               : [],
+            heroLogoImage: data.settings.heroLogoImage || "",
+            coupleOrder:
+              data.settings.coupleOrder === "bride-first"
+                ? "bride-first"
+                : "groom-first",
           });
         }
       } catch {
@@ -384,7 +392,6 @@ export default function WeddingContentSettings() {
                 ["engagementTitle", "Engagement Title", "The Sangjit Engagement of"],
                 ["displayDate", "Display Date", "06.09.2026"],
                 ["openButtonLabel", "Open Button Label", "Open Invitation"],
-                ["eventSectionTitle", "Event Section Title", "Wedding Event"],
                 ["dressCodeTitle", "Dress Code Title", "Dress Code"],
                 ["giftTitle", "Gift Title", "Gift"],
               ] as const
@@ -401,6 +408,46 @@ export default function WeddingContentSettings() {
                 />
               </div>
             ))}
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Hero Logo (above engagement title)
+              </label>
+              {form.heroLogoImage ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={form.heroLogoImage}
+                  alt="Hero logo"
+                  className="mb-2 max-h-24 w-auto object-contain"
+                />
+              ) : null}
+              <input
+                type="file"
+                accept="image/png,image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  void readCeremonyPngFile(file)
+                    .then((dataUrl) =>
+                      setForm((f) => ({ ...f, heroLogoImage: dataUrl }))
+                    )
+                    .catch(() => setError("Failed to process hero logo."));
+                  e.target.value = "";
+                }}
+              />
+              {form.heroLogoImage ? (
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, heroLogoImage: "" }))}
+                  className="mt-2 text-xs text-red-500"
+                >
+                  Remove hero logo
+                </button>
+              ) : null}
+              <p className="mt-2 text-xs text-stone-400">
+                Separate from the couple logo. Shown above &quot;The Sangjit…&quot;
+                on the first screen.
+              </p>
+            </div>
             <div className="md:col-span-2">
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
                 Cover Message
@@ -442,6 +489,35 @@ export default function WeddingContentSettings() {
 
         {tab === "couple" && (
           <div className="space-y-8">
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Couple Order (left → right)
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <label className="inline-flex items-center gap-2 rounded-lg border border-stone-200 px-4 py-2 text-sm dark:border-stone-700">
+                  <input
+                    type="radio"
+                    name="coupleOrder"
+                    checked={form.coupleOrder !== "bride-first"}
+                    onChange={() =>
+                      setForm((f) => ({ ...f, coupleOrder: "groom-first" }))
+                    }
+                  />
+                  Groom left, Bride right
+                </label>
+                <label className="inline-flex items-center gap-2 rounded-lg border border-stone-200 px-4 py-2 text-sm dark:border-stone-700">
+                  <input
+                    type="radio"
+                    name="coupleOrder"
+                    checked={form.coupleOrder === "bride-first"}
+                    onChange={() =>
+                      setForm((f) => ({ ...f, coupleOrder: "bride-first" }))
+                    }
+                  />
+                  Bride left, Groom right
+                </label>
+              </div>
+            </div>
             <div className="grid gap-6 lg:grid-cols-2">
               {(["groom", "bride"] as const).map((role) => (
                 <div key={role} className="space-y-4 rounded-xl border border-stone-200 p-5 dark:border-stone-700">
@@ -495,23 +571,28 @@ export default function WeddingContentSettings() {
             <div className="space-y-4">
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Quote
+                  Words above Countdown
                 </label>
                 <textarea
                   className="input-field min-h-[100px]"
                   value={form.quote}
+                  placeholder="Short message or verse shown above the countdown"
                   onChange={(e) =>
                     setForm((f) => ({ ...f, quote: e.target.value }))
                   }
                 />
+                <p className="mt-1 text-xs text-stone-400">
+                  Shown under the Instagram handles, above the countdown.
+                </p>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Quote Source
+                  Words Source (optional)
                 </label>
                 <input
                   className="input-field"
                   value={form.quoteSource}
+                  placeholder="e.g. QS. Ar-Rum: 21"
                   onChange={(e) =>
                     setForm((f) => ({ ...f, quoteSource: e.target.value }))
                   }
