@@ -586,14 +586,14 @@
   @media (max-width: 767px) {
     .invitation-hero-stage {
       justify-content: space-between;
-      padding-top: clamp(4.5rem, 10dvh, 5.75rem);
+      padding-top: clamp(4.15rem, 8.5dvh, 5.25rem);
       padding-bottom: max(1.1rem, calc(env(safe-area-inset-bottom, 0px) + 1.1rem));
     }
 
     .invitation-hero-cluster {
-      /* Sit in the upper band / vertical center of the top half */
-      margin-top: clamp(0.35rem, 3.5dvh, 1.75rem);
-      transform: translateY(0);
+      /* Sit higher in the upper band so faces stay clear */
+      margin-top: 0;
+      transform: translateY(-0.65rem);
     }
 
     .invitation-hero-names {
