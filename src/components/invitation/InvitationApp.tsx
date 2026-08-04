@@ -46,7 +46,9 @@ export default function InvitationApp() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userPausedMusicRef = useRef(false);
-  const autoplayAttemptedRef = useRef(false);
+  const invitationOpenedRef = useRef(false);
+  const phaseRef = useRef<Phase>(phase);
+  phaseRef.current = phase;
 
   const cleanUrl = useCallback(() => {
     const url = `${window.location.pathname}${window.location.search}`;
@@ -108,6 +110,13 @@ export default function InvitationApp() {
     return () => observer.disconnect();
   }, [phase, isNavigating]);
 
+  const stopMusic = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    setMusicPlaying(false);
+  }, []);
+
   const primeMusic = useCallback(() => {
     const audio = audioRef.current;
     if (!audio || !musicAvailable || userPausedMusicRef.current) return;
@@ -150,7 +159,8 @@ export default function InvitationApp() {
 
   const handleOpen = () => {
     userPausedMusicRef.current = false;
-    autoplayAttemptedRef.current = true;
+    invitationOpenedRef.current = true;
+    // Start on the same user gesture as "Open Invitation"
     primeMusic();
 
     setPhase("curtain");
@@ -160,6 +170,10 @@ export default function InvitationApp() {
       window.scrollTo({ top: 0, behavior: "auto" });
       setActiveSection("home");
       cleanUrl();
+      // Keep playing after curtain; browsers can drop playback on route/UI updates
+      if (!userPausedMusicRef.current) {
+        primeMusic();
+      }
     }, 900);
   };
 
@@ -190,42 +204,35 @@ export default function InvitationApp() {
     void fetch("/api/wedding-music", { cache: "force-cache" }).catch(() => {});
   }, [musicAvailable]);
 
+  // After invitation is open, keep trying to play unless the guest muted it.
   useEffect(() => {
     if (
-      phase !== "open" ||
+      (phase !== "open" && phase !== "curtain") ||
       !musicAvailable ||
-      userPausedMusicRef.current ||
-      autoplayAttemptedRef.current
+      !invitationOpenedRef.current ||
+      userPausedMusicRef.current
     ) {
       return;
     }
 
-    autoplayAttemptedRef.current = true;
     primeMusic();
   }, [phase, musicAvailable, primeMusic]);
 
-  // Stop music when leaving the tab/page; resume when returning (unless user muted).
+  // Pause when leaving the site/tab; autoplay again when returning.
   useEffect(() => {
     if (!musicAvailable) return;
 
-    const stopMusic = () => {
-      const audio = audioRef.current;
-      if (!audio) return;
-      audio.pause();
-      setMusicPlaying(false);
-    };
+    const canResume = () =>
+      invitationOpenedRef.current &&
+      !userPausedMusicRef.current &&
+      (phaseRef.current === "open" || phaseRef.current === "curtain");
 
     const handleVisibility = () => {
       if (document.visibilityState === "hidden") {
         stopMusic();
         return;
       }
-
-      if (
-        document.visibilityState === "visible" &&
-        phase === "open" &&
-        !userPausedMusicRef.current
-      ) {
+      if (document.visibilityState === "visible" && canResume()) {
         primeMusic();
       }
     };
@@ -234,17 +241,37 @@ export default function InvitationApp() {
       stopMusic();
     };
 
+    const handlePageShow = () => {
+      if (canResume()) {
+        primeMusic();
+      }
+    };
+
+    const handleFocus = () => {
+      if (canResume()) {
+        primeMusic();
+      }
+    };
+
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("pagehide", handlePageHide);
-    window.addEventListener("beforeunload", handlePageHide);
+    window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("focus", handleFocus);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("pagehide", handlePageHide);
-      window.removeEventListener("beforeunload", handlePageHide);
-      stopMusic();
+      window.removeEventListener("pageshow", handlePageShow);
+      window.removeEventListener("focus", handleFocus);
     };
-  }, [musicAvailable, phase, primeMusic]);
+  }, [musicAvailable, primeMusic, stopMusic]);
+
+  // Only stop audio when the invitation app unmounts.
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
 
   if (!eventSettings.settingsReady || !weddingReady) {
     return (
@@ -269,11 +296,7 @@ export default function InvitationApp() {
           preload="auto"
           playsInline
           onPlay={() => setMusicPlaying(true)}
-          onPause={() => {
-            if (userPausedMusicRef.current) {
-              setMusicPlaying(false);
-            }
-          }}
+          onPause={() => setMusicPlaying(false)}
           onEnded={handleMusicEnded}
         />
       )}
