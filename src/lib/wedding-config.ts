@@ -18,6 +18,9 @@ export const DEFAULT_INVITATION_COPY: InvitationCopy = {
   giftTitle: "Gift",
   giftMessage:
     "Your love, kind wishes and prayer on our wedding day is the greatest gift of all. However, should you wish to send us blessings via online registry, you can conveniently transfer through our bank account.",
+  rsvpReminderEyebrow: "Reminder",
+  rsvpReminderTitle: "Please RSVP",
+  rsvpReminderMessage: "Tap here to reserve your seat.",
 };
 
 export const DEFAULT_WEDDING: WeddingSettings = {

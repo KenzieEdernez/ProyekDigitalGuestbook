@@ -6,6 +6,9 @@ interface RsvpReminderToastProps {
   visible: boolean;
   onRsvp: () => void;
   onDismiss?: () => void;
+  eyebrow?: string;
+  title?: string;
+  message?: string;
 }
 
 /** Chat-bubble reminder that points down toward the RSVP FAB. */
@@ -13,6 +16,9 @@ export default function RsvpReminderToast({
   visible,
   onRsvp,
   onDismiss,
+  eyebrow = "Reminder",
+  title = "Please RSVP",
+  message = "Tap here to reserve your seat.",
 }: RsvpReminderToastProps) {
   const [show, setShow] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
@@ -53,15 +59,21 @@ export default function RsvpReminderToast({
         onClick={onRsvp}
         className="block w-full rounded-2xl bg-white px-3.5 py-3 text-left shadow-[0_10px_28px_rgba(26,35,50,0.18)] ring-1 ring-black/5"
       >
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#5c2430]">
-          Reminder
-        </p>
-        <p className="mt-1 font-display text-[1.05rem] font-light leading-snug text-navy">
-          Please RSVP
-        </p>
-        <p className="mt-1 text-[11px] font-light leading-relaxed text-stone-500">
-          Tap here to reserve your seat.
-        </p>
+        {eyebrow.trim() ? (
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8a7355]">
+            {eyebrow}
+          </p>
+        ) : null}
+        {title.trim() ? (
+          <p className="mt-1 font-display text-[1.05rem] font-light leading-snug text-navy whitespace-pre-line">
+            {title}
+          </p>
+        ) : null}
+        {message.trim() ? (
+          <p className="mt-1 text-[11px] font-light leading-relaxed text-stone-500 whitespace-pre-line">
+            {message}
+          </p>
+        ) : null}
       </button>
       {/* Tail pointing down-right toward the RSVP button */}
       <span className="rsvp-chat-tail" aria-hidden />

@@ -318,6 +318,9 @@ export default function InvitationApp() {
             showRsvpReminder={phase === "open" && showRsvpReminder}
             onRsvpReminder={() => setShowRsvpReminder(false)}
             onRsvpReminderDismiss={() => setShowRsvpReminder(false)}
+            rsvpReminderEyebrow={wedding.invitationCopy.rsvpReminderEyebrow}
+            rsvpReminderTitle={wedding.invitationCopy.rsvpReminderTitle}
+            rsvpReminderMessage={wedding.invitationCopy.rsvpReminderMessage}
           />
 
           <main>

@@ -12,6 +12,10 @@ export interface InvitationCopy {
   dressCodeNote: string;
   giftTitle: string;
   giftMessage: string;
+  /** RSVP reminder chat bubble (above FAB). */
+  rsvpReminderEyebrow: string;
+  rsvpReminderTitle: string;
+  rsvpReminderMessage: string;
 }
 
 export interface CoupleProfile {

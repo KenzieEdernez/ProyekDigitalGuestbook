@@ -196,6 +196,13 @@ function sanitizeInvitationCopy(
     dressCodeNote: textValue(input?.dressCodeNote) || fallback.dressCodeNote,
     giftTitle: textValue(input?.giftTitle) || fallback.giftTitle,
     giftMessage: multilineValue(input?.giftMessage) || fallback.giftMessage,
+    rsvpReminderEyebrow:
+      textValue(input?.rsvpReminderEyebrow) || fallback.rsvpReminderEyebrow,
+    rsvpReminderTitle:
+      multilineValue(input?.rsvpReminderTitle) || fallback.rsvpReminderTitle,
+    rsvpReminderMessage:
+      multilineValue(input?.rsvpReminderMessage) ||
+      fallback.rsvpReminderMessage,
   };
 }
 

@@ -15,13 +15,13 @@ export default function RsvpFabIcon({ className = "" }: { className?: string }) 
         width="24"
         height="28"
         rx="2"
-        fill="currentColor"
+        fill="#faf7f2"
       />
       <text
         x="32"
         y="23"
         textAnchor="middle"
-        fill="#5c2430"
+        fill="var(--fab-accent, #5c4033)"
         fontSize="7.5"
         fontWeight="700"
         fontFamily="ui-sans-serif, system-ui, sans-serif"
@@ -34,7 +34,7 @@ export default function RsvpFabIcon({ className = "" }: { className?: string }) 
         y1="28"
         x2="39"
         y2="28"
-        stroke="#5c2430"
+        stroke="var(--fab-accent, #5c4033)"
         strokeWidth="1.4"
         strokeLinecap="round"
         opacity="0.55"
@@ -44,7 +44,7 @@ export default function RsvpFabIcon({ className = "" }: { className?: string }) 
         y1="32.5"
         x2="39"
         y2="32.5"
-        stroke="#5c2430"
+        stroke="var(--fab-accent, #5c4033)"
         strokeWidth="1.4"
         strokeLinecap="round"
         opacity="0.4"
@@ -58,7 +58,7 @@ export default function RsvpFabIcon({ className = "" }: { className?: string }) 
       {/* Envelope inner shadow band */}
       <path
         d="M9 31l23 14 23-14"
-        stroke="#5c2430"
+        stroke="var(--fab-accent, #5c4033)"
         strokeWidth="2.2"
         strokeLinejoin="round"
         opacity="0.22"
@@ -66,7 +66,7 @@ export default function RsvpFabIcon({ className = "" }: { className?: string }) 
       {/* Envelope flap (open / folded back look) */}
       <path
         d="M9 31L32 45L55 31"
-        stroke="#5c2430"
+        stroke="var(--fab-accent, #5c4033)"
         strokeWidth="1.6"
         strokeLinejoin="round"
         fill="none"
@@ -75,7 +75,7 @@ export default function RsvpFabIcon({ className = "" }: { className?: string }) 
       {/* Front pocket fold highlight */}
       <path
         d="M12 53.5h40"
-        stroke="#5c2430"
+        stroke="var(--fab-accent, #5c4033)"
         strokeWidth="1.2"
         opacity="0.12"
         strokeLinecap="round"

@@ -8,6 +8,13 @@ import RsvpFabIcon from "@/components/invitation/RsvpFabIcon";
 import RsvpReminderToast from "@/components/invitation/RsvpReminderToast";
 import type { InvitationSection } from "@/lib/wedding-config";
 
+const DARK_SECTION_IDS = new Set([
+  "home",
+  "event",
+  "gift",
+  "closing",
+]);
+
 interface InvitationNavProps {
   active: InvitationSection;
   coupleName: string;
@@ -18,6 +25,31 @@ interface InvitationNavProps {
   showRsvpReminder?: boolean;
   onRsvpReminder?: () => void;
   onRsvpReminderDismiss?: () => void;
+  rsvpReminderEyebrow?: string;
+  rsvpReminderTitle?: string;
+  rsvpReminderMessage?: string;
+}
+
+function sectionUnderFabIsDark(): boolean {
+  if (typeof document === "undefined") return true;
+
+  const probeY = window.innerHeight - 96;
+  const sections = document.querySelectorAll<HTMLElement>(
+    ".invitation-section, #closing"
+  );
+
+  for (const section of sections) {
+    const rect = section.getBoundingClientRect();
+    if (rect.top <= probeY && rect.bottom >= probeY) {
+      const id = section.id;
+      if (DARK_SECTION_IDS.has(id)) return true;
+      if (section.classList.contains("location-section")) return true;
+      if (section.classList.contains("bg-navy")) return true;
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export default function InvitationNav({
@@ -30,9 +62,13 @@ export default function InvitationNav({
   showRsvpReminder = false,
   onRsvpReminder,
   onRsvpReminderDismiss,
+  rsvpReminderEyebrow,
+  rsvpReminderTitle,
+  rsvpReminderMessage,
 }: InvitationNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [fabOnDark, setFabOnDark] = useState(true);
 
   useEffect(() => {
     let ticking = false;
@@ -41,13 +77,22 @@ export default function InvitationNav({
       ticking = true;
       requestAnimationFrame(() => {
         setScrolled(window.scrollY > 16);
+        setFabOnDark(sectionUnderFabIsDark());
         ticking = false;
       });
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
+
+  useEffect(() => {
+    setFabOnDark(sectionUnderFabIsDark());
+  }, [active]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -99,10 +144,17 @@ export default function InvitationNav({
         onNavigate={handleNav}
       />
 
-      <div className="invitation-fab-stack fixed bottom-6 right-4 z-40 flex flex-col items-end gap-3 lg:bottom-8 lg:right-8">
+      <div
+        className={`invitation-fab-stack fixed bottom-6 right-4 z-40 flex flex-col items-end gap-3 lg:bottom-8 lg:right-8 ${
+          fabOnDark ? "is-on-dark" : "is-on-light"
+        }`}
+      >
         {showRsvpReminder && (
           <RsvpReminderToast
             visible={showRsvpReminder}
+            eyebrow={rsvpReminderEyebrow}
+            title={rsvpReminderTitle}
+            message={rsvpReminderMessage}
             onRsvp={() => {
               onRsvpReminder?.();
               handleNav("rsvp");
@@ -120,7 +172,7 @@ export default function InvitationNav({
           className="invitation-fab-rsvp"
           aria-label="RSVP"
         >
-          <RsvpFabIcon className="h-8 w-8 text-white" />
+          <RsvpFabIcon className="h-8 w-8" />
         </button>
 
         {musicAvailable && (
@@ -131,9 +183,9 @@ export default function InvitationNav({
             aria-label={musicPlaying ? "Pause music" : "Play music"}
           >
             {musicPlaying ? (
-              <Pause className="h-5 w-5 fill-current text-navy" />
+              <Pause className="h-5 w-5 fill-current" />
             ) : (
-              <Play className="h-5 w-5 fill-current text-navy translate-x-0.5" />
+              <Play className="h-5 w-5 fill-current translate-x-0.5" />
             )}
           </button>
         )}

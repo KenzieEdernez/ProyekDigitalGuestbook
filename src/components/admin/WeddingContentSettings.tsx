@@ -569,6 +569,55 @@ export default function WeddingContentSettings() {
                 onChange={(e) => updateInvitationCopy("giftMessage", e.target.value)}
               />
             </div>
+            <div className="md:col-span-2 border-t border-stone-200 pt-5 dark:border-stone-700">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                RSVP Reminder Bubble
+              </p>
+              <p className="mb-4 text-xs text-stone-400">
+                Chat bubble that appears above the RSVP button after the invitation opens.
+              </p>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    Eyebrow
+                  </label>
+                  <input
+                    className="input-field"
+                    value={form.invitationCopy.rsvpReminderEyebrow ?? ""}
+                    placeholder="Reminder"
+                    onChange={(e) =>
+                      updateInvitationCopy("rsvpReminderEyebrow", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    Title
+                  </label>
+                  <input
+                    className="input-field"
+                    value={form.invitationCopy.rsvpReminderTitle ?? ""}
+                    placeholder="Please RSVP"
+                    onChange={(e) =>
+                      updateInvitationCopy("rsvpReminderTitle", e.target.value)
+                    }
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    Message
+                  </label>
+                  <textarea
+                    className="input-field min-h-[72px]"
+                    value={form.invitationCopy.rsvpReminderMessage ?? ""}
+                    placeholder="Tap here to reserve your seat."
+                    onChange={(e) =>
+                      updateInvitationCopy("rsvpReminderMessage", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
