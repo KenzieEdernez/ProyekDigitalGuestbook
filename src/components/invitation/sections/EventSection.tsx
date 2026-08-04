@@ -14,9 +14,13 @@ export default function EventSection({ ceremonies }: EventSectionProps) {
       id="event"
       className="location-section invitation-section invitation-section-pad relative overflow-hidden"
     >
+      <div className="location-section-glow pointer-events-none absolute inset-0" />
+      <div className="grain-overlay absolute inset-0 opacity-40" />
+
       <div className="relative mx-auto w-full max-w-xl px-5 text-center sm:px-8">
         <Reveal direction="blur" duration={700}>
           <h2 className="location-section-title">Location</h2>
+          <div className="location-section-rule" aria-hidden />
         </Reveal>
 
         <div className="mt-8 space-y-14 sm:mt-10 sm:space-y-16">
@@ -38,12 +42,14 @@ export default function EventSection({ ceremonies }: EventSectionProps) {
                   ) : null}
 
                   {venueName ? (
-                    <h3 className="location-card-venue">{venueName}</h3>
+                    <h3 className="location-card-venue whitespace-pre-line">
+                      {venueName}
+                    </h3>
                   ) : null}
 
                   {ceremony.address?.trim() ? (
                     <p className="location-card-address whitespace-pre-line">
-                      {ceremony.address.trim()}
+                      {ceremony.address}
                     </p>
                   ) : null}
 

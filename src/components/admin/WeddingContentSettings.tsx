@@ -582,27 +582,15 @@ export default function WeddingContentSettings() {
                 <textarea
                   className="input-field min-h-[100px]"
                   value={form.quote}
-                  placeholder="Short message or verse shown above the countdown"
+                  placeholder="Type exactly as it should appear. Enter = new line."
                   onChange={(e) =>
                     setForm((f) => ({ ...f, quote: e.target.value }))
                   }
                 />
                 <p className="mt-1 text-xs text-stone-400">
-                  Shown under the Instagram handles, above the countdown.
+                  Shown under Instagram handles, above the countdown. Line breaks
+                  and capitalization match what you type (no quote marks).
                 </p>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Words Source (optional)
-                </label>
-                <input
-                  className="input-field"
-                  value={form.quoteSource}
-                  placeholder="e.g. QS. Ar-Rum: 21"
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, quoteSource: e.target.value }))
-                  }
-                />
               </div>
             </div>
           </div>
@@ -686,7 +674,7 @@ export default function WeddingContentSettings() {
                   <textarea
                     className="input-field min-h-[72px]"
                     value={item.location}
-                    placeholder={"e.g. PARK HYATT JAKARTA"}
+                    placeholder={"Venue name — Enter for new lines"}
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
@@ -699,7 +687,7 @@ export default function WeddingContentSettings() {
                     }
                   />
                   <p className="mt-1 text-xs text-stone-400">
-                    Shown large under the venue illustration.
+                    Shown as typed (including Enter). Not forced to uppercase.
                   </p>
                 </div>
                 <div className="mb-3">

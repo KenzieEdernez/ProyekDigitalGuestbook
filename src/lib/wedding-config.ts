@@ -38,9 +38,8 @@ export const DEFAULT_WEDDING: WeddingSettings = {
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80&auto=format&fit=crop&crop=face",
     instagram: "@jessica.m",
   },
-  quote:
-    "And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquility with them.",
-  quoteSource: "QS. Ar-Rum: 21",
+  quote: "",
+  quoteSource: "",
   invitationCopy: DEFAULT_INVITATION_COPY,
   loveStory: [],
   ceremonies: [
@@ -129,8 +128,12 @@ export function mergeWeddingSettings(
   return {
     groom: { ...DEFAULT_WEDDING.groom, ...stored.groom },
     bride: { ...DEFAULT_WEDDING.bride, ...stored.bride },
-    quote: stored.quote?.trim() || DEFAULT_WEDDING.quote,
-    quoteSource: stored.quoteSource?.trim() || DEFAULT_WEDDING.quoteSource,
+    quote:
+      typeof stored.quote === "string" ? stored.quote : DEFAULT_WEDDING.quote,
+    quoteSource:
+      typeof stored.quoteSource === "string"
+        ? stored.quoteSource
+        : DEFAULT_WEDDING.quoteSource,
     invitationCopy: {
       ...DEFAULT_WEDDING.invitationCopy,
       ...stored.invitationCopy,

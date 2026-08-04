@@ -131,14 +131,9 @@ export default function CoupleSection({
           <div className="couple-countdown mt-12 sm:mt-14">
             {wedding.quote?.trim() ? (
               <div className="mx-auto mb-8 max-w-xl text-center">
-                <p className="font-display text-lg font-light leading-relaxed text-navy sm:text-xl">
-                  “{wedding.quote.trim()}”
+                <p className="whitespace-pre-line font-display text-base font-light leading-relaxed text-navy sm:text-lg">
+                  {wedding.quote}
                 </p>
-                {wedding.quoteSource?.trim() ? (
-                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-royal/80">
-                    {wedding.quoteSource.trim()}
-                  </p>
-                ) : null}
               </div>
             ) : null}
 

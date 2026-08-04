@@ -16,6 +16,14 @@ function textValue(value: unknown) {
   return String(value ?? "").trim();
 }
 
+/** Keep internal line breaks from admin textareas; only trim outer edges. */
+function multilineValue(value: unknown) {
+  return String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/^\n+|\n+$/g, "")
+    .trimEnd();
+}
+
 async function saveImage(value: string, folder: string) {
   if (!value.startsWith("data:image/")) return value;
 
@@ -130,8 +138,8 @@ function sanitizeCeremonies(items: CeremonyItem[] | undefined): CeremonyItem[] {
       time: textValue(item.time)
         ? formatEventTimeAt(stripTimePrefix(textValue(item.time)))
         : "",
-      location: textValue(item.location),
-      address: textValue(item.address),
+      location: multilineValue(item.location),
+      address: multilineValue(item.address),
       mapUrl: textValue(item.mapUrl) || "https://maps.google.com",
       image: textValue(item.image),
     }))
@@ -170,19 +178,21 @@ function sanitizeInvitationCopy(
 ): InvitationCopy {
   const fallback = DEFAULT_WEDDING.invitationCopy;
   return {
-    engagementTitle: textValue(input?.engagementTitle) || fallback.engagementTitle,
-    coverMessage: textValue(input?.coverMessage) || fallback.coverMessage,
+    engagementTitle:
+      multilineValue(input?.engagementTitle) || fallback.engagementTitle,
+    coverMessage: multilineValue(input?.coverMessage) || fallback.coverMessage,
     openButtonLabel: textValue(input?.openButtonLabel) || fallback.openButtonLabel,
     displayDate: textValue(input?.displayDate) || fallback.displayDate,
     eventSectionTitle:
       textValue(input?.eventSectionTitle) || fallback.eventSectionTitle,
     dressCodeTitle: textValue(input?.dressCodeTitle) || fallback.dressCodeTitle,
     dressCodeDescription:
-      textValue(input?.dressCodeDescription) || fallback.dressCodeDescription,
+      multilineValue(input?.dressCodeDescription) ||
+      fallback.dressCodeDescription,
     dressCodeTheme: textValue(input?.dressCodeTheme) || fallback.dressCodeTheme,
     dressCodeNote: textValue(input?.dressCodeNote) || fallback.dressCodeNote,
     giftTitle: textValue(input?.giftTitle) || fallback.giftTitle,
-    giftMessage: textValue(input?.giftMessage) || fallback.giftMessage,
+    giftMessage: multilineValue(input?.giftMessage) || fallback.giftMessage,
   };
 }
 
@@ -190,8 +200,8 @@ function sanitizeSettings(input: Partial<WeddingSettings>): WeddingSettings {
   const settings: WeddingSettings = {
     groom: sanitizeCouple(input.groom ?? {}, DEFAULT_WEDDING.groom),
     bride: sanitizeCouple(input.bride ?? {}, DEFAULT_WEDDING.bride),
-    quote: textValue(input.quote) || DEFAULT_WEDDING.quote,
-    quoteSource: textValue(input.quoteSource) || DEFAULT_WEDDING.quoteSource,
+    quote: multilineValue(input.quote),
+    quoteSource: textValue(input.quoteSource),
     invitationCopy: sanitizeInvitationCopy(input.invitationCopy),
     loveStory: sanitizeLoveStory(input.loveStory),
     ceremonies: sanitizeCeremonies(input.ceremonies),

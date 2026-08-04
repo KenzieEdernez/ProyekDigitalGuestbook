@@ -54,7 +54,7 @@ export default function HomeSection({
             ) : null}
 
             <Reveal direction="up" delay={120} duration={1000}>
-              <p className="mt-2 text-[9px] font-light uppercase tracking-[0.46em] text-white/80 sm:mt-4 sm:text-[10px]">
+              <p className="mt-2 whitespace-pre-line text-[10px] font-light tracking-[0.28em] text-white/80 sm:mt-4 sm:text-[11px]">
                 {copy.engagementTitle}
               </p>
             </Reveal>
