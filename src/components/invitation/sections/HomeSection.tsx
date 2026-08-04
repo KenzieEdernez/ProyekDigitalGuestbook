@@ -43,48 +43,52 @@ export default function HomeSection({
       <div className="invitation-hero-vignette absolute inset-0" />
 
       <div className="invitation-hero-stage relative z-10 min-h-[100dvh] px-6 text-center text-white sm:px-8">
+        {/* Logo + titles sit in the upper half so faces stay clear */}
         <div className="invitation-hero-cluster mx-auto flex w-full max-w-lg flex-col items-center">
           <div className="invitation-hero-copy w-full">
             {wedding.heroLogoImage ? (
               <Reveal direction="blur" duration={900}>
-                <div className="invitation-hero-logo-wrap mb-3 flex justify-center bg-transparent sm:mb-4">
+                <div className="invitation-hero-logo-wrap mb-2 flex justify-center bg-transparent sm:mb-4">
                   <InvitationLogo src={wedding.heroLogoImage} size="hero" />
                 </div>
               </Reveal>
             ) : null}
 
             <Reveal direction="up" delay={120} duration={1000}>
-              <p className="mt-2 whitespace-pre-line text-[10px] font-light tracking-[0.28em] text-white/80 sm:mt-4 sm:text-[11px]">
+              <p className="mt-1 whitespace-pre-line text-[10px] font-light tracking-[0.28em] text-white/80 sm:mt-4 sm:text-[11px]">
                 {copy.engagementTitle}
               </p>
             </Reveal>
 
             <Reveal direction="up" delay={240} duration={1000}>
-              <h2 className="invitation-hero-names mt-3 font-display text-white sm:mt-4">
+              <h2 className="invitation-hero-names mt-2 font-display text-white sm:mt-4">
                 {getCoupleDisplayName(wedding)}
               </h2>
             </Reveal>
 
             <Reveal direction="up" delay={360}>
-              <p className="mt-4 font-display text-[0.95rem] tracking-[0.38em] text-white/90 sm:mt-5 sm:text-base">
+              <p className="mt-3 font-display text-[0.95rem] tracking-[0.38em] text-white/90 sm:mt-5 sm:text-base">
                 {spacedDate}
               </p>
             </Reveal>
-
-            {guestName && (
-              <Reveal direction="up" delay={460}>
-                <div className="invitation-home-guest mt-5 mx-auto w-full max-w-xs rounded-xl border border-white/20 bg-white/10 px-5 py-4 backdrop-blur-sm">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/55">
-                    Dear,
-                  </p>
-                  <p className="mt-1.5 font-display text-xl font-light text-white sm:text-2xl">
-                    {guestName}
-                  </p>
-                </div>
-              </Reveal>
-            )}
           </div>
         </div>
+
+        {/* Dear box pinned to the bottom of the first slide */}
+        {guestName ? (
+          <Reveal direction="up" delay={460} className="invitation-home-guest-wrap">
+            <div className="invitation-home-guest mx-auto w-full max-w-xs rounded-xl border border-white/20 bg-white/10 px-5 py-4 backdrop-blur-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/55">
+                Dear,
+              </p>
+              <p className="mt-1.5 font-display text-xl font-light text-white sm:text-2xl">
+                {guestName}
+              </p>
+            </div>
+          </Reveal>
+        ) : (
+          <div className="invitation-home-guest-spacer" aria-hidden />
+        )}
       </div>
     </section>
   );

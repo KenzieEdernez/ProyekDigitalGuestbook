@@ -538,10 +538,15 @@
     min-height: 100dvh;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 1.35rem;
-    padding-top: clamp(4.5rem, 10vh, 6.5rem);
-    padding-bottom: clamp(3.5rem, 8vh, 5.5rem);
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: clamp(4.75rem, 11vh, 6.5rem);
+    padding-bottom: max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 1.25rem));
+  }
+
+  .invitation-hero-cluster {
+    flex-shrink: 0;
+    width: 100%;
   }
 
   .invitation-hero-logo-wrap {
@@ -564,6 +569,51 @@
     line-height: 1.05;
     letter-spacing: 0.01em;
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .invitation-home-guest-wrap {
+    width: 100%;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+
+  .invitation-home-guest-spacer {
+    flex-shrink: 0;
+    height: 0;
+  }
+
+  /* Mobile: keep titles in the upper half so faces stay visible */
+  @media (max-width: 767px) {
+    .invitation-hero-stage {
+      justify-content: space-between;
+      padding-top: clamp(4.5rem, 10dvh, 5.75rem);
+      padding-bottom: max(1.1rem, calc(env(safe-area-inset-bottom, 0px) + 1.1rem));
+    }
+
+    .invitation-hero-cluster {
+      /* Sit in the upper band / vertical center of the top half */
+      margin-top: clamp(0.35rem, 3.5dvh, 1.75rem);
+      transform: translateY(0);
+    }
+
+    .invitation-hero-names {
+      font-size: clamp(2.15rem, 9.5vw, 2.85rem);
+    }
+
+    .invitation-home-guest {
+      max-width: 17.5rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .invitation-hero-stage {
+      padding-top: clamp(5.5rem, 12vh, 7rem);
+      padding-bottom: clamp(2rem, 5vh, 3.5rem);
+    }
+
+    .invitation-hero-cluster {
+      margin-top: clamp(1rem, 6vh, 3.5rem);
+    }
   }
 
   .invitation-logo-image {
