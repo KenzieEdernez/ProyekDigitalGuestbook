@@ -10,19 +10,111 @@ interface GiftSectionProps {
   copy: InvitationCopy;
 }
 
-export default function GiftSection({ gifts, copy }: GiftSectionProps) {
-  const [copied, setCopied] = useState<string | null>(null);
+function GiftEnvelope({
+  account,
+  index,
+}: {
+  account: GiftAccount;
+  index: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const copyToClipboard = async (text: string, key: string) => {
+  const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(text);
-      setCopied(key);
-      setTimeout(() => setCopied(null), 2000);
+      await navigator.clipboard.writeText(account.accountNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
       // ignored
     }
   };
 
+  return (
+    <Reveal direction="up" delay={index * 120 + 200}>
+      <div className={`gift-envelope ${open ? "is-open" : ""}`}>
+        <div className="gift-envelope-stage">
+          <div className="gift-envelope-back" aria-hidden />
+
+          <div
+            id={`gift-letter-${account.id}`}
+            className="gift-letter"
+            role="region"
+            aria-label={`${account.bank} account details`}
+            aria-hidden={!open}
+          >
+            <div className="gift-letter-inner">
+              <p className="gift-letter-bank">{account.bank}</p>
+              <p className="gift-letter-label">Account Name</p>
+              <p className="gift-letter-name">{account.accountName}</p>
+              <p className="gift-letter-number">{account.accountNumber}</p>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void copyToClipboard();
+                }}
+                className="gift-letter-copy"
+                tabIndex={open ? 0 : -1}
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3.5 w-3.5" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" />
+                    Copy Number
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="gift-envelope-pocket" aria-hidden />
+
+          <div className="gift-envelope-flap" aria-hidden>
+            <span className="gift-envelope-flap-face gift-envelope-flap-front">
+              <span className="gift-envelope-hint">
+                {open ? "Tap to close" : "Tap to open"}
+              </span>
+            </span>
+            <span className="gift-envelope-flap-face gift-envelope-flap-back" />
+          </div>
+
+          <div className="gift-envelope-seal" aria-hidden>
+            <span className="gift-envelope-seal-mark">
+              {account.bank.slice(0, 1).toUpperCase()}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="gift-envelope-hit"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls={`gift-letter-${account.id}`}
+          >
+            <span className="sr-only">
+              {open
+                ? `Close ${account.bank} gift details`
+                : `Open envelope for ${account.bank}`}
+            </span>
+          </button>
+        </div>
+
+        {!open && (
+          <p className="gift-envelope-caption" aria-hidden>
+            {account.bank}
+          </p>
+        )}
+      </div>
+    </Reveal>
+  );
+}
+
+export default function GiftSection({ gifts, copy }: GiftSectionProps) {
   return (
     <section
       id="gift"
@@ -49,45 +141,14 @@ export default function GiftSection({ gifts, copy }: GiftSectionProps) {
           </p>
         </Reveal>
 
-        <div className="mt-10 space-y-5">
-          {gifts.map((account, i) => {
-            const key = `${account.bank}-${account.accountNumber}`;
-            return (
-              <Reveal key={account.id} direction="up" delay={i * 100 + 200}>
-                <div className="mx-auto max-w-sm rounded-[1.75rem] border border-royal/20 bg-white/[0.04] px-6 py-8 backdrop-blur-sm">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-royal">
-                    {account.bank}
-                  </p>
-                  <p className="mt-5 text-[9px] uppercase tracking-[0.28em] text-white/40">
-                    Account Name
-                  </p>
-                  <p className="mt-2 font-display text-2xl text-white">
-                    {account.accountName}
-                  </p>
-                  <p className="mt-5 font-mono text-[1.65rem] font-light tracking-[0.18em] text-white sm:text-3xl">
-                    {account.accountNumber}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(account.accountNumber, key)}
-                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-royal/35 bg-royal/10 px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.22em] text-royal transition-all hover:bg-royal/20"
-                  >
-                    {copied === key ? (
-                      <>
-                        <Check className="h-3.5 w-3.5" />
-                        Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-3.5 w-3.5" />
-                        Copy
-                      </>
-                    )}
-                  </button>
-                </div>
-              </Reveal>
-            );
-          })}
+        <div className="gift-envelope-list mt-12 space-y-14 sm:space-y-16">
+          {gifts.map((account, i) => (
+            <GiftEnvelope
+              key={account.id || `${account.bank}-${account.accountNumber}-${i}`}
+              account={account}
+              index={i}
+            />
+          ))}
         </div>
       </div>
     </section>
