@@ -205,6 +205,48 @@ export default function InvitationApp() {
     primeMusic();
   }, [phase, musicAvailable, primeMusic]);
 
+  // Stop music when leaving the tab/page; resume when returning (unless user muted).
+  useEffect(() => {
+    if (!musicAvailable) return;
+
+    const stopMusic = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      audio.pause();
+      setMusicPlaying(false);
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        stopMusic();
+        return;
+      }
+
+      if (
+        document.visibilityState === "visible" &&
+        phase === "open" &&
+        !userPausedMusicRef.current
+      ) {
+        primeMusic();
+      }
+    };
+
+    const handlePageHide = () => {
+      stopMusic();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("beforeunload", handlePageHide);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("beforeunload", handlePageHide);
+      stopMusic();
+    };
+  }, [musicAvailable, phase, primeMusic]);
+
   if (!eventSettings.settingsReady || !weddingReady) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-champagne px-6">
